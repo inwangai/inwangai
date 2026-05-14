@@ -111,7 +111,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 32px;height:64px;d
     </div>
 
     <div class="cta-row">
-      <a href="https://inwangai.com/register" id="assessLink" class="btn-main">
+      <a href="https://inwangai.com/assess" id="assessLink" class="btn-main">
         Assessment Shuru Karo →
       </a>
       <a href="https://inwangai.com" class="btn-sec">
@@ -132,7 +132,7 @@ const name = p.get('name');
 
 if(id){
   document.getElementById('displayId').textContent = id;
-  document.getElementById('assessLink').href = 'https://inwangai.com/register?id=' + id;
+  document.getElementById('assessLink').href = 'https://inwangai.com/assess?id=' + id + '&name=' + encodeURIComponent(name||'');
 }
 
 if(name){
@@ -141,11 +141,7 @@ if(name){
   if(nameEl) nameEl.textContent = decodeURIComponent(name);
 }
 
-// Auto redirect to assessment after 5 seconds
-setTimeout(function(){
-  var link = document.getElementById('assessLink');
-  if(link) window.location.href = link.href;
-}, 5000);
+// No auto redirect - student clicks manually
 
 // Neural bg
 const c=document.getElementById('bgCanvas'),ctx=c.getContext('2d');
