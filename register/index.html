@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>INWANG — Register Karo | AI Career Coach</title>
+<title>INWANG — Register Karo</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -919,7 +919,250 @@ a{color:inherit!important;text-decoration:none!important}
 
 <div class="main" style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center">
 
+<!-- ════════════════════════════════
+     SCREEN 1: REGISTRATION
+════════════════════════════════ -->
+<div class="screen active" id="screen1" style="width:100%;max-width:640px">
+  <div class="hero" style="width:100%;max-width:640px;text-align:center">
+    <div class="hero-badge">
+      <div class="hero-dot"></div>
+      <span id="txt-badge">India's First Hybrid AI + Human Career Coach</span>
+    </div>
+    <h1 id="txt-h1">Apna sahi <span>career</span><br>khud discover karo</h1>
+    <p id="txt-sub">AI-powered assessment se apni strengths, career clusters aur future path pata karo — bilkul free.</p>
+  </div>
 
+  <div class="form-card" style="margin:0 auto;max-width:560px;">
+    <div class="form-card-title" id="txt-reg-title">Registration</div>
+    <div class="form-card-sub" id="txt-reg-sub">Pehle basic details bharo — sirf 1 minute lagega</div>
+
+    <div class="field-group">
+      <label class="field-label"><span>*</span> <span id="lbl-name">Poora naam</span></label>
+      <input class="field-input" type="text" id="f1-name" placeholder="Jaise certificate mein likha ho">
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label"><span>*</span> <span id="lbl-mobile">Mobile number</span></label>
+        <input class="field-input" type="tel" id="f1-mobile" placeholder="10-digit number" maxlength="10">
+      </div>
+      <div class="field-group">
+        <label class="field-label" id="lbl-whatsapp">WhatsApp number</label>
+        <input class="field-input" type="tel" id="f1-whatsapp" placeholder="Same ya alag">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label"><span>*</span> <span id="lbl-email">Email ID</span></label>
+      <input class="field-input" type="email" id="f1-email" placeholder="Report is email pe aayegi">
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label"><span>*</span> <span id="lbl-city">City / District</span></label>
+        <input class="field-input" type="text" id="f1-city" placeholder="Muzaffarpur">
+      </div>
+      <div class="field-group">
+        <label class="field-label"><span>*</span> <span id="lbl-state">State</span></label>
+        <input class="field-input" type="text" id="f1-state" placeholder="Bihar">
+      </div>
+    </div>
+
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label" id="txt-academic">Academic Info</div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label"><span>*</span> <span id="lbl-qual">Qualification</span></label>
+        <select class="field-input" id="f1-qual">
+          <option value="">Select karo</option>
+          <option value="Class 9">Class 9 (Studying)</option>
+          <option value="Class 10">Class 10 (Studying)</option>
+          <option value="Class 10 Pass">Class 10 Pass</option>
+          <option value="Class 11">Class 11 (Studying)</option>
+          <option value="Class 12 Appearing">Class 12 Appearing (Board Exam)</option>
+          <option value="Class 12 Result Awaited">Class 12 Result Awaited</option>
+          <option value="Class 12 Pass">Class 12 Pass</option>
+          <option value="ITI Pursuing">ITI Pursuing</option>
+          <option value="ITI Completed">ITI Completed</option>
+          <option value="Diploma Pursuing">Diploma Pursuing</option>
+          <option value="Diploma Completed">Diploma Completed</option>
+          <option value="UG 1st Year">UG 1st Year (Pursuing)</option>
+          <option value="UG 2nd Year">UG 2nd Year (Pursuing)</option>
+          <option value="UG 3rd Year">UG 3rd Year (Pursuing)</option>
+          <option value="UG Appearing">UG Final Year / Appearing</option>
+          <option value="UG Completed">UG Completed / Graduate</option>
+          <option value="PG Pursuing">PG Pursuing</option>
+          <option value="PG Appearing">PG Appearing</option>
+          <option value="PG Completed">PG Completed</option>
+          <option value="Working Professional">Working Professional</option>
+          <option value="PhD Pursuing">PhD Pursuing</option>
+          <option value="PhD Completed">PhD Completed</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label" id="lbl-stream">Stream / Background</label>
+        <select class="field-input" id="f1-stream">
+          <option value="">Select karo</option>
+          <option>Science (PCM)</option>
+          <option>Science (PCB)</option>
+          <option>Science (Both)</option>
+          <option>Commerce</option>
+          <option>Arts / Humanities</option>
+          <option>Diploma</option>
+          <option>Any / Not sure</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label" id="lbl-marks">Marks / CGPA</label>
+        <input class="field-input" type="text" id="f1-marks" placeholder="Jaise: 78% ya 8.2">
+      </div>
+      <div class="field-group">
+        <label class="field-label" id="lbl-budget">Budget (approx.)</label>
+        <select class="field-input" id="f1-budget">
+          <option value="">Select karo</option>
+          <option>Under ₹1 Lakh</option>
+          <option>₹1–3 Lakh</option>
+          <option>₹3–5 Lakh</option>
+          <option>₹5–10 Lakh</option>
+          <option>Above ₹10 Lakh</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" id="lbl-goal">Career goal (1-2 lines)</label>
+      <input class="field-input" type="text" id="f1-goal" placeholder="Jaise: Software engineer banana hai ya doctor...">
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" id="lbl-confusion">Main confusion kya hai?</label>
+      <input class="field-input" type="text" id="f1-confusion" placeholder="Jaise: Kaun sa stream loon, kya karna chahiye...">
+    </div>
+
+
+    <div class="field-group">
+      <label class="field-label">Father's Name</label>
+      <input class="field-input" type="text" id="f1-father" placeholder="Father ka naam">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Parent Mobile Number</label>
+      <input class="field-input" type="tel" id="f1-pmobile" placeholder="Parent ka mobile">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Lead Source</label>
+      <select class="field-input" id="f1-source">
+        <option value="">Select Source</option>
+        <option value="Walk-in">Walk-in</option>
+        <option value="WhatsApp">WhatsApp</option>
+        <option value="Instagram">Instagram</option>
+        <option value="Facebook">Facebook</option>
+        <option value="YouTube">YouTube</option>
+        <option value="School Visit">School Visit</option>
+        <option value="Coaching Referral">Coaching Referral</option>
+        <option value="Friend Referral">Friend Referral</option>
+        <option value="Google">Google</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Source Detail</label>
+      <input class="field-input" type="text" id="f1-source-detail" placeholder="School/Coaching/Person name">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Preferred Course Category</label>
+      <select class="field-input" id="f1-category">
+        <option value="">Select Category</option>
+        <option value="Engineering">Engineering</option>
+        <option value="Medical">Medical</option>
+        <option value="Management">Management</option>
+        <option value="Law">Law</option>
+        <option value="Arts / Humanities">Arts / Humanities</option>
+        <option value="Commerce / Finance">Commerce / Finance</option>
+        <option value="IT / Computer">IT / Computer</option>
+        <option value="Defence / Govt">Defence / Govt</option>
+        <option value="Design / Creative">Design / Creative</option>
+        <option value="Not sure">Not sure</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Target Course (if known)</label>
+      <input class="field-input" type="text" id="f1-course" placeholder="B.Tech CSE, MBBS, BBA, etc.">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Competitive Exam</label>
+      <select class="field-input" id="f1-exam">
+        <option value="">Select Exam</option>
+        <option value="JEE">JEE</option>
+        <option value="NEET">NEET</option>
+        <option value="CLAT">CLAT</option>
+        <option value="CUET">CUET</option>
+        <option value="CAT">CAT</option>
+        <option value="SSC">SSC</option>
+        <option value="UPSC">UPSC</option>
+        <option value="NDA">NDA</option>
+        <option value="Not decided">Not decided</option>
+        <option value="None">None</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Exam Score (if available)</label>
+      <input class="field-input" type="text" id="f1-score" placeholder="JEE 85 percentile, NEET 450...">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Abroad Studies?</label>
+      <select class="field-input" id="f1-abroad">
+        <option value="No">No</option>
+        <option value="Yes">Yes</option>
+        <option value="Maybe">Maybe</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Preferred Country (if Abroad)</label>
+      <input class="field-input" type="text" id="f1-country" placeholder="USA, Canada, UK, Australia...">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Parent's Main Concern</label>
+      <input class="field-input" type="text" id="f1-concern" placeholder="Parent ki tension kya hai?">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Student Priority</label>
+      <select class="field-input" id="f1-priority">
+        <option value="">Select Priority</option>
+        <option value="Good College">Good College</option>
+        <option value="High Salary">High Salary</option>
+        <option value="Govt Job">Govt Job</option>
+        <option value="Own Business">Own Business</option>
+        <option value="Abroad">Abroad</option>
+        <option value="Not sure">Not sure</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Additional Notes (optional)</label>
+      <textarea class="field-input" id="f1-notes" rows="2" placeholder="Koi aur info..."></textarea>
+    </div>
+
+    <div id="form1-error" class="err"></div>
+
+    <button class="btn-primary" onclick="submitForm1()" id="btn-next1">
+      Register Karo →
+    </button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     SCREEN 2: ASSESSMENT
+════════════════════════════════ -->
+
+</div>
+</div>
 <script>
 // ── STATE ──
 let lang = 'hi';
@@ -1154,27 +1397,23 @@ function submitForm1() {
   const err    = document.getElementById('form1-error');
 
   if(!name || !mobile || !email || !city || !state || !qual) {
-    err.textContent = lang==='hi' ? '* wale fields zaroori hain.' : '* fields are required.';
+    err.textContent = '* Fields zaroori hain.';
     err.style.display = 'block';
     return;
   }
   if(!/^\d{10}$/.test(mobile)) {
-    err.textContent = lang==='hi' ? 'Mobile number 10 digit ka hona chahiye.' : 'Mobile must be 10 digits.';
+    err.textContent = 'Mobile 10 digits ka hona chahiye.';
     err.style.display = 'block';
     return;
   }
   err.style.display = 'none';
-  err.textContent = '';
 
-  // Generate ID
   inwangId = generateLocalId();
   studentName = name;
 
-  // Show loading
-  var btn = document.querySelector('#screen1 .btn-next');
-  if(btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+  var btn = document.querySelector('.btn-next1');
+  if(btn) { btn.textContent = lang==='hi'?'Save ho raha hai...':'Saving...'; btn.disabled = true; }
 
-  // Save to AppScript
   fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec', {
     method: 'POST',
     mode: 'no-cors',
@@ -1183,26 +1422,25 @@ function submitForm1() {
       action: 'register',
       id: inwangId,
       name: name,
-      father: document.getElementById('f1-father') ? document.getElementById('f1-father').value.trim() : '',
-      pmobile: document.getElementById('f1-pmobile') ? document.getElementById('f1-pmobile').value.trim() : '',
+      father: document.getElementById('f1-father')?document.getElementById('f1-father').value.trim():'',
+      pmobile: document.getElementById('f1-pmobile')?document.getElementById('f1-pmobile').value.trim():'',
       mobile: mobile,
       whatsapp: mobile,
       email: email,
       city: city,
       state: state,
       qual: qual,
-      stream: document.getElementById('f1-stream') ? document.getElementById('f1-stream').value : '',
-      marks: document.getElementById('f1-marks') ? document.getElementById('f1-marks').value.trim() : '',
-      goal: document.getElementById('f1-goal') ? document.getElementById('f1-goal').value.trim() : '',
-      confusion: document.getElementById('f1-confusion') ? document.getElementById('f1-confusion').value.trim() : '',
-      concern: document.getElementById('f1-concern') ? document.getElementById('f1-concern').value.trim() : '',
+      stream: document.getElementById('f1-stream')?document.getElementById('f1-stream').value:'',
+      marks: document.getElementById('f1-marks')?document.getElementById('f1-marks').value.trim():'',
+      goal: document.getElementById('f1-goal')?document.getElementById('f1-goal').value.trim():'',
+      confusion: document.getElementById('f1-confusion')?document.getElementById('f1-confusion').value.trim():'',
+      concern: document.getElementById('f1-concern')?document.getElementById('f1-concern').value.trim():'',
       source: 'Website',
     })
   }).finally(function(){
-    // Always redirect - no-cors means we can't read response
-    showToast(lang==='hi' ? 'Registration ho gaya! ✅' : 'Registration complete! ✅');
+    showToast(lang==='hi'?'Registration ho gaya! ✅':'Registered! ✅');
     setTimeout(function(){
-      window.location.href = 'https://inwangai.com/thankyou?id=' + encodeURIComponent(inwangId) + '&name=' + encodeURIComponent(name);
+      window.location.href = 'https://inwangai.com/thankyou?id='+encodeURIComponent(inwangId)+'&name='+encodeURIComponent(name);
     }, 1500);
   });
 }
