@@ -1410,44 +1410,69 @@ function submitForm1() {
     return;
   }
   err.style.display='none';
-
-  inwangId = generateLocalId();
   studentName = name;
 
   var btn = document.getElementById('btn-next1');
   if(btn){btn.textContent='Saving...';btn.disabled=true;}
 
-  var payload = {
-    action:'register',
-    id: inwangId,
-    name: name,
-    father: document.getElementById('f1-father')?document.getElementById('f1-father').value.trim():'',
-    pmobile: document.getElementById('f1-pmobile')?document.getElementById('f1-pmobile').value.trim():'',
-    mobile: mobile,
-    whatsapp: mobile,
-    email: email,
-    city: city,
-    state: state,
-    qual: qual,
-    stream: document.getElementById('f1-stream')?document.getElementById('f1-stream').value:'',
-    marks: document.getElementById('f1-marks')?document.getElementById('f1-marks').value.trim():'',
-    goal: document.getElementById('f1-goal')?document.getElementById('f1-goal').value.trim():'',
-    confusion: document.getElementById('f1-confusion')?document.getElementById('f1-confusion').value.trim():'',
-    concern: document.getElementById('f1-concern')?document.getElementById('f1-concern').value.trim():'',
-    source: 'Website',
+  // Use JSONP - AppScript doGet with action=register
+  var cbName = 'regCb_' + Date.now();
+  var script = document.createElement('script');
+  
+  var timer = setTimeout(function(){
+    if(window[cbName]) delete window[cbName];
+    try{document.head.removeChild(script);}catch(e){}
+    // Fallback - use local ID and redirect anyway
+    inwangId = generateLocalId();
+    doRedirect(inwangId, name);
+  }, 10000);
+
+  window[cbName] = function(d){
+    clearTimeout(timer);
+    delete window[cbName];
+    try{document.head.removeChild(script);}catch(e){}
+    if(d && d.success && d.id){
+      inwangId = d.id;
+      doRedirect(inwangId, name);
+    } else if(d && d.duplicate && d.id){
+      inwangId = d.id;
+      doRedirect(inwangId, name);
+    } else {
+      inwangId = generateLocalId();
+      doRedirect(inwangId, name);
+    }
   };
 
-  fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec', {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(payload)
-  }).then(function(){
-    doRedirect(inwangId, name);
-  }).catch(function(){
-    doRedirect(inwangId, name);
-  });
+  // Build query params
+  var params = [
+    'action=register',
+    'name=' + encodeURIComponent(name),
+    'mobile=' + encodeURIComponent(mobile),
+    'email=' + encodeURIComponent(email),
+    'city=' + encodeURIComponent(city),
+    'state=' + encodeURIComponent(state),
+    'qual=' + encodeURIComponent(qual),
+    'father=' + encodeURIComponent(document.getElementById('f1-father')?document.getElementById('f1-father').value.trim():''),
+    'pmobile=' + encodeURIComponent(document.getElementById('f1-pmobile')?document.getElementById('f1-pmobile').value.trim():''),
+    'stream=' + encodeURIComponent(document.getElementById('f1-stream')?document.getElementById('f1-stream').value:''),
+    'marks=' + encodeURIComponent(document.getElementById('f1-marks')?document.getElementById('f1-marks').value.trim():''),
+    'goal=' + encodeURIComponent(document.getElementById('f1-goal')?document.getElementById('f1-goal').value.trim():''),
+    'source=Website',
+    'callback=' + cbName
+  ].join('&');
+
+  script.src = 'https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?' + params;
+  document.head.appendChild(script);
 }
+
+function doRedirect(id, name){
+  localStorage.removeItem('inwang_reg_draft');
+  showToast('Registration ho gaya!');
+  setTimeout(function(){
+    window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name);
+  },1500);
+}
+
 
 function doRedirect(id, name){
   localStorage.removeItem('inwang_reg_draft');
