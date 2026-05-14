@@ -191,7 +191,7 @@ body::before {
 }
 
 /* ── SCREEN ── */
-.screen { display: none; }
+.screen { display: none; } #screen1 { display: block; }
 .screen.active { display: block; }
 
 /* ── HERO ── */
@@ -856,6 +856,8 @@ body::before {
 
 .btn-primary{animation:none!important}
 a{color:inherit!important;text-decoration:none!important}
+
+#toast { position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -923,7 +925,7 @@ a{color:inherit!important;text-decoration:none!important}
 <!-- ════════════════════════════════
      SCREEN 1: REGISTRATION
 ════════════════════════════════ -->
-<div class="screen active" id="screen1" style="width:100%;max-width:640px">
+<div class="screen active" id="screen1" class="screen active" style="width:100%;max-width:640px;display:block">
   <div class="hero" style="width:100%;max-width:640px;text-align:center">
     <div class="hero-badge">
       <div class="hero-dot"></div>
@@ -1389,62 +1391,79 @@ function updateProgress() {
 
 // ── FORM 1 SUBMIT ──
 function submitForm1() {
-  const name   = document.getElementById('f1-name').value.trim();
-  const mobile = document.getElementById('f1-mobile').value.trim();
-  const email  = document.getElementById('f1-email').value.trim();
-  const city   = document.getElementById('f1-city').value.trim();
-  const state  = document.getElementById('f1-state').value.trim();
-  const qual   = document.getElementById('f1-qual').value;
-  const err    = document.getElementById('form1-error');
+  var name   = document.getElementById('f1-name').value.trim();
+  var mobile = document.getElementById('f1-mobile').value.trim();
+  var email  = document.getElementById('f1-email').value.trim();
+  var city   = document.getElementById('f1-city').value.trim();
+  var state  = document.getElementById('f1-state').value.trim();
+  var qual   = document.getElementById('f1-qual').value;
+  var err    = document.getElementById('form1-error');
 
-  if(!name || !mobile || !email || !city || !state || !qual) {
-    err.textContent = '* Fields zaroori hain.';
-    err.style.display = 'block';
+  if(!name||!mobile||!email||!city||!state||!qual){
+    err.textContent='* Fields zaroori hain.';
+    err.style.display='block';
     return;
   }
-  if(!/^\d{10}$/.test(mobile)) {
-    err.textContent = 'Mobile 10 digits ka hona chahiye.';
-    err.style.display = 'block';
+  if(!/^\d{10}$/.test(mobile)){
+    err.textContent='Mobile 10 digits ka hona chahiye.';
+    err.style.display='block';
     return;
   }
-  err.style.display = 'none';
+  err.style.display='none';
 
   inwangId = generateLocalId();
   studentName = name;
 
-  var btn = document.querySelector('.btn-next1');
-  if(btn) { btn.textContent = lang==='hi'?'Save ho raha hai...':'Saving...'; btn.disabled = true; }
+  var btn = document.getElementById('btn-next1');
+  if(btn){btn.textContent='Saving...';btn.disabled=true;}
+
+  var payload = {
+    action:'register',
+    id: inwangId,
+    name: name,
+    father: document.getElementById('f1-father')?document.getElementById('f1-father').value.trim():'',
+    pmobile: document.getElementById('f1-pmobile')?document.getElementById('f1-pmobile').value.trim():'',
+    mobile: mobile,
+    whatsapp: mobile,
+    email: email,
+    city: city,
+    state: state,
+    qual: qual,
+    stream: document.getElementById('f1-stream')?document.getElementById('f1-stream').value:'',
+    marks: document.getElementById('f1-marks')?document.getElementById('f1-marks').value.trim():'',
+    goal: document.getElementById('f1-goal')?document.getElementById('f1-goal').value.trim():'',
+    confusion: document.getElementById('f1-confusion')?document.getElementById('f1-confusion').value.trim():'',
+    concern: document.getElementById('f1-concern')?document.getElementById('f1-concern').value.trim():'',
+    source: 'Website',
+  };
 
   fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec', {
     method: 'POST',
     mode: 'no-cors',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      action: 'register',
-      id: inwangId,
-      name: name,
-      father: document.getElementById('f1-father')?document.getElementById('f1-father').value.trim():'',
-      pmobile: document.getElementById('f1-pmobile')?document.getElementById('f1-pmobile').value.trim():'',
-      mobile: mobile,
-      whatsapp: mobile,
-      email: email,
-      city: city,
-      state: state,
-      qual: qual,
-      stream: document.getElementById('f1-stream')?document.getElementById('f1-stream').value:'',
-      marks: document.getElementById('f1-marks')?document.getElementById('f1-marks').value.trim():'',
-      goal: document.getElementById('f1-goal')?document.getElementById('f1-goal').value.trim():'',
-      confusion: document.getElementById('f1-confusion')?document.getElementById('f1-confusion').value.trim():'',
-      concern: document.getElementById('f1-concern')?document.getElementById('f1-concern').value.trim():'',
-      source: 'Website',
-    })
-  }).finally(function(){
-    localStorage.removeItem('inwang_reg_draft'); // Clear draft
-    showToast(lang==='hi'?'Registration ho gaya! ✅':'Registered! ✅');
-    setTimeout(function(){
-      window.location.href = 'https://inwangai.com/thankyou?id='+encodeURIComponent(inwangId)+'&name='+encodeURIComponent(name);
-    }, 1500);
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  }).then(function(){
+    doRedirect(inwangId, name);
+  }).catch(function(){
+    doRedirect(inwangId, name);
   });
+}
+
+function doRedirect(id, name){
+  localStorage.removeItem('inwang_reg_draft');
+  showToast('Registration ho gaya!');
+  setTimeout(function(){
+    window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name);
+  },1500);
+}
+
+
+function doRedirect(id, name){
+  localStorage.removeItem('inwang_reg_draft');
+  showToast('Registration ho gaya! ✅');
+  setTimeout(function(){
+    window.location.href = 'https://inwangai.com/thankyou?id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(name);
+  }, 1500);
 }
 
 
@@ -1625,6 +1644,7 @@ function updateStepIndicator(n) {
   for(let i=1;i<=3;i++) {
     const dot = document.getElementById('sd'+i);
     const lbl = document.getElementById('sl'+i);
+    if(!dot || !lbl) continue;
     if(i < current) {
       dot.className='step-dot done'; dot.textContent='✓';
     } else if(i===current) {
@@ -1634,8 +1654,8 @@ function updateStepIndicator(n) {
     }
     lbl.className='step-label' + (i===current?' active':'');
   }
-  if(current>=2) document.getElementById('sl12').className='step-line done';
-  if(current>=3) document.getElementById('sl23').className='step-line done';
+  var sl12=document.getElementById('sl12'); if(sl12&&current>=2) sl12.className='step-line done';
+  var sl23=document.getElementById('sl23'); if(sl23&&current>=3) sl23.className='step-line done';
 }
 
 // ── HELPERS ──
@@ -1643,9 +1663,10 @@ function scrollToTop() { window.scrollTo({top:0,behavior:'smooth'}); }
 
 function showToast(msg) {
   const t = document.getElementById('toast');
+  if(!t){ console.log('Toast:', msg); return; }
   t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 3000);
+  t.style.opacity = '1';
+  setTimeout(()=>{ t.style.opacity = '0'; }, 3000);
 }
 
 function unlockReport() {
@@ -1699,5 +1720,6 @@ window.onload = function(){
 };
 
 </script>
+<div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none">✅</div>
 </body>
 </html>
