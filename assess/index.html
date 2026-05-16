@@ -1828,64 +1828,40 @@ function submitForm1() {
 }
 
 function saveAssessmentToSheet(scores, results){
-  // Use JSONP to save assessment
-  var cbName = 'assCb_' + Date.now();
-  var script = document.createElement('script');
-  window[cbName] = function(d){ 
-    delete window[cbName];
-    try{document.head.removeChild(script);}catch(e){}
-    console.log('Assessment saved:', d);
-  };
-  var params = [
-    'action=save_assessment',
-    'id=' + encodeURIComponent(inwangId||''),
-    'name=' + encodeURIComponent(studentName||''),
-    'mobile=' + encodeURIComponent(''),
-    'a=' + encodeURIComponent(scores.analytical||0),
-    'c=' + encodeURIComponent(scores.communication||0),
-    'l=' + encodeURIComponent(scores.learning||0),
-    'd=' + encodeURIComponent(scores.decision||0),
-    'm=' + encodeURIComponent(scores.motivation||0),
-    'cl=' + encodeURIComponent(scores.clarity||0),
-    'r=' + encodeURIComponent(scores.readiness||0),
-    'c1=' + encodeURIComponent(results.cluster1||''),
-    'c2=' + encodeURIComponent(results.cluster2||''),
-    'c3=' + encodeURIComponent(results.cluster3||''),
-    'rl=' + encodeURIComponent(results.readinessLevel||''),
-    'stage=' + encodeURIComponent(results.stage||''),
-    'callback=' + cbName
-  ].join('&');
-  script.src = 'https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?' + params;
-  document.head.appendChild(script);
+  console.log('Saving assessment for:', inwangId, scores);
   
-  // Also POST as backup
-  fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec', {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({
-      action: 'save_assessment',
-      id: inwangId,
-      name: studentName,
-      mobile: document.getElementById('f1-mobile') ? document.getElementById('f1-mobile').value.trim() : '',
-      scores: scores,
-      cluster1: results.cluster1||'',
-      cluster2: results.cluster2||'',
-      cluster3: results.cluster3||'',
-      readinessLevel: results.readinessLevel||'',
-      stage: results.stage||'',
-      skillGaps: results.skillGaps||'',
-      strengths: results.strengths||'',
-      behaviour: results.behaviour||'',
-      streamPrimary: results.streamPrimary||'',
-      streamAlign: results.streamAlign||'',
-      pathway: results.pathway||'',
-    }),
-    mode: 'no-cors'
-  }).catch(function(e){ console.warn('Assessment save error:', e); });
+  var params = new URLSearchParams({
+    action: 'save_assessment',
+    id: inwangId || '',
+    name: studentName || '',
+    a:  Math.round((scores.analytical||0)*100)/100,
+    c:  Math.round((scores.communication||0)*100)/100,
+    l:  Math.round((scores.learning||0)*100)/100,
+    d:  Math.round((scores.decision||0)*100)/100,
+    m:  Math.round((scores.motivation||0)*100)/100,
+    cl: Math.round((scores.clarity||0)*100)/100,
+    r:  Math.round((scores.readiness||0)*100)/100,
+    f:  Math.round((scores.foundation||0)*100)/100,
+    c1: results ? (results.cluster1||'') : '',
+    c2: results ? (results.cluster2||'') : '',
+    c3: results ? (results.cluster3||'') : '',
+    rl: results ? (results.readinessLevel||'') : '',
+    q40: assessmentAnswers['q40'] || '',
+    q41: assessmentAnswers['q41'] || '',
+    q42: assessmentAnswers['q42'] || '',
+  });
+
+  fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?' + params.toString())
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    console.log('Assessment saved:', d);
+  })
+  .catch(function(e){
+    console.warn('Assessment save error:', e);
+  });
 }
 
-// ── LOCAL ID GENERATOR ──
+
 function generateLocalId() {
   const yr = String(new Date().getFullYear()).slice(-2);
   const num = String(Math.floor(Math.random()*99999)+1).padStart(5,'0');
@@ -2035,6 +2011,21 @@ function showReport() {
   document.getElementById('r-readiness-level').textContent = readinessLevel;
 
   goToScreen(4);
+  
+  // ── SAVE TO SHEET ──
+  // Build results object from computed data
+  var saveResults = {
+    cluster1: clusterScores.length > 0 ? clusterScores[0].name : '',
+    cluster2: clusterScores.length > 1 ? clusterScores[1].name : '',
+    cluster3: clusterScores.length > 2 ? clusterScores[2].name : '',
+    readinessLevel: readinessLevel || '',
+    stage: '',
+    skillGaps: top3 ? top3.map(function(d){return d.name + ' → ' + (d.val<4?'Needs work':'Good');}).join('\n') : '',
+    strengths: top3 ? top3.map(function(d){return d.name;}).join(', ') : '',
+    behaviour: '',
+    streamPrimary: '',
+  };
+  saveAssessmentToSheet(scores, saveResults);
   
   // Update screen4 with student info
   var idPill = document.getElementById('r-id-pill');
