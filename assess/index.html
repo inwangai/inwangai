@@ -31,6 +31,10 @@ body {
   color: var(--white);
   min-height: 100vh;
   overflow-x: hidden;
+  box-sizing: border-box;
+}
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 /* ── BACKGROUND PATTERN ── */
@@ -357,21 +361,27 @@ body::before {
 
 .scale-btns {
   display: flex;
-  gap: 6px;
+  gap: 8px;
+  flex-wrap: nowrap;
+  width: 100%;
 }
 
 .scale-btn {
   flex: 1;
-  height: 34px;
-  border: 1.5px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 12px;
+  height: 52px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.7);
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
   font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.scale-btn:hover {
+  background: rgba(200,168,75,0.1);
+  border-color: rgba(200,168,75,0.3);
 }
 
 .scale-btn:hover {
@@ -649,6 +659,8 @@ body::before {
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 12px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .zone-chip {
@@ -1160,11 +1172,39 @@ a{color:inherit!important;text-decoration:none!important}
 <!-- ════════════════════════════════
      SCREEN 2: ASSESSMENT
 ════════════════════════════════ -->
-<div class="screen" id="screen2" style="width:100%;max-width:640px">
+<div class="screen" id="screen2" style="width:100%;max-width:640px;box-sizing:border-box;overflow-x:hidden">
+
+  <!-- ASSESSMENT INTRO -->
+  <div id="assess-intro" style="background:linear-gradient(135deg,#0a1929,#071428);border:1px solid rgba(200,168,75,0.2);border-radius:16px;padding:28px;margin-bottom:24px;max-width:560px;margin-left:auto;margin-right:auto">
+    <div style="font-size:11px;color:#c8a84b;letter-spacing:2px;font-weight:700;margin-bottom:12px">INWANG AI ASSESSMENT</div>
+    <h2 id="intro-title" style="font-size:20px;font-weight:800;color:#fff;margin-bottom:8px">Career Intelligence Assessment</h2>
+    <p id="intro-desc" style="font-size:13px;color:#8899bb;line-height:1.7;margin-bottom:16px">यह AI-आधारित आकलन आपकी रुचि, कौशल, सोचने की शैली और करियर दिशा को समझने के लिए बनाया गया है।<br><br><strong style="color:#fff">⏱ समय: लगभग 10-15 मिनट</strong><br>इसमें कोई सही या गलत उत्तर नहीं है।<br>कृपया ईमानदारी से उत्तर दें।</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div style="background:rgba(200,168,75,0.08);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:#c8a84b">40</div>
+        <div style="font-size:11px;color:#6b7a99">Questions</div>
+      </div>
+      <div style="background:rgba(0,212,255,0.08);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:#00d4ff">10-15</div>
+        <div style="font-size:11px;color:#6b7a99">Minutes</div>
+      </div>
+    </div>
+    <div id="intro-scale" style="font-size:12px;color:#6b7a99;margin-bottom:16px;line-height:1.6">
+      <div style="margin-bottom:6px">⭐ <strong style="color:#fff">1</strong> = <span id="intro-s1">बिल्कुल agree नहीं</span></div>
+      <div style="margin-bottom:6px">⭐⭐⭐⭐ <strong style="color:#fff">4</strong> = <span id="intro-s4">Neutral</span></div>
+      <div>⭐⭐⭐⭐⭐⭐⭐ <strong style="color:#fff">7</strong> = <span id="intro-s7">पूरी तरह agree</span></div>
+    </div>
+    <button onclick="document.getElementById('assess-intro').style.display='none';document.getElementById('assess-questions').style.display='block';renderQuestions();updateProgress();" 
+      id="intro-start-btn"
+      style="width:100%;background:linear-gradient(135deg,#c8a84b,#e8c96d);color:#020408;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer">
+      Assessment Shuru Karo →
+    </button>
+  </div>
+  <div id="assess-questions" style="display:none">
   <div style="max-width:560px;margin:0 auto;padding:20px 16px 0;">
     <div class="progress-wrap">
       <div class="progress-meta">
-        <span class="progress-label" id="txt-progress">Question <span id="qnum">1</span> / 40</span>
+        <span class="progress-label" id="txt-progress">Section <span id="qnum">1</span> / <span id="total-q">7</span></span>
         <span class="progress-pct" id="pct-label">0%</span>
       </div>
       <div class="progress-bar-bg">
@@ -1173,14 +1213,14 @@ a{color:inherit!important;text-decoration:none!important}
     </div>
   </div>
 
-  <div id="questionsContainer" style="max-width:560px;margin:0 auto;padding:0 16px 20px;"></div>
+  <div id="questionsContainer" style="max-width:560px;margin:0 auto;padding:0 16px 20px;width:100%;box-sizing:border-box;"></div>
 
   <div style="max-width:560px;margin:0 auto;padding:0 16px 20px;">
     <div id="assess-error" class="err" style="margin-bottom:10px;text-align:center"></div>
-    <button class="btn-primary" onclick="submitAssessment()" id="btn-submit">
+    <button class="btn-primary" onclick="submitAssessment()" id="btn-submit" style="display:none">
       Report Generate Karo →
     </button>
-    <button class="btn-secondary" onclick="scrollToTop()" id="btn-scroll">Upar Jaao</button>
+    <button class="btn-secondary" onclick="scrollToTop()" id="btn-scroll" style="display:none">Upar Jaao</button>
   </div>
 </div>
 
@@ -1390,15 +1430,15 @@ const T = {
     progress: "Question",
     analyzing: "आपका career profile analyze हो रहा है...",
     wait: "थोड़ा wait करो — 10-15 seconds",
-    rs_personality: "Career Personality Type",
-    rs_strengths: "आपके Top Strength Indicators",
+    rs_personality: "करियर व्यक्तित्व प्रकार",
+    rs_strengths: "आपकी मुख्य शक्तियां Indicators",
     rs_zones: "Potential Career Zones",
     rs_score: "Career Readiness Score",
     rs_hidden: "Hidden Talent Signal",
     lt1: "एक specific area detect हुआ है",
-    ls1: "जिसमें आप 80% students से better perform कर सकते हैं।\nFull report में unlock होगा।",
+    ls1: "जिसमें आप 80% छात्रों से बेहतर प्रदर्शन कर सकते हैं।\nपूरी रिपोर्ट में दिखेगा।",
     lt2: "एक unique career direction detect हुआ है",
-    ls2: "जो most students overlook करते हैं।\nFull report में reveal होगा।",
+    ls2: "जो अधिकतर छात्र नजरअंदाज करते हैं।\nपूरी रिपोर्ट में दिखेगा।",
     cta_title: "अपना complete career roadmap unlock करो",
     cta_sub: "Full report में मिलेगा:",
     btn_unlock: "Full Report Unlock करो",
@@ -1424,7 +1464,7 @@ const T = {
     progress: "Question",
     analyzing: "Analyzing your career profile...",
     wait: "Please wait — 10-15 seconds",
-    rs_personality: "Career Personality Type",
+    rs_personality: "करियर व्यक्तित्व प्रकार",
     rs_strengths: "Your Top Strength Indicators",
     rs_zones: "Potential Career Zones",
     rs_score: "Career Readiness Score",
@@ -1451,50 +1491,202 @@ function setLang(l) {
   document.getElementById('btn-hi').classList.toggle('active', l==='hi');
   document.getElementById('btn-en').classList.toggle('active', l==='en');
   const t = T[l];
-  document.getElementById('txt-badge').textContent = t.badge;
-  document.getElementById('txt-h1').innerHTML = `${t.h1_1} <span>${t.h1_2}</span><br>${t.h1_3}`;
-  document.getElementById('txt-sub').textContent = t.sub;
-  document.getElementById('txt-reg-title').textContent = t.reg_title;
-  document.getElementById('txt-reg-sub').textContent = t.reg_sub;
-  document.getElementById('lbl-name').textContent = t.lbl_name;
-  document.getElementById('lbl-mobile').textContent = t.lbl_mobile;
-  document.getElementById('lbl-whatsapp').textContent = t.lbl_whatsapp;
-  document.getElementById('lbl-email').textContent = t.lbl_email;
-  document.getElementById('lbl-city').textContent = t.lbl_city;
-  document.getElementById('lbl-state').textContent = t.lbl_state;
-  document.getElementById('lbl-qual').textContent = t.lbl_qual;
-  document.getElementById('lbl-stream').textContent = t.lbl_stream;
-  document.getElementById('lbl-marks').textContent = t.lbl_marks;
-  document.getElementById('lbl-budget').textContent = t.lbl_budget;
-  document.getElementById('lbl-goal').textContent = t.lbl_goal;
-  document.getElementById('lbl-confusion').textContent = t.lbl_confusion;
-  document.getElementById('txt-academic').textContent = t.academic;
-  document.getElementById('btn-next1').textContent = t.btn_next;
-  document.getElementById('btn-submit').textContent = t.submit_btn;
-  document.getElementById('btn-scroll').textContent = t.scroll_btn;
-  document.getElementById('txt-analyzing').textContent = t.analyzing;
-  document.getElementById('txt-wait').textContent = t.wait;
-  document.getElementById('rs-personality-lbl').textContent = t.rs_personality;
-  document.getElementById('rs-strengths-lbl').textContent = t.rs_strengths;
-  document.getElementById('rs-zones-lbl').textContent = t.rs_zones;
-  document.getElementById('rs-score-lbl').textContent = t.rs_score;
-  document.getElementById('rs-hidden-lbl').textContent = t.rs_hidden;
-  document.getElementById('lt1').textContent = t.lt1;
-  document.getElementById('ls-sub1').innerHTML = t.ls1.replace('\n','<br>');
-  document.getElementById('lt2').textContent = t.lt2;
-  document.getElementById('ls-sub2').innerHTML = t.ls2.replace('\n','<br>') + '<br><strong style="color:rgba(255,255,255,0.7)">Full report mein reveal hoga.</strong>';
-  document.getElementById('cta-title').textContent = t.cta_title;
-  document.getElementById('cta-sub').textContent = t.cta_sub;
-  document.getElementById('btn-unlock').textContent = t.btn_unlock;
-  document.getElementById('btn-counsel').textContent = t.btn_counsel;
-  document.getElementById('r-zones-note').textContent = t.zones_note;
-  for(let i=1;i<=5;i++) document.getElementById('lss'+i).textContent = t.lss[i-1];
-  for(let i=1;i<=6;i++) document.getElementById('cf'+i).textContent = t.cf[i-1];
-  if(document.getElementById('screen2').classList.contains('active')) renderQuestions();
+  var _t=document.getElementById('txt-badge');if(_t)_t.textContent=t.badge;
+  var _t=document.getElementById('txt-h1');if(_t)_t.innerHTML=`${t.h1_1} <span>${t.h1_2}</span><br>${t.h1_3}`;
+  var _t=document.getElementById('txt-sub');if(_t)_t.textContent=t.sub;
+  var _t=document.getElementById('txt-reg-title');if(_t)_t.textContent=t.reg_title;
+  var _t=document.getElementById('txt-reg-sub');if(_t)_t.textContent=t.reg_sub;
+  var _t=document.getElementById('lbl-name');if(_t)_t.textContent=t.lbl_name;
+  var _t=document.getElementById('lbl-mobile');if(_t)_t.textContent=t.lbl_mobile;
+  var _t=document.getElementById('lbl-whatsapp');if(_t)_t.textContent=t.lbl_whatsapp;
+  var _t=document.getElementById('lbl-email');if(_t)_t.textContent=t.lbl_email;
+  var _t=document.getElementById('lbl-city');if(_t)_t.textContent=t.lbl_city;
+  var _t=document.getElementById('lbl-state');if(_t)_t.textContent=t.lbl_state;
+  var _t=document.getElementById('lbl-qual');if(_t)_t.textContent=t.lbl_qual;
+  var _t=document.getElementById('lbl-stream');if(_t)_t.textContent=t.lbl_stream;
+  var _t=document.getElementById('lbl-marks');if(_t)_t.textContent=t.lbl_marks;
+  var _t=document.getElementById('lbl-budget');if(_t)_t.textContent=t.lbl_budget;
+  var _t=document.getElementById('lbl-goal');if(_t)_t.textContent=t.lbl_goal;
+  var _t=document.getElementById('lbl-confusion');if(_t)_t.textContent=t.lbl_confusion;
+  var _t=document.getElementById('txt-academic');if(_t)_t.textContent=t.academic;
+  var _t=document.getElementById('btn-next1');if(_t)_t.textContent=t.btn_next;
+  var _t=document.getElementById('btn-submit');if(_t)_t.textContent=t.submit_btn;
+  var _t=document.getElementById('btn-scroll');if(_t)_t.textContent=t.scroll_btn;
+  var _t=document.getElementById('txt-analyzing');if(_t)_t.textContent=t.analyzing;
+  var _t=document.getElementById('txt-wait');if(_t)_t.textContent=t.wait;
+  var _t=document.getElementById('rs-personality-lbl');if(_t)_t.textContent=t.rs_personality;
+  var _t=document.getElementById('rs-strengths-lbl');if(_t)_t.textContent=t.rs_strengths;
+  var _t=document.getElementById('rs-zones-lbl');if(_t)_t.textContent=t.rs_zones;
+  var _t=document.getElementById('rs-score-lbl');if(_t)_t.textContent=t.rs_score;
+  var _t=document.getElementById('rs-hidden-lbl');if(_t)_t.textContent=t.rs_hidden;
+  var _t=document.getElementById('lt1');if(_t)_t.textContent=t.lt1;
+  var _t=document.getElementById('ls-sub1');if(_t)_t.innerHTML=t.ls1.replace('\n','<br>');
+  var _t=document.getElementById('lt2');if(_t)_t.textContent=t.lt2;
+  var _t=document.getElementById('ls-sub2');if(_t)_t.innerHTML=t.ls2.replace('\n','<br>') + '<br><strong style="color:rgba(255,255,255,0.7)">Full report mein reveal hoga.</strong>';
+  var _t=document.getElementById('cta-title');if(_t)_t.textContent=t.cta_title;
+  var _t=document.getElementById('cta-sub');if(_t)_t.textContent=t.cta_sub;
+  var _t=document.getElementById('btn-unlock');if(_t)_t.textContent=t.btn_unlock;
+  var _t=document.getElementById('btn-counsel');if(_t)_t.textContent=t.btn_counsel;
+  var _t=document.getElementById('r-zones-note');if(_t)_t.textContent=t.zones_note;
+  for(let i=1;i<=5;i++){var _e=document.getElementById('lss'+i);if(_e&&t.lss)_e.textContent=t.lss[i-1];}
+  for(let i=1;i<=6;i++){var _e=document.getElementById('cf'+i);if(_e&&t.cf)_e.textContent=t.cf[i-1];}
+  // Update intro text
+  var introTitle = document.getElementById('intro-title');
+  var introDesc = document.getElementById('intro-desc');
+  var introStartBtn = document.getElementById('intro-start-btn');
+  var introS1 = document.getElementById('intro-s1');
+  
+  if(l === 'en'){
+    if(introTitle) introTitle.textContent = 'Career Intelligence Assessment';
+    if(introDesc) introDesc.innerHTML = 'This AI-based assessment helps us understand your interests, skills, thinking style and career direction.<br><br><strong style="color:#fff">⏱ Time required: 10-15 minutes</strong><br>There are no right or wrong answers.<br>Please answer honestly for best results.';
+    if(introStartBtn) introStartBtn.textContent = 'Start Assessment →';
+    if(introS1) introS1.textContent = 'Completely disagree';
+  } else {
+    if(introTitle) introTitle.textContent = 'Career Intelligence Assessment';
+    if(introDesc) introDesc.innerHTML = 'यह AI-आधारित आकलन आपकी रुचि, कौशल, सोचने की शैली और करियर दिशा को समझने के लिए बनाया गया है।<br><br><strong style="color:#fff">⏱ समय: लगभग 10-15 मिनट</strong><br>इसमें कोई सही या गलत उत्तर नहीं है।<br>कृपया ईमानदारी से उत्तर दें ताकि सही परिणाम मिल सके।';
+    if(introStartBtn) introStartBtn.textContent = 'Assessment Shuru Karo →';
+    if(introS1) introS1.textContent = 'Bilkul agree nahi';
+  }
+  
+  // Re-render questions if showing
+  var qDiv = document.getElementById('assess-questions');
+  if(qDiv && qDiv.style.display !== 'none') renderQuestions();
 }
 
 // ── RENDER QUESTIONS ──
+var currentSection = 0;
+
 function renderQuestions() {
+  renderSection(0);
+}
+
+function renderSection(secIdx) {
+  currentSection = secIdx;
+  const c = document.getElementById('questionsContainer');
+  if(!c) return;
+  c.innerHTML = '';
+  
+  var sections = [{"id": "sec1", "en_title": "Section 1: Thinking & Learning", "hi_title": "खंड 1: सोच और सीखने की क्षमता", "en_desc": "These questions help us understand how you think, analyze and learn.", "hi_desc": "ये प्रश्न आपकी सोचने, विश्लेषण करने और सीखने की क्षमता को समझने में मदद करते हैं।", "qs": ["q3", "q4", "q9", "q10", "q8", "q12"]}, {"id": "sec2", "en_title": "Section 2: Communication & People Skills", "hi_title": "खंड 2: संचार और लोगों के साथ काम करना", "en_desc": "These questions help us understand how you interact with people and communicate.", "hi_desc": "ये प्रश्न आपके लोगों के साथ काम करने और संचार कौशल को समझने में मदद करते हैं।", "qs": ["q5", "q11", "q6", "q7"]}, {"id": "sec3", "en_title": "Section 3: Decision Making & Resilience", "hi_title": "खंड 3: निर्णय लेना और दृढ़ता", "en_desc": "These questions help us understand how you make decisions and handle challenges.", "hi_desc": "ये प्रश्न आपके निर्णय लेने और चुनौतियों से निपटने की क्षमता को समझने में मदद करते हैं।", "qs": ["q13", "q14", "q15", "q16", "q17", "q18", "q33", "q34", "q35", "q36"]}, {"id": "sec4", "en_title": "Section 4: Motivation & Values", "hi_title": "खंड 4: प्रेरणा और मूल्य", "en_desc": "These questions help us understand what motivates you and what you value in a career.", "hi_desc": "ये प्रश्न आपकी प्रेरणा और करियर में आपके लिए क्या महत्वपूर्ण है यह समझने में मदद करते हैं।", "qs": ["q19", "q20", "q21", "q22", "q23", "q24", "q25", "q26", "q27"]}, {"id": "sec5", "en_title": "Section 5: Environment & Support", "hi_title": "खंड 5: परिवेश और सहायता", "en_desc": "These questions help us understand your environment and support system.", "hi_desc": "ये प्रश्न आपके परिवेश और सहायता प्रणाली को समझने में मदद करते हैं।", "qs": ["q28", "q29", "q30", "q31", "q32"]}, {"id": "sec6", "en_title": "Section 6: Career Clarity", "hi_title": "खंड 6: करियर स्पष्टता", "en_desc": "These questions help us understand how clear you are about your career direction.", "hi_desc": "ये प्रश्न आपकी करियर दिशा के बारे में स्पष्टता को समझने में मदद करते हैं।", "qs": ["q37", "q38", "q39"]}, {"id": "sec7", "en_title": "Section 7: Open Reflection", "hi_title": "खंड 7: खुला विचार", "en_desc": "Please write your honest thoughts. There are no right or wrong answers.", "hi_desc": "कृपया अपने विचार ईमानदारी से लिखें। कोई सही या गलत उत्तर नहीं है।", "qs": ["q40", "q41", "q42"]}];
+  var lang_val = (typeof lang !== 'undefined') ? lang : 'hi';
+  
+  if(secIdx >= sections.length){
+    submitAssessment();
+    return;
+  }
+  
+  var sec = sections[secIdx];
+  
+  // Section header
+  var header = document.createElement('div');
+  header.style.cssText = 'background:linear-gradient(135deg,#0a1929,#071428);border:1px solid rgba(200,168,75,0.2);border-radius:14px;padding:20px;margin-bottom:20px';
+  header.innerHTML = '<div style="font-size:10px;color:#c8a84b;letter-spacing:2px;font-weight:700;margin-bottom:8px">INWANG AI · ' + (secIdx+1) + ' / ' + sections.length + '</div>' +
+    '<div style="font-size:17px;font-weight:800;color:#fff;margin-bottom:6px">' + (lang_val==="hi" ? sec.hi_title : sec.en_title) + '</div>' +
+    '<div style="font-size:12px;color:#8899bb;line-height:1.6">' + (lang_val==="hi" ? sec.hi_desc : sec.en_desc) + '</div>';
+  c.appendChild(header);
+  
+  // Get questions for this section
+  var secQIds = sec.qs;
+  var secQuestions = questions.filter(function(q){ return secQIds.indexOf(q.id) !== -1; });
+  // Sort by section order
+  secQuestions.sort(function(a,b){ return secQIds.indexOf(a.id) - secQIds.indexOf(b.id); });
+  
+  secQuestions.forEach(function(q, i){
+    var txt = lang_val === 'hi' ? q.hi : q.en;
+    var selected = assessmentAnswers[q.id] || 0;
+    
+    if(q.type === 'text'){
+      var textVal = assessmentAnswers[q.id] || '';
+      var div = document.createElement('div');
+      div.className = 'question-card';
+      div.innerHTML = '<div class="q-num">Q' + (i+1) + '</div>' +
+        '<div class="q-text">' + txt + '</div>' +
+        '<textarea id="text_'+q.id+'" rows="4" placeholder="' + (lang_val==="hi"?"यहाँ लिखें...":"Write here...") + '" ' +
+        'style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;color:#fff;font-size:13px;font-family:inherit;resize:vertical;margin-top:12px;outline:none;box-sizing:border-box" ' +
+        'onchange="assessmentAnswers[\''+q.id+'\' ]=this.value" onkeyup="assessmentAnswers[\''+q.id+'\' ]=this.value">' + textVal + '</textarea>';
+      c.appendChild(div);
+      return;
+    }
+    
+    var div = document.createElement('div');
+    div.className = 'question-card';
+    var scaleHtml = '<div class="scale-btns" style="margin:14px 0 6px">';
+    for(var v=1;v<=7;v++){
+      var isSel = (selected===v);
+      scaleHtml += '<button class="scale-btn' + (isSel?' selected':'') + '" onclick="setAnswer(\''+q.id+'\','+v+',this)">' + v + '</button>';
+    }
+    scaleHtml += '</div>';
+    scaleHtml += '<div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:8px"><span>' + (lang_val==="hi"?"बिल्कुल agree नहीं":"Completely disagree") + '</span><span>' + (lang_val==="hi"?"पूरी तरह agree":"Completely agree") + '</span></div>';
+    div.innerHTML = '<div class="q-num">Q' + (i+1) + '</div><div class="q-text">' + txt + '</div>' + scaleHtml;
+    c.appendChild(div);
+  });
+  
+  // Navigation buttons
+  var navDiv = document.createElement('div');
+  navDiv.style.cssText = 'display:flex;gap:12px;margin-top:24px;margin-bottom:40px;max-width:560px;margin-left:auto;margin-right:auto';
+  
+  var isLast = (secIdx === sections.length - 1);
+  
+  if(secIdx > 0){
+    var prevBtn = document.createElement('button');
+    prevBtn.textContent = lang_val==="hi" ? "← पिछला" : "← Previous";
+    prevBtn.style.cssText = 'flex:1;padding:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit';
+    prevBtn.onclick = function(){ 
+      saveTextAnswers();
+      renderSection(secIdx-1); 
+      window.scrollTo(0,0);
+    };
+    navDiv.appendChild(prevBtn);
+  }
+  
+  var nextBtn = document.createElement('button');
+  nextBtn.id = 'sec-next-btn';
+  nextBtn.textContent = isLast ? (lang_val==="hi"?"Submit करें →":"Submit →") : (lang_val==="hi"?"अगला →":"Next →");
+  nextBtn.style.cssText = 'flex:2;padding:14px;background:linear-gradient(135deg,#c8a84b,#e8c96d);color:#020408;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit';
+  nextBtn.onclick = function(){
+    saveTextAnswers();
+    // Check all MCQ answered in this section
+    var unanswered = secQuestions.filter(function(q){ return q.type!=='text' && !assessmentAnswers[q.id]; });
+    if(unanswered.length > 0){
+      showToast(lang_val==="hi" ? 'सभी प्रश्नों के उत्तर दें' : 'Please answer all questions');
+      // Highlight unanswered
+      unanswered.forEach(function(q){
+        var card = document.querySelector('[data-qid="'+q.id+'"]');
+        if(card) card.style.border = '1px solid #e74c3c';
+      });
+      return;
+    }
+    if(isLast){
+      submitAssessment();
+    } else {
+      renderSection(secIdx+1);
+      window.scrollTo(0,0);
+    }
+  };
+  navDiv.appendChild(nextBtn);
+  c.appendChild(navDiv);
+  
+  // Update progress
+  var pct = Math.round(((secIdx) / sections.length) * 100);
+  var pbar = document.getElementById('pbar');
+  if(pbar) pbar.style.width = pct + '%';
+  var pctLabel = document.getElementById('pct-label');
+  if(pctLabel) pctLabel.textContent = pct + '%';
+  var qnum = document.getElementById('qnum');
+  if(qnum) qnum.textContent = secIdx + 1;
+  
+  // Total label
+  var totalLabel = document.getElementById('total-q');
+  if(totalLabel) totalLabel.textContent = sections.length;
+}
+
+function saveTextAnswers(){
+  questions.filter(function(q){return q.type==='text';}).forEach(function(q){
+    var el = document.getElementById('text_'+q.id);
+    if(el) assessmentAnswers[q.id] = el.value;
+  });
+}
+
+function _old_renderQuestions_unused() {
   const c = document.getElementById('questionsContainer');
   c.innerHTML = '';
   questions.forEach((q, i) => {
@@ -1543,12 +1735,20 @@ function renderQuestions() {
 }
 
 // ── SELECT ANSWER ──
+function setAnswer(qid, val, btn){ 
+  selectAnswer(qid, val, btn); 
+}
 function selectAnswer(qid, val, btn) {
   assessmentAnswers[qid] = val;
-  const sq = document.getElementById('sq_' + qid);
-  sq.classList.add('answered');
-  sq.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
+  // Update button visual
+  var parent = btn ? btn.parentElement : null;
+  if(parent) {
+    parent.querySelectorAll('.scale-btn').forEach(function(b){ b.classList.remove('selected'); });
+    btn.classList.add('selected');
+  }
+  // Legacy sq_ wrapper support
+  var sq = document.getElementById('sq_' + qid);
+  if(sq) sq.classList.add('answered');
   updateProgress();
 }
 
@@ -1628,8 +1828,40 @@ function submitForm1() {
 }
 
 function saveAssessmentToSheet(scores, results){
+  // Use JSONP to save assessment
+  var cbName = 'assCb_' + Date.now();
+  var script = document.createElement('script');
+  window[cbName] = function(d){ 
+    delete window[cbName];
+    try{document.head.removeChild(script);}catch(e){}
+    console.log('Assessment saved:', d);
+  };
+  var params = [
+    'action=save_assessment',
+    'id=' + encodeURIComponent(inwangId||''),
+    'name=' + encodeURIComponent(studentName||''),
+    'mobile=' + encodeURIComponent(''),
+    'a=' + encodeURIComponent(scores.analytical||0),
+    'c=' + encodeURIComponent(scores.communication||0),
+    'l=' + encodeURIComponent(scores.learning||0),
+    'd=' + encodeURIComponent(scores.decision||0),
+    'm=' + encodeURIComponent(scores.motivation||0),
+    'cl=' + encodeURIComponent(scores.clarity||0),
+    'r=' + encodeURIComponent(scores.readiness||0),
+    'c1=' + encodeURIComponent(results.cluster1||''),
+    'c2=' + encodeURIComponent(results.cluster2||''),
+    'c3=' + encodeURIComponent(results.cluster3||''),
+    'rl=' + encodeURIComponent(results.readinessLevel||''),
+    'stage=' + encodeURIComponent(results.stage||''),
+    'callback=' + cbName
+  ].join('&');
+  script.src = 'https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?' + params;
+  document.head.appendChild(script);
+  
+  // Also POST as backup
   fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec', {
     method: 'POST',
+    mode: 'no-cors',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({
       action: 'save_assessment',
@@ -1802,12 +2034,30 @@ function showReport() {
 
   document.getElementById('r-readiness-level').textContent = readinessLevel;
 
-  // Redirect to payment page after assessment
-  setTimeout(function(){
-    window.location.href = 'https://inwangai.com/payment?id=' + encodeURIComponent(inwangId||'');
-  }, 2000);
-  
   goToScreen(4);
+  
+  // Update screen4 with student info
+  var idPill = document.getElementById('r-id-pill');
+  if(idPill) idPill.textContent = inwangId||'';
+  var nameEl = document.getElementById('r-name');
+  if(nameEl) nameEl.textContent = studentName||'';
+  
+  // Show AI loading then redirect to payment
+  var overlay = document.getElementById('ai-assess-loading');
+  if(overlay) overlay.style.display = 'flex';
+  var msgs = ['6D scoring engine processing...','Career clusters mapping...','Skill gaps analyzing...','Generating your profile...','Almost ready...'];
+  var i=0;
+  var textEl = document.getElementById('ai-assess-text');
+  var iv = setInterval(function(){
+    i=(i+1)%msgs.length;
+    if(textEl) textEl.textContent = msgs[i];
+  }, 800);
+  
+  setTimeout(function(){
+    clearInterval(iv);
+    if(overlay) overlay.style.display = 'none';
+    window.location.href = 'https://inwangai.com/payment?id=' + encodeURIComponent(inwangId||'');
+  }, 4000);
 
   // Animate score bar
   setTimeout(()=>{
@@ -1870,18 +2120,48 @@ function bookCounselling() {
 
 // ── INIT ──
 window.onload = function(){
-  // Get ID and name from URL
   var params = new URLSearchParams(window.location.search);
   var urlId = params.get('id');
   var urlName = params.get('name');
-  if(urlId) { inwangId = urlId; }
-  if(urlName) { studentName = decodeURIComponent(urlName); }
+  if(urlId) inwangId = urlId;
+  if(urlName) studentName = decodeURIComponent(urlName);
   
-  // Start directly at screen 2 (assessment)
   goToScreen(2);
-  renderQuestions();
+  // Show intro first - questions render when user clicks Start
+  var intro = document.getElementById('assess-intro');
+  var qDiv = document.getElementById('assess-questions');
+  if(intro) intro.style.display = 'block';
+  if(qDiv) qDiv.style.display = 'none';
   updateProgress();
 };
 </script>
+
+<!-- AI LOADING ASSESS -->
+<div id="ai-assess-loading" style="display:none;position:fixed;inset:0;z-index:9999;background:#020408;flex-direction:column;align-items:center;justify-content:center">
+  <div style="position:relative;width:140px;height:140px;margin-bottom:32px">
+    <svg width="140" height="140" style="position:absolute;top:0;left:0;animation:spin 3s linear infinite">
+      <circle cx="70" cy="70" r="64" fill="none" stroke="rgba(200,168,75,0.15)" stroke-width="2"/>
+      <circle cx="70" cy="70" r="64" fill="none" stroke="#c8a84b" stroke-width="2" stroke-dasharray="50 350" stroke-linecap="round"/>
+    </svg>
+    <svg width="140" height="140" style="position:absolute;top:0;left:0;animation:spin 2s linear infinite reverse">
+      <circle cx="70" cy="70" r="50" fill="none" stroke="rgba(0,212,255,0.15)" stroke-width="1.5"/>
+      <circle cx="70" cy="70" r="50" fill="none" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="30 280" stroke-linecap="round"/>
+    </svg>
+    <svg width="140" height="140" style="position:absolute;top:0;left:0;animation:spin 1.5s linear infinite">
+      <circle cx="70" cy="70" r="36" fill="none" stroke="rgba(200,168,75,0.1)" stroke-width="1"/>
+      <circle cx="70" cy="70" r="36" fill="none" stroke="rgba(200,168,75,0.5)" stroke-width="1" stroke-dasharray="20 200" stroke-linecap="round"/>
+    </svg>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;animation:pulse 1.5s ease-in-out infinite">🧠</div>
+  </div>
+  <div style="font-size:11px;color:#c8a84b;letter-spacing:3px;margin-bottom:12px">INWANG AI</div>
+  <div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:8px">Analyzing Your Profile</div>
+  <div id="ai-assess-text" style="font-size:13px;color:#6b7a99;margin-bottom:24px">6D scoring engine processing...</div>
+  <div style="display:flex;gap:6px">
+    <div style="width:8px;height:8px;background:#c8a84b;border-radius:50%;animation:dot 1.4s ease-in-out infinite"></div>
+    <div style="width:8px;height:8px;background:#c8a84b;border-radius:50%;animation:dot 1.4s ease-in-out 0.2s infinite"></div>
+    <div style="width:8px;height:8px;background:#c8a84b;border-radius:50%;animation:dot 1.4s ease-in-out 0.4s infinite"></div>
+  </div>
+</div>
+
 </body>
 </html>
