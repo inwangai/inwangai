@@ -1878,25 +1878,8 @@ function submitAssessment() {
   assessmentAnswers['q41'] = q41val;
   assessmentAnswers['q42'] = q42val;
   
-  const total = questions.length;
-  const done  = Object.keys(assessmentAnswers).length;
-  const err   = document.getElementById('assess-error');
-  if(done < total) {
-    const remain = total - done;
-    err.textContent = lang==='hi'
-      ? `${remain} questions baaki hain. Sabhi answer karo.`
-      : `${remain} questions remaining. Please answer all.`;
-    scrollToTop();
-    // Highlight unanswered
-    questions.forEach(q => {
-      if(!assessmentAnswers[q.id]) {
-        const el = document.getElementById('sq_'+q.id);
-        if(el) { el.style.borderColor='rgba(192,57,43,0.5)'; el.style.background='rgba(192,57,43,0.05)'; }
-      }
-    });
-    return;
-  }
-  err.textContent = '';
+  const err = document.getElementById('assess-error');
+  if(err) err.textContent = '';
   goToScreen(3);
   runScoringEngine();
 }
