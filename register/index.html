@@ -1415,55 +1415,42 @@ function submitForm1() {
   var btn = document.getElementById('btn-next1');
   if(btn){btn.textContent='Saving...';btn.disabled=true;}
 
-  // Use JSONP - AppScript doGet with action=register
-  var cbName = 'regCb_' + Date.now();
-  var script = document.createElement('script');
-  
-  var timer = setTimeout(function(){
-    if(window[cbName]) delete window[cbName];
-    try{document.head.removeChild(script);}catch(e){}
-    // Fallback - use local ID and redirect anyway
-    inwangId = generateLocalId();
-    doRedirect(inwangId, name);
-  }, 10000);
+  // Build URL params for GET request
+  var params = new URLSearchParams({
+    action: 'register',
+    name: name,
+    mobile: mobile,
+    email: email,
+    city: city,
+    state: state,
+    qual: qual,
+    father: document.getElementById('f1-father')?document.getElementById('f1-father').value.trim():'',
+    pmobile: document.getElementById('f1-pmobile')?document.getElementById('f1-pmobile').value.trim():'',
+    stream: document.getElementById('f1-stream')?document.getElementById('f1-stream').value:'',
+    marks: document.getElementById('f1-marks')?document.getElementById('f1-marks').value.trim():'',
+    goal: document.getElementById('f1-goal')?document.getElementById('f1-goal').value.trim():'',
+    source: 'Website'
+  });
 
-  window[cbName] = function(d){
-    clearTimeout(timer);
-    delete window[cbName];
-    try{document.head.removeChild(script);}catch(e){}
-    if(d && d.success && d.id){
+  // Use fetch GET - AppScript allows CORS on GET
+  fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?' + params.toString())
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    console.log('Register response:', d);
+    if(d && d.id){
       inwangId = d.id;
-      doRedirect(inwangId, name);
-    } else if(d && d.duplicate && d.id){
-      inwangId = d.id;
-      doRedirect(inwangId, name);
     } else {
       inwangId = generateLocalId();
-      doRedirect(inwangId, name);
     }
-  };
-
-  // Build query params
-  var params = [
-    'action=register',
-    'name=' + encodeURIComponent(name),
-    'mobile=' + encodeURIComponent(mobile),
-    'email=' + encodeURIComponent(email),
-    'city=' + encodeURIComponent(city),
-    'state=' + encodeURIComponent(state),
-    'qual=' + encodeURIComponent(qual),
-    'father=' + encodeURIComponent(document.getElementById('f1-father')?document.getElementById('f1-father').value.trim():''),
-    'pmobile=' + encodeURIComponent(document.getElementById('f1-pmobile')?document.getElementById('f1-pmobile').value.trim():''),
-    'stream=' + encodeURIComponent(document.getElementById('f1-stream')?document.getElementById('f1-stream').value:''),
-    'marks=' + encodeURIComponent(document.getElementById('f1-marks')?document.getElementById('f1-marks').value.trim():''),
-    'goal=' + encodeURIComponent(document.getElementById('f1-goal')?document.getElementById('f1-goal').value.trim():''),
-    'source=Website',
-    'callback=' + cbName
-  ].join('&');
-
-  script.src = 'https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?' + params;
-  document.head.appendChild(script);
+    doRedirect(inwangId, name);
+  })
+  .catch(function(e){
+    console.warn('Register error:', e);
+    inwangId = generateLocalId();
+    doRedirect(inwangId, name);
+  });
 }
+
 
 function showAILoading(msgs){
   var overlay = document.getElementById('ai-loading');
