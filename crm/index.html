@@ -49,11 +49,11 @@ sup{text-decoration:none!important;border-bottom:none!important}
 .sb-urole{font-size:9px;color:var(--muted)}
 
 /* ── MAIN ── */
-.main{margin-left:var(--sidebar);flex:1;min-height:100vh;display:flex;flex-direction:column}
-.topbar{position:sticky;top:0;z-index:200;min-height:56px;background:rgba(2,4,8,.97);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;flex-wrap:wrap;gap:8px}
+.main{margin-left:var(--sidebar);flex:1;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;max-width:calc(100vw - var(--sidebar))}
+.topbar{position:sticky;top:0;z-index:200;min-height:56px;background:rgba(2,4,8,.97);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 16px;flex-shrink:0;flex-wrap:nowrap;gap:8px;overflow:visible;box-sizing:border-box;width:100%}
 .tb-l{display:flex;align-items:center;gap:10px}
 .tb-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700}
-.tb-r{display:flex;align-items:center;gap:10px}
+.tb-r{display:flex;align-items:center;gap:8px;flex-shrink:0;overflow:visible;min-width:0}
 .search-wrap{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--border);border-radius:7px;padding:0 11px;transition:border-color .2s}
 .search-wrap:focus-within{border-color:var(--gb)}
 .search-wrap input{background:none;border:none;padding:7px 0;font-size:11px;color:var(--white);font-family:inherit;outline:none;width:180px}
@@ -95,7 +95,7 @@ sup{text-decoration:none!important;border-bottom:none!important}
 
 /* ── TABLE ── */
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse;min-width:700px}
+table{width:100%;border-collapse:collapse;min-width:600px}
 thead{background:rgba(0,0,0,.2)}
 th{padding:9px 14px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
 th:hover{color:var(--muted2)}
@@ -228,7 +228,7 @@ tr:hover td{background:rgba(200,168,75,.025)}
 @keyframes sp{to{transform:rotate(360deg)}}
 
 /* ── LOGIN SCREEN ── */
-#login-screen{position:fixed;inset:0;z-index:9999;background:var(--void);display:flex;align-items:center;justify-content:center}
+#login-screen{position:fixed;inset:0;z-index:9999;background:var(--void);display:flex;align-items:center;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px;box-sizing:border-box}
 #login-screen::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(200,168,75,.08),transparent 70%);pointer-events:none}
 .login-box{width:100%;max-width:380px;padding:0 20px;position:relative;z-index:1}
 .login-logo{text-align:center;margin-bottom:32px}
@@ -269,10 +269,39 @@ tr:hover td{background:rgba(200,168,75,.025)}
 /* ── LOGIN SCREEN ── */
 #login-screen{position:fixed;inset:0;z-index:9999;background:#020408}
 #login-screen canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
-.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;z-index:1}
-#login-screen .card{width:100%;max-width:400px;background:#0a1929;border:1px solid rgba(200,168,75,0.12);border-radius:20px;padding:36px 32px;text-align:center}
+.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;position:relative;z-index:1;width:100%;box-sizing:border-box}
+#login-screen .card{width:100%;max-width:440px;background:#0a1929;border:1px solid rgba(200,168,75,0.15);border-radius:20px;padding:36px 32px;text-align:center;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
 .logo{width:64px;height:48px;object-fit:contain;mix-blend-mode:screen;margin:0 auto 16px;display:block}
 .err{background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:8px;padding:10px;font-size:12px;color:#e74c3c;margin-bottom:14px;display:none}
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 768px) {
+  :root { --sidebar: 0px; }
+  .sidebar { transform: translateX(-100%); transition: transform 0.3s; position: fixed; z-index: 500; width: 230px !important; }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0 !important; }
+  .topbar { padding: 0 10px; gap: 4px; }
+  .tb-title { font-size: 13px; }
+  .tb-btn { font-size: 10px; padding: 5px 8px; }
+  .btn-primary { font-size: 10px; padding: 5px 8px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .gsearch-wrap { display: none; }
+  #login-screen .card { padding: 24px 16px !important; }
+  .logo { width: 48px !important; height: 36px !important; }
+}
+
+@media(max-width:768px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)!important}
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:500px!important}
+  .ph{flex-wrap:wrap;gap:8px}
+}
+
+@media(max-width:480px){
+  #login-screen .card{padding:24px 18px!important;border-radius:16px!important}
+  #login-screen .card h2{font-size:18px!important}
+}
 </style>
 </head>
 <body>
@@ -314,8 +343,20 @@ tr:hover td{background:rgba(200,168,75,.025)}
       <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()"
         style="width:100%;background:#071428;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:11px 14px;font-size:13px;color:#fff;font-family:inherit;outline:none;box-sizing:border-box">
     </div>
-    <button onclick="doLogin()" style="width:100%;padding:14px;background:linear-gradient(135deg,#c8a84b,#e8c96d);color:#020408;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">Sign In →</button>
-    <p style="font-size:11px;color:#4a5568;margin-top:16px">admin / inwang2026 &nbsp;·&nbsp; counsellor / team@inwang</p>
+    <button onclick="doLogin()" style="width:100%;padding:16px;background:linear-gradient(135deg,#c8a84b,#e8c96d);color:#020408;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px;letter-spacing:0.3px">Sign In →</button>
+    
+    <!-- Forgot Password -->
+    <div style="margin-top:16px;text-align:center">
+      <a href="#" onclick="showForgotPassword();return false;" style="font-size:12px;color:#6b7a99;text-decoration:none;border-bottom:1px dashed rgba(107,122,153,0.4)">Forgot Password?</a>
+    </div>
+    
+    <div id="forgot-panel" style="display:none;margin-top:14px;background:rgba(200,168,75,0.05);border:1px solid rgba(200,168,75,0.15);border-radius:10px;padding:14px;text-align:left">
+      <div style="font-size:11px;font-weight:700;color:#c8a84b;margin-bottom:8px;letter-spacing:0.5px">PASSWORD RESET</div>
+      <p style="font-size:12px;color:#6b7a99;line-height:1.6;margin:0">Password reset ke liye admin se contact karo:<br>
+        <span style="color:#fff;font-weight:600">mohmeraj90@gmail.com</span>
+      </p>
+    </div>
+    
   </div>
 </div>
 </div>
@@ -362,7 +403,8 @@ tr:hover td{background:rgba(200,168,75,.025)}
 <!-- MAIN -->
 <main class="main">
   <div class="topbar">
-    <div class="tb-l">
+    <div class="tb-l" style="display:flex;align-items:center;gap:8px">
+      <button id="hamburger-btn" onclick="toggleSidebar()" style="display:none;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:4px">☰</button>
       <span class="tb-title" id="tb-title">Dashboard</span>
     </div>
     <div class="tb-r">
@@ -385,7 +427,7 @@ tr:hover td{background:rgba(200,168,75,.025)}
         <div><div class="ph-title">Live Dashboard</div><div class="ph-sub">ACURATE CRM · INWANG AI Career Intelligence · Real-time overview</div></div>
         <div class="ph-actions">
           <button class="btn-sec" onclick="syncData()" style="font-size:11px">🔄 Sync Now</button>
-          <button class="btn-primary" onclick="nav('leads',null)" style="font-size:11px">+ New Lead</button>
+          <button class="btn-primary" onclick="openNewLeadModal()" style="font-size:11px">+ New Lead</button>
         </div>
       </div>
       <!-- STATS -->
@@ -509,7 +551,7 @@ tr:hover td{background:rgba(200,168,75,.025)}
       <div class="card">
         <div class="card-head"><div class="card-title">All Assessments</div><div class="card-sub" id="ass-sub">—</div></div>
         <div class="tbl-wrap">
-          <table style="min-width:1000px">
+          <table style="min-width:600px">
             <thead><tr><th>ID</th><th>Student</th><th>Primary Cluster</th><th>Readiness</th><th style="white-space:nowrap">Analytical</th><th>Comm</th><th style="white-space:nowrap">Learning</th><th style="white-space:nowrap">Decision</th><th style="white-space:nowrap">Motivation</th><th style="white-space:nowrap">Clarity</th><th>Stage</th><th></th></tr></thead>
             <tbody id="ass-tbody"></tbody>
           </table>
@@ -523,7 +565,7 @@ tr:hover td{background:rgba(200,168,75,.025)}
       <div class="card">
         <div class="card-head"><div class="card-title">Report Queue</div></div>
         <div class="tbl-wrap">
-          <table style="min-width:1000px">
+          <table style="min-width:600px">
             <thead><tr><th>ID</th><th>Student</th><th>Primary Cluster</th><th>Readiness</th><th>Package</th><th>Report Status</th><th>Counsellor</th><th>Actions</th></tr></thead>
             <tbody id="rpt-tbody"></tbody>
           </table>
@@ -840,6 +882,11 @@ function checkBadge(){
   var b=document.getElementById('admin-badge');
   if(b) b.style.display=(u==='admin'||u==='meraj')?'block':'none';
 }
+function showForgotPassword(){
+  var p = document.getElementById('forgot-panel');
+  if(p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
 function doLogin(){
   var u = document.getElementById('login-user').value.trim().toLowerCase();
   var p = document.getElementById('login-pass').value;
@@ -1455,7 +1502,8 @@ function buildActionsTab(l,a){
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
         <button class="btn-sec" onclick="openWA('${l.smob}','${l.name}')">💬 WhatsApp Student</button>
         <button class="btn-sec" onclick="openWA('${l.pmob}','${l.name} ke Parents')">📞 WhatsApp Parent</button>
-        ${a?`<button class="btn-primary" onclick="generateRpt('${l.id}');closeModal('lead-modal')">📄 Generate Report</button>`:'<button class="btn-sec" disabled style="opacity:.4">📄 No Assessment Yet</button>'}
+        ${a?`<button class="btn-primary" onclick="generateRpt('${l.id}');closeModal('lead-modal')">📄 Generate Report</button>
+        <button class="btn-sec" onclick="generateAndSendCoupon('${l.id}')" style="background:rgba(200,168,75,0.15);border-color:rgba(200,168,75,0.4);color:#c8a84b">🎟️ Generate Coupon</button>`:'<button class="btn-sec" disabled style="opacity:.4">📄 No Assessment Yet</button>'}
         <button class="btn-sec" onclick="markPaid('${l.id}')">✅ Mark Paid</button>
       </div>
     </div>
@@ -1569,6 +1617,46 @@ function openWA(mob,name){
   var n=String(mob).replace(/\D/g,'');
   window.open('https://wa.me/91'+n+'?text=Hi+'+encodeURIComponent(name)+',+INWANG+AI+Career+Guidance+se+bol+rahe+hain.+Kya+aap+free+hain?','_blank');
 }
+function generateAndSendCoupon(id){
+  var l = LEADS.find(function(x){return x.id===id;});
+  if(!l){notif('Lead not found');return;}
+  notif('Generating coupon for '+l.name+'...');
+  
+  // Use GET with callback - reliable!
+  var cbName = 'cpCb_' + Date.now();
+  var script = document.createElement('script');
+  
+  var timer = setTimeout(function(){
+    delete window[cbName];
+    try{document.head.removeChild(script);}catch(e){}
+    notif('Error: Timeout. Check AppScript!');
+  }, 10000);
+  
+  window[cbName] = function(d){
+    clearTimeout(timer);
+    delete window[cbName];
+    try{document.head.removeChild(script);}catch(e){}
+    
+    if(d && d.success && d.coupon){
+      notif('Coupon: '+d.coupon+' — Email sent!');
+      navigator.clipboard.writeText(d.coupon).catch(function(){});
+      var mob = l.smob||l.pmob||'';
+      var msg = encodeURIComponent('Hi '+l.name+', Aapka INWANG Report Coupon: '+d.coupon+'\nReport link: https://inwangai.com/report?id='+id+'&code='+d.coupon);
+      setTimeout(function(){
+        if(confirm('Coupon: '+d.coupon+'\n\nWhatsApp pe bhejein?')){
+          window.open('https://wa.me/91'+mob+'?text='+msg,'_blank');
+        }
+      }, 300);
+      syncData();
+    } else {
+      notif('Error: '+(d&&d.error ? d.error : 'Failed'));
+    }
+  };
+  
+  script.src = 'https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?action=generate_coupon&id='+encodeURIComponent(id)+'&callback='+cbName;
+  document.head.appendChild(script);
+}
+
 function generateRpt(id){
   var l=LEADS.find(x=>x.id===id);
   notif('📄 Opening report template for '+l.name+'…');
@@ -1659,14 +1747,27 @@ function syncData(){
 // Write back to Sheet (POST)
 function pushToSheet(action, payload){
   if(!CFG.webapp) return;
-  fetch(CFG.webapp, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({action, ...payload})
-  }).then(r=>r.json()).then(d=>{
-    if(d.success) notif('✅ Saved to Sheet!');
-    else notif('⚠️ Sheet update: '+(d.error||'failed'));
-  }).catch(()=>notif('⚠️ Could not save to Sheet'));
+  
+  // Build GET params
+  var params = new URLSearchParams({action: action});
+  Object.keys(payload).forEach(function(k){ params.set(k, payload[k]); });
+  
+  fetch(CFG.webapp + '?' + params.toString())
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.success) notif('✅ Saved!');
+    else notif('⚠️ '+(d.error||'Sheet update failed'));
+  })
+  .catch(function(){
+    // Fallback no-cors POST
+    fetch(CFG.webapp, {
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify(Object.assign({action:action}, payload))
+    });
+    notif('✅ Update sent!');
+  });
 }
 
 // ══ SETTINGS ══
@@ -1889,5 +1990,32 @@ function notif(msg){
   n._t=setTimeout(()=>n.classList.remove('show'),2800);
 }
 </script>
+
+<!-- NEW LEAD MODAL -->
+<div id="modal-new-lead" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.7);overflow-y:auto">
+  <div style="max-width:500px;margin:40px auto;background:#0a1929;border:1px solid rgba(200,168,75,0.2);border-radius:16px;padding:28px;position:relative">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-size:16px;font-weight:800">+ New Lead</div>
+      <button onclick="closeNewLeadModal()" style="background:none;border:none;color:#6b7a99;font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div style="display:grid;gap:12px">
+      <div><label style="font-size:11px;color:#6b7a99;display:block;margin-bottom:4px">INWANG ID (auto)</label>
+        <input id="nl-id" readonly style="width:100%;background:#071428;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:9px 12px;color:#c8a84b;font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+      <div><label style="font-size:11px;color:#6b7a99;display:block;margin-bottom:4px">STUDENT NAME *</label>
+        <input id="nl-name" placeholder="Full name" style="width:100%;background:#071428;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:9px 12px;color:#fff;font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+      <div><label style="font-size:11px;color:#6b7a99;display:block;margin-bottom:4px">MOBILE *</label>
+        <input id="nl-mob" type="tel" placeholder="Student mobile" style="width:100%;background:#071428;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:9px 12px;color:#fff;font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+      <div><label style="font-size:11px;color:#6b7a99;display:block;margin-bottom:4px">EMAIL</label>
+        <input id="nl-email" type="email" placeholder="Email address" style="width:100%;background:#071428;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:9px 12px;color:#fff;font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+      <div><label style="font-size:11px;color:#6b7a99;display:block;margin-bottom:4px">CITY</label>
+        <input id="nl-city" placeholder="City" style="width:100%;background:#071428;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:9px 12px;color:#fff;font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+      <div><label style="font-size:11px;color:#6b7a99;display:block;margin-bottom:4px">QUALIFICATION</label>
+        <input id="nl-qual" placeholder="e.g. 12th Pass, B.Tech" style="width:100%;background:#071428;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:9px 12px;color:#fff;font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+      <div id="nl-err" style="color:#e74c3c;font-size:12px;display:none"></div>
+      <button onclick="submitNewLead()" style="width:100%;background:linear-gradient(135deg,#c8a84b,#e8c96d);color:#020408;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px">Save Lead →</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
