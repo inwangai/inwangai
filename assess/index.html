@@ -1828,35 +1828,70 @@ function submitForm1() {
 }
 
 function saveAssessmentToSheet(scores, results){
-  console.log('Saving assessment for:', inwangId, scores);
+  var id = inwangId || '';
+  var name = studentName || '';
+  console.log('Saving assessment:', id, name, scores);
   
-  var params = new URLSearchParams({
-    _t: Date.now(),
+  // Method 1: no-cors POST (data saves, no response)
+  var payload = {
     action: 'save_assessment',
-    id: inwangId || '',
-    name: studentName || '',
-    a:  Math.round((scores.analytical||0)*100)/100,
-    c:  Math.round((scores.communication||0)*100)/100,
-    l:  Math.round((scores.learning||0)*100)/100,
-    d:  Math.round((scores.decision||0)*100)/100,
-    m:  Math.round((scores.motivation||0)*100)/100,
-    cl: Math.round((scores.clarity||0)*100)/100,
-    r:  Math.round((scores.readiness||0)*100)/100,
-    f:  Math.round((scores.foundation||0)*100)/100,
-    c1: results ? (results.cluster1||'') : '',
-    c2: results ? (results.cluster2||'') : '',
-    c3: results ? (results.cluster3||'') : '',
-    rl: results ? (results.readinessLevel||'') : '',
+    id: id,
+    name: name,
+    scores: {
+      analytical:    Math.round((scores.analytical||0)*100)/100,
+      communication: Math.round((scores.communication||0)*100)/100,
+      learning:      Math.round((scores.learning||0)*100)/100,
+      decision:      Math.round((scores.decision||0)*100)/100,
+      motivation:    Math.round((scores.motivation||0)*100)/100,
+      clarity:       Math.round((scores.clarity||0)*100)/100,
+      readiness:     Math.round((scores.readiness||0)*100)/100,
+      foundation:    Math.round((scores.foundation||0)*100)/100,
+    },
+    cluster1: results ? (results.cluster1||'') : '',
+    cluster2: results ? (results.cluster2||'') : '',
+    cluster3: results ? (results.cluster3||'') : '',
+    readinessLevel: results ? (results.readinessLevel||'') : '',
+    skillGaps: results ? (results.skillGaps||'') : '',
+    strengths: results ? (results.strengths||'') : '',
+    stage: results ? (results.stage||'') : '',
     q40: assessmentAnswers['q40'] || '',
     q41: assessmentAnswers['q41'] || '',
     q42: assessmentAnswers['q42'] || '',
+  };
+  
+  // POST no-cors - AppScript receives it!
+  fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec', {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify(payload)
+  }).then(function(){
+    console.log('Assessment POST sent!');
+  }).catch(function(e){
+    console.warn('POST failed, trying GET...');
+    // Method 2: GET fallback
+    var params = new URLSearchParams({
+      action: 'save_assessment',
+      id: id, name: name,
+      a: payload.scores.analytical,
+      c: payload.scores.communication,
+      l: payload.scores.learning,
+      d: payload.scores.decision,
+      m: payload.scores.motivation,
+      cl: payload.scores.clarity,
+      r: payload.scores.readiness,
+      f: payload.scores.foundation,
+      c1: payload.cluster1,
+      c2: payload.cluster2,
+      c3: payload.cluster3,
+      rl: payload.readinessLevel,
+      q40: payload.q40,
+      q41: payload.q41,
+      q42: payload.q42,
+    });
+    var img = new Image();
+    img.src = 'https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?' + params.toString();
   });
-
-  // Use Image ping - bypasses CORS
-  var img = new Image();
-  img.onload = function(){ console.log('Assessment saved!'); };
-  img.onerror = function(){ console.log('Assessment save request sent!'); };
-  img.src = 'https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?' + params.toString();
 }
 
 
