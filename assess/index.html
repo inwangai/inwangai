@@ -1831,6 +1831,7 @@ function saveAssessmentToSheet(scores, results){
   console.log('Saving assessment for:', inwangId, scores);
   
   var params = new URLSearchParams({
+    _t: Date.now(),
     action: 'save_assessment',
     id: inwangId || '',
     name: studentName || '',
@@ -1851,14 +1852,11 @@ function saveAssessmentToSheet(scores, results){
     q42: assessmentAnswers['q42'] || '',
   });
 
-  fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?' + params.toString())
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    console.log('Assessment saved:', d);
-  })
-  .catch(function(e){
-    console.warn('Assessment save error:', e);
-  });
+  // Use Image ping - bypasses CORS
+  var img = new Image();
+  img.onload = function(){ console.log('Assessment saved!'); };
+  img.onerror = function(){ console.log('Assessment save request sent!'); };
+  img.src = 'https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?' + params.toString();
 }
 
 
@@ -2030,7 +2028,7 @@ function showReport() {
   setTimeout(function(){
     clearInterval(iv);
     if(overlay) overlay.style.display = 'none';
-    window.location.href = 'https://inwangai.com/payment?id=' + encodeURIComponent(inwangId||'');
+    window.location.href = 'https://inwangai.com/report?id=' + encodeURIComponent(inwangId||'');
   }, 4000);
 
   // Animate score bar
