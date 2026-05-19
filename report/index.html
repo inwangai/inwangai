@@ -512,7 +512,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;display:flex;ali
     </div>
   </a>
   <div class="nav-r">
-    <button class="btn-l active" id="LB" onclick="TL()">IN Hinglish</button>
+    <button class="btn-l active" id="LB" onclick="TL()">English</button>
     <button class="btn-p" onclick="window.print()" title="Print / Save white PDF">🖨 Print</button>
     <button class="btn-p" id="btnDigitalPDF" onclick="saveDigitalPDF()" title="Save dark digital PDF" style="background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.3);color:var(--cyan)">💾 Digital PDF</button>
   </div>
@@ -1254,7 +1254,7 @@ function AL(){
   var d=D;if(!d)return;
   var hi=L==='hi';
   if(document.getElementById('LB')){
-    document.getElementById('LB').textContent = hi ? 'IN Hinglish' : 'EN English';
+    document.getElementById('LB').textContent = hi ? 'English' : 'Hinglish';
     document.getElementById('LB').className = 'btn-l active';
   }
   document.getElementById('ltxt').textContent=hi?'Report load ho rahi hai...':'Loading your report...';
@@ -1915,22 +1915,39 @@ function mergeWithDefaults(d){
   var streamAlign = d.align || 'Aligned';
   var streamPrimary = d.sp || 'Science / General';
   
-  // Parse skill gaps
-  var gapsText = d.gaps || '';
-  var gapLines = gapsText.split('\n').filter(function(g){ return g.trim(); });
-  var gaps = gapLines.length > 0 ? gapLines.map(function(g){
-    var parts = g.split('→');
-    var dim = (parts[0]||g).trim();
-    var action = (parts[1]||'Practice regularly').trim();
-    var score = scores[dim.toLowerCase()] || 4;
+  // Build gaps from actual scores
+  var DIM_MAP = [
+    {key:'analytical',    hi:'Analytical Thinking',     en:'Analytical Thinking',     
+     ahi:'Logical problems aur structured tasks practice karo', aen:'Practice logical problems and structured tasks'},
+    {key:'communication', hi:'Communication Skills',    en:'Communication Skills',     
+     ahi:'Group discussions aur presentations mein participate karo', aen:'Participate in group discussions and presentations'},
+    {key:'learning',      hi:'Seekhne ki Kshamata',     en:'Learning Agility',         
+     ahi:'Roz kuch naya seekhne ki aadat banao', aen:'Build a habit of learning something new daily'},
+    {key:'decision',      hi:'Nirnay Lene ki Shakti',   en:'Decision Making',          
+     ahi:'Options evaluate karo, phir decide karo', aen:'Evaluate options carefully before deciding'},
+    {key:'motivation',    hi:'Prerana aur Drive',       en:'Motivation & Drive',       
+     ahi:'Short-term goals set karo aur track karo', aen:'Set short-term goals and track progress'},
+    {key:'clarity',       hi:'Career Clarity',          en:'Career Clarity',           
+     ahi:'Career paths explore karo aur counselling lo', aen:'Explore career paths and seek counselling'},
+  ];
+  
+  // Sort by score ascending (lowest first = biggest gaps)
+  var dimScores = DIM_MAP.map(function(d){ return {d:d, s:scores[d.key]||4}; });
+  dimScores.sort(function(a,b){ return a.s - b.s; });
+  
+  var gaps = dimScores.slice(0,4).map(function(item){
+    var s = item.s;
+    var lvl = s >= 5.5 ? 'lg' : s >= 4 ? 'lm' : 'll';
+    var cur_hi = s >= 5.5 ? 'Accha' : s >= 4 ? 'Developing' : 'Needs Work';
+    var cur_en = s >= 5.5 ? 'Good' : s >= 4 ? 'Developing' : 'Needs Work';
     return {
-      a:{hi:dim,en:dim},
-      c:{hi:score>=5?'Good':'Developing',en:score>=5?'Good':'Developing'},
-      r:{hi:'Strong',en:'Strong'},
-      ac:{hi:action,en:action},
-      l:score>=5?'lm':'ll'
+      a:  {hi: item.d.hi, en: item.d.en},
+      c:  {hi: cur_hi,    en: cur_en},
+      r:  {hi: 'Strong',  en: 'Strong'},
+      ac: {hi: item.d.ahi, en: item.d.aen},
+      l:  lvl
     };
-  }) : demo.gaps;
+  });
   
   // Parse strengths
   var strText = d.str || '';
@@ -2012,15 +2029,27 @@ function mergeWithDefaults(d){
   };
 
   // Check if Sheet data is valid (not "No matching course found")
+  // Deduplicate courses and roles
+  function dedup(arr){ 
+    if(!arr) return null;
+    var seen = {};
+    return arr.filter(function(x){ 
+      var k = x.toLowerCase().trim();
+      if(seen[k]) return false;
+      seen[k] = true;
+      return k.length > 0;
+    }).slice(0,6);
+  }
+  
   var sheetCourses = d.courses && d.courses !== 'No matching course found' ? 
-    d.courses.split(',').map(function(x){return x.trim();}).filter(Boolean) : null;
+    dedup(d.courses.split(',').map(function(x){return x.trim();}).filter(Boolean)) : null;
   var sheetRoles = d.roles && d.roles !== 'No roles mapped' ?
-    d.roles.split(',').map(function(x){return x.trim();}).filter(Boolean) : null;
+    dedup(d.roles.split(',').map(function(x){return x.trim();}).filter(Boolean)) : null;
 
   // Use Sheet → fallback to cluster default → fallback to demo
   var fb = CLUSTER_FALLBACK[pri] || {};
-  var courses = sheetCourses || fb.courses || demo.courses;
-  var roles   = sheetRoles   || fb.roles   || demo.roles;
+  var courses = sheetCourses || dedup(fb.courses) || demo.courses;
+  var roles   = sheetRoles   || dedup(fb.roles)   || demo.roles;
   
   // Pathway
   var pathway = d.path || '';
@@ -2031,6 +2060,10 @@ function mergeWithDefaults(d){
     name:      d.name || demo.name,
     father:    d.father || '',
     qual:      d.qual || demo.qual,
+    goal:      d.goal || '',
+    confusion: d.confusion || '',
+    priority:  d.priority || '',
+    pconcern:  d.pconcern || '',
     city:      d.city || 'Muzaffarpur',
     state:     d.state || 'Bihar',
     date:      new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'}),
@@ -2058,18 +2091,72 @@ function mergeWithDefaults(d){
     },
     str: {hi: strengths, en: strengths},
     gaps: gaps,
-    mot: demo.mot,
-    concern: demo.concern,
-    intro: {
-      body_hi: 'Yeh AI-based career assessment report '+d.name+' ke natural strengths, learning pattern aur career direction ko samajhne ke liye design ki gayi hai.',
-      body_en: "This report has been designed to understand "+d.name+"'s natural strengths, learning patterns and career direction.",
-      pts_hi: demo.intro.pts_hi,
-      pts_en: demo.intro.pts_en,
-      note_hi: demo.intro.note_hi,
-      note_en: demo.intro.note_en
+    mot: {
+      hi: [
+        m>=5 ? 'Apne goals achieve karne ki strong internal drive' : 'External support se better perform karna',
+        de>=5 ? 'Decisions confidently lena aur challenges face karna' : 'Guided environment mein best results dena',
+        cl>=5 ? 'Career direction ke baare mein aware hona aur focused rehna' : 'Career clarity develop karna step by step',
+      ],
+      en: [
+        m>=5 ? 'Strong internal drive to achieve goals' : 'Performs better with external support',
+        de>=5 ? 'Takes decisions confidently and faces challenges' : 'Gives best results in a guided environment',
+        cl>=5 ? 'Aware about career direction and stays focused' : 'Developing career clarity step by step',
+      ]
     },
-    interest: demo.interest,
-    parent: demo.parent,
+    concern: {
+      q: {hi: d.confusion ? '"'+d.confusion+'"' : (d.goal ? '"'+d.goal+'" — is direction mein clarity chahiye' : '"Sahi career kaise choose karein?"'),
+          en: d.confusion ? '"'+d.confusion+'"' : (d.goal ? '"'+d.goal+'" — need clarity in this direction' : '"How to choose the right career?"')},
+      r: {hi: 'INWANG assessment ne '+d.name+' ke natural strengths clearly identify ki hain — '+pri.split('/')[0].trim()+' cluster mein strong signal mila hai. Counselling session mein detailed guidance milegi.',
+          en: 'The INWANG assessment has clearly identified '+d.name+"'s natural strengths — strong signal found in "+pri.split('/')[0].trim()+' cluster. Detailed guidance will be provided in the counselling session.'}
+    },
+    intro: {
+      body_hi: d.name+' ki yeh AI Career Report unke natural strengths, thinking style aur career direction ko clearly samjhne ke liye banayi gayi hai.'+(d.priority?' Student ki priority: "'+d.priority+'"':'')+' Yeh report assessment responses aur counselling discussion ko combine karke banayi gayi hai.',
+      body_en: "This AI Career Report has been designed to clearly understand "+d.name+"'s natural strengths, thinking style and career direction."+(d.priority?' Student priority: "'+d.priority+'"':'')+" This report combines assessment responses with counselling discussion.",
+      pts_hi: ['Student aur parents ko clear career direction dena','Course aur college selection mein informed decision banana','Personality aur strengths ke according suitable fields identify karna'],
+      pts_en: ['Give student and parents a clear career direction','Make an informed decision for course and college selection','Identify suitable fields aligned with personality and strengths'],
+      note_hi: 'Har recommendation ke saath uska reason bhi clearly explain kiya gaya hai.',
+      note_en: 'Every recommendation includes a clear explanation of its reasoning.'
+    },
+    interest: {
+      hi: {
+        on: [
+          a>=5 ? 'Logical aur analytical tasks mein natural interest' : 'Creative aur practical tasks mein interest',
+          l>=5 ? 'Naye concepts sikhna engaging lagta hai' : 'Practical application mein zyada comfortable',
+          m>=5 ? 'Clear goals ke saath focused rehna' : 'Step by step guidance mein better performance',
+        ],
+        off: [
+          a<4 ? 'Highly structured analytical work mein discomfort' : 'Unstructured aur ambiguous environments mein challenge',
+        ]
+      },
+      en: {
+        on: [
+          a>=5 ? 'Natural interest in logical and analytical tasks' : 'Interest in creative and practical tasks',
+          l>=5 ? 'Finds learning new concepts engaging' : 'More comfortable with practical application',
+          m>=5 ? 'Stays focused with clear goals' : 'Better performance with step-by-step guidance',
+        ],
+        off: [
+          a<4 ? 'Discomfort with highly structured analytical work' : 'Challenged by unstructured and ambiguous environments',
+        ]
+      }
+    },
+    parent: {
+      ind: {
+        hi: [
+          m>=5 ? 'Goal-driven mindset — apne career ke baare mein serious hain' : 'Supportive environment mein better perform karte hain',
+          de>=5 ? 'Self-reliant decision making — khud sochte hain' : 'Guidance appreciate karte hain aur follow karte hain',
+          cl>=5 ? 'Career clarity — direction ke baare mein aware hain' : 'Career guidance se bahut benefit hoga',
+        ],
+        en: [
+          m>=5 ? 'Goal-driven mindset — serious about their career' : 'Performs better in a supportive environment',
+          de>=5 ? 'Self-reliant decision making — thinks independently' : 'Appreciates and follows guidance well',
+          cl>=5 ? 'Career clarity — aware about direction' : 'Will benefit greatly from career guidance',
+        ]
+      },
+      note: {
+        hi: 'Ye assessment results clearly dikhate hain ki '+d.name+' mein career success ke liye zaruri qualities hain.'+(d.pconcern?' Parent concern: "'+d.pconcern+'" — ye bilkul valid hai aur counselling mein address kiya jaayega.':' Sahi direction ke saath ye bahut aage ja sakte hain.'),
+        en: 'These assessment results clearly show that '+d.name+' has the qualities needed for career success.'+(d.pconcern?' Parent concern: "'+d.pconcern+'" — this is completely valid and will be addressed in counselling.':' With the right direction, they can go very far.')
+      }
+    },
   };
 }
 
