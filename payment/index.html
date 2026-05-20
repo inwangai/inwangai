@@ -3,189 +3,397 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>INWANG — Unlock Full Report</title>
+<title>INWANG — Unlock Your Career Report</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&family=Space+Mono&display=swap" rel="stylesheet">
 <style>
-:root{--void:#020408;--navy:#071428;--panel:#0a1929;--card:#0d2137;--gold:#c8a84b;--gold2:#e8c96d;--white:#ffffff;--muted:#6b7a99;--border:rgba(200,168,75,0.12);}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--void);color:var(--white);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.wrap{width:100%;max-width:480px}
-.logo-area{text-align:center;margin-bottom:32px}
-.brand{font-size:24px;font-weight:800;color:var(--gold);letter-spacing:2px}
-.brand sup{font-size:10px;opacity:0.7}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:16px}
-.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(200,168,75,0.1);border:1px solid rgba(200,168,75,0.3);border-radius:100px;padding:4px 14px;font-size:11px;color:var(--gold);font-weight:700;letter-spacing:0.5px;margin-bottom:16px}
-h2{font-size:22px;font-weight:800;margin-bottom:6px}
-.sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6}
-.id-box{background:rgba(200,168,75,0.08);border:1px solid rgba(200,168,75,0.2);border-radius:10px;padding:12px 16px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center}
-.id-label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.5px}
-.id-val{font-size:15px;font-weight:800;color:var(--gold)}
-.price-box{text-align:center;margin-bottom:24px}
-.price{font-size:42px;font-weight:800;color:var(--gold)}
-.price-sub{font-size:12px;color:var(--muted);margin-top:4px}
-.divider{height:1px;background:var(--border);margin:20px 0}
-.step{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start}
-.step-n{width:28px;height:28px;border-radius:50%;background:rgba(200,168,75,0.15);border:1px solid rgba(200,168,75,0.3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--gold);flex-shrink:0}
-.step-text{font-size:13px;color:#e0e6f0;line-height:1.5;padding-top:4px}
-.step-text strong{color:var(--white)}
-.qr-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center;margin:20px 0}
-.qr-placeholder{width:200px;height:200px;background:rgba(255,255,255,0.05);border:2px dashed rgba(200,168,75,0.3);border-radius:12px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px}
-.upi-id{font-size:14px;font-weight:700;color:var(--gold);margin-top:8px}
-.upi-name{font-size:11px;color:var(--muted)}
-.btn-wa{display:block;background:#25D366;color:#fff;padding:14px;border-radius:12px;font-weight:800;font-size:15px;text-decoration:none;text-align:center;margin-top:20px}
-.btn-wa:hover{opacity:0.9}
-.or-divider{text-align:center;color:var(--muted);font-size:12px;margin:16px 0;position:relative}
-.or-divider::before,.or-divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:var(--border)}
-.or-divider::before{left:0}.or-divider::after{right:0}
-.coupon-section{margin-top:20px}
-.coupon-label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;letter-spacing:0.5px}
+:root{
+  --gold:#c8a84b;--gold2:#e8c96d;--void:#020408;
+  --surface:#071428;--surface2:#0a1929;
+  --border:rgba(255,255,255,0.06);--text:#e8eaf6;--muted:#6b7a99;
+  --cyan:#00d4ff;--green:#10b981;--red:#ef4444;
+}
+body{background:var(--void);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* BG */
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:0.12}
+.bg-o1{width:500px;height:500px;background:#c8a84b;top:-200px;right:-100px}
+.bg-o2{width:400px;height:400px;background:#00d4ff;bottom:-100px;left:-100px}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(200,168,75,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(200,168,75,0.02) 1px,transparent 1px);background-size:50px 50px}
+
+/* NAV */
+nav{position:relative;z-index:10;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo img{height:36px}
+.nav-brand{font-family:'Outfit',sans-serif;font-weight:800;font-size:18px;color:#fff;letter-spacing:0.5px}
+.nav-brand span{color:var(--gold)}
+
+/* MAIN */
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:40px 20px 80px}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:40px}
+.inwang-id{display:inline-flex;align-items:center;gap:8px;background:rgba(200,168,75,0.1);border:1px solid rgba(200,168,75,0.2);border-radius:100px;padding:6px 16px;font-family:'Space Mono',monospace;font-size:12px;color:var(--gold);margin-bottom:16px}
+.header h1{font-family:'Outfit',sans-serif;font-size:clamp(24px,4vw,36px);font-weight:900;margin-bottom:8px}
+.header p{font-size:14px;color:var(--muted);max-width:440px;margin:0 auto;line-height:1.7}
+
+/* PACKAGE SELECTOR */
+.pkg-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:16px}
+.packages{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px}
+.pkg{
+  background:var(--surface2);border:2px solid var(--border);
+  border-radius:16px;padding:20px;cursor:pointer;transition:all 0.2s;
+  position:relative;overflow:hidden;
+}
+.pkg:hover{border-color:rgba(200,168,75,0.3);transform:translateY(-2px)}
+.pkg.selected{border-color:var(--gold);background:linear-gradient(135deg,rgba(200,168,75,0.08),rgba(200,168,75,0.03))}
+.pkg.selected::before{content:'✓';position:absolute;top:10px;right:12px;width:20px;height:20px;background:var(--gold);color:#020408;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;line-height:20px;text-align:center}
+.pkg-stage{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.pkg-name{font-family:'Outfit',sans-serif;font-size:15px;font-weight:800;color:#fff;margin-bottom:10px}
+.pkg-orig{font-size:11px;color:var(--muted);text-decoration:line-through}
+.pkg-price{font-family:'Outfit',sans-serif;font-size:28px;font-weight:900;color:var(--gold);line-height:1}
+.pkg-save{display:inline-block;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#10b981;font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;margin-top:4px}
+.pkg-features{margin-top:12px;border-top:1px solid var(--border);padding-top:12px}
+.pkg-feat{font-size:11px;color:rgba(255,255,255,0.6);padding:3px 0;display:flex;gap:6px;align-items:flex-start;line-height:1.4}
+.pkg-feat::before{content:'✦';color:var(--gold);font-size:8px;flex-shrink:0;margin-top:2px}
+
+/* ADDON */
+.addon-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:12px}
+.addons{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:32px}
+.addon{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:14px;cursor:pointer;transition:all 0.2s;text-align:center;
+}
+.addon:hover{border-color:rgba(0,212,255,0.2)}
+.addon.selected{border-color:var(--cyan);background:rgba(0,212,255,0.05)}
+.addon-name{font-size:12px;font-weight:700;color:#fff;margin-bottom:2px}
+.addon-orig{font-size:10px;color:var(--muted);text-decoration:line-through}
+.addon-price{font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:var(--cyan)}
+.addon-desc{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5}
+
+/* TOTAL */
+.total-box{
+  background:linear-gradient(135deg,#0a1929,#071428);
+  border:1px solid rgba(200,168,75,0.2);border-radius:16px;
+  padding:20px 24px;margin-bottom:24px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.total-left{font-size:13px;color:var(--muted)}
+.total-amount{font-family:'Outfit',sans-serif;font-size:32px;font-weight:900;color:var(--gold)}
+
+/* PAYMENT SECTION */
+.pay-section{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.pay-card{background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:24px}
+.pay-card-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+
+/* How to pay */
+.how-steps{display:flex;flex-direction:column;gap:10px}
+.how-step{display:flex;gap:12px;align-items:flex-start}
+.how-num{width:22px;height:22px;border-radius:50%;background:rgba(200,168,75,0.15);color:var(--gold);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.how-text{font-size:12px;color:rgba(255,255,255,0.7);line-height:1.6}
+.how-text strong{color:#fff}
+
+/* QR */
+.qr-wrap{text-align:center}
+.qr-img{width:160px;height:160px;border-radius:12px;margin-bottom:8px;border:2px solid rgba(200,168,75,0.2)}
+.qr-upi{font-family:'Space Mono',monospace;font-size:11px;color:var(--gold);margin-bottom:2px}
+.qr-name{font-size:11px;color:var(--muted)}
+
+/* WA Button */
+.wa-btn{
+  display:block;width:100%;padding:14px;background:#25d366;
+  color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;text-align:center;text-decoration:none;
+  margin-bottom:16px;transition:all 0.2s;
+}
+.wa-btn:hover{background:#22c55e;transform:scale(1.01)}
+
+/* Coupon */
+.coupon-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:20px}
+.coupon-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
 .coupon-row{display:flex;gap:8px}
-.coupon-input{flex:1;background:var(--navy);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--white);font-family:inherit;outline:none;text-transform:uppercase;letter-spacing:1px}
+.coupon-input{
+  flex:1;background:rgba(255,255,255,0.04);border:1.5px solid var(--border);
+  border-radius:10px;padding:12px 14px;color:#fff;font-size:14px;
+  font-family:'Space Mono',monospace;outline:none;transition:border-color 0.2s;
+  letter-spacing:1px;
+}
 .coupon-input:focus{border-color:var(--gold)}
-.btn-coupon{background:linear-gradient(135deg,#c8a84b,#e8c96d);color:#020408;padding:12px 20px;border:none;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;white-space:nowrap}
-.coupon-err{font-size:12px;color:#e74c3c;margin-top:8px;display:none}
-.coupon-ok{font-size:12px;color:#10b981;margin-top:8px;display:none}
-.footer{text-align:center;font-size:11px;color:var(--muted);margin-top:20px}
+.coupon-input::placeholder{color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:0}
+.coupon-btn{
+  padding:12px 20px;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#020408;border:none;border-radius:10px;font-size:13px;font-weight:800;
+  cursor:pointer;font-family:inherit;white-space:nowrap;
+}
+.coupon-err{font-size:12px;color:var(--red);margin-top:8px;display:none}
+.coupon-ok{font-size:12px;color:var(--green);margin-top:8px;display:none}
+
+/* Trust */
+.trust{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-top:32px}
+.trust-item{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+
+@media(max-width:640px){
+  .packages{grid-template-columns:1fr}
+  .addons{grid-template-columns:1fr}
+  .pay-section{grid-template-columns:1fr}
+  .total-box{flex-direction:column;gap:8px;text-align:center}
+}
 </style>
 </head>
 <body>
+<div class="bg">
+  <div class="bg-orb bg-o1"></div>
+  <div class="bg-orb bg-o2"></div>
+  <div class="bg-grid"></div>
+</div>
+
+<nav>
+  <a href="https://inwangai.com" class="nav-logo">
+    <div class="nav-brand">INWANG<span>™</span></div>
+  </a>
+  <div style="font-size:12px;color:var(--muted)">AI Career Intelligence</div>
+</nav>
+
 <div class="wrap">
-  <div class="logo-area">
-    <a href="https://inwangai.com" style="text-decoration:none">
-      <div class="brand">INWANG<sup>TM</sup></div>
-      <div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;margin-top:2px">AI CAREER INTELLIGENCE</div>
-    </a>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="inwang-id" id="id-pill">Loading...</div>
+    <h1>Unlock Your <span style="background:linear-gradient(135deg,#c8a84b,#e8c96d);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Career Report</span></h1>
+    <p>Select your stage — get a personalized AI Career Intelligence Report built for your future</p>
   </div>
 
-  <div class="card">
-    <div class="badge">🔓 Unlock Full Report</div>
-    <h2>Apni Full Career Report Unlock Karo</h2>
-    <p class="sub">Payment karo aur apna personalized AI Career Report pao — Salary Roadmap, Skill Kit, Courses aur Govt Opportunities ke saath.</p>
-
-    <div class="id-box">
-      <div>
-        <div class="id-label">INWANG ID</div>
-        <div class="id-val" id="displayId">IA-26-00001</div>
+  <!-- PACKAGES -->
+  <div class="pkg-title">Select Your Package</div>
+  <div class="packages">
+    <div class="pkg" id="pkg-basic" onclick="selectPkg('basic',149)">
+      <div class="pkg-stage">Class 9 – 10</div>
+      <div class="pkg-name">Stream Intelligence</div>
+      <div class="pkg-orig">₹499</div>
+      <div class="pkg-price">₹149</div>
+      <div class="pkg-save">70% OFF</div>
+      <div class="pkg-features">
+        <div class="pkg-feat">6D AI Personality Scoring</div>
+        <div class="pkg-feat">Stream Suitability Analysis</div>
+        <div class="pkg-feat">10-Year Career Preview</div>
+        <div class="pkg-feat">Diploma/ITI Path Guide</div>
+        <div class="pkg-feat">Parent Guidance Section</div>
+        <div class="pkg-feat">Digital PDF Download</div>
       </div>
-      <div style="font-size:20px">🎯</div>
     </div>
-
-    <div class="price-box">
-      <div class="price">₹149</div>
-      <div class="price-sub">One-time · Full AI Career Report</div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:0.5px;margin-bottom:14px">HOW TO PAY</div>
-
-    <div class="step">
-      <div class="step-n">1</div>
-      <div class="step-text"><strong>UPI se ₹149 bhejo</strong> — neeche QR scan karo ya UPI ID use karo</div>
-    </div>
-    <div class="step">
-      <div class="step-n">2</div>
-      <div class="step-text"><strong>Screenshot WhatsApp karo</strong> — payment proof ke saath apna INWANG ID bhejo</div>
-    </div>
-    <div class="step">
-      <div class="step-n">3</div>
-      <div class="step-text"><strong>Coupon code milega</strong> — 15-30 minutes mein WhatsApp/Email pe</div>
-    </div>
-    <div class="step">
-      <div class="step-n">4</div>
-      <div class="step-text"><strong>Coupon enter karo</strong> — neeche box mein — Full Report unlock!</div>
-    </div>
-
-    <div class="qr-box">
-      <img id="qrImg" 
-        src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=9470659224@hdfc&pn=Mohammad%20Meraj&am=149&cu=INR&tn=INWANG+Career+Report"
-        alt="UPI QR Code"
-        style="width:200px;height:200px;border-radius:8px;background:#fff;padding:8px"
-        onerror="this.style.display='none';document.getElementById('qrFallback').style.display='block'">
-      <div id="qrFallback" style="display:none;width:200px;height:200px;background:rgba(255,255,255,0.05);border:2px dashed rgba(200,168,75,0.3);border-radius:12px;margin:0 auto;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px">
-        <div style="font-size:32px">📱</div>
-        <div style="font-size:11px;color:var(--muted)">UPI ID use karo neeche</div>
+    <div class="pkg selected" id="pkg-standard" onclick="selectPkg('standard',349)">
+      <div class="pkg-stage">Class 11 – 12</div>
+      <div class="pkg-name">Career Intelligence</div>
+      <div class="pkg-orig">₹999</div>
+      <div class="pkg-price">₹349</div>
+      <div class="pkg-save">65% OFF</div>
+      <div class="pkg-features">
+        <div class="pkg-feat">Everything in Basic</div>
+        <div class="pkg-feat">Career Cluster Deep Analysis</div>
+        <div class="pkg-feat">College & Course Mapping</div>
+        <div class="pkg-feat">Entrance Exam Roadmap</div>
+        <div class="pkg-feat">Salary Ladder 0–10 Years</div>
+        <div class="pkg-feat">Govt Job Opportunities</div>
+        <div class="pkg-feat">Print + Digital Report</div>
       </div>
-      <div class="upi-id">9470659224@hdfc</div>
-      <div class="upi-name">Mohammad Meraj · Acurate Multi Services</div>
     </div>
-
-    <a href="https://wa.me/919470659224?text=Hi+INWANG,+Maine+₹149+payment+kar+diya.+Mera+INWANG+ID+hai:" id="waBtn" class="btn-wa" target="_blank">
-      📸 Payment Screenshot WhatsApp Karo →
-    </a>
-
-    <div class="divider"></div>
-
-    <div class="coupon-section">
-      <div class="coupon-label">COUPON CODE MILA? YAHAN ENTER KARO</div>
-      <div class="coupon-row">
-        <input type="text" class="coupon-input" id="couponInput" placeholder="INWANG-XXXX" maxlength="12">
-        <button class="btn-coupon" onclick="verifyCoupon()">Unlock →</button>
+    <div class="pkg" id="pkg-premium" onclick="selectPkg('premium',599)">
+      <div class="pkg-stage">Graduate & Working</div>
+      <div class="pkg-name">Career Acceleration</div>
+      <div class="pkg-orig">₹1499</div>
+      <div class="pkg-price">₹599</div>
+      <div class="pkg-save">60% OFF</div>
+      <div class="pkg-features">
+        <div class="pkg-feat">Everything in Standard</div>
+        <div class="pkg-feat">Career Pivot Intelligence</div>
+        <div class="pkg-feat">Private Sector Job Mapping</div>
+        <div class="pkg-feat">ROI Analysis</div>
+        <div class="pkg-feat">90-Day Action Plan</div>
+        <div class="pkg-feat">30-Day Follow-up Support</div>
+        <div class="pkg-feat">Priority WhatsApp Support</div>
       </div>
-      <div class="coupon-err" id="couponErr">❌ Invalid coupon code. Please check and try again.</div>
-      <div class="coupon-ok" id="couponOk">✅ Coupon verified! Report unlock ho raha hai...</div>
     </div>
   </div>
 
-  <div class="footer">© 2026 INWANG™ · Acurate Multi Services Pvt. Ltd.</div>
+  <!-- ADDONS -->
+  <div class="addon-title">➕ Add Human Mentorship (Optional)</div>
+  <div class="addons">
+    <div class="addon" id="addon-1" onclick="selectAddon('1',199)">
+      <div class="addon-name">1 Session</div>
+      <div class="addon-orig">₹499</div>
+      <div class="addon-price">₹199</div>
+      <div class="addon-desc">45 min · 1-on-1 · Parent can join</div>
+    </div>
+    <div class="addon" id="addon-3" onclick="selectAddon('3',499)">
+      <div class="addon-name">3 Sessions</div>
+      <div class="addon-orig">₹999</div>
+      <div class="addon-price">₹499</div>
+      <div class="addon-desc">College shortlist + Exam strategy</div>
+    </div>
+    <div class="addon" id="addon-6" onclick="selectAddon('6',899)">
+      <div class="addon-name">6 Sessions</div>
+      <div class="addon-orig">₹1999</div>
+      <div class="addon-price">₹899</div>
+      <div class="addon-desc">Full mentorship + Admission support</div>
+    </div>
+  </div>
+
+  <!-- TOTAL -->
+  <div class="total-box">
+    <div class="total-left">
+      <div style="font-weight:700;color:#fff;margin-bottom:4px" id="total-label">Career Intelligence Report</div>
+      <div id="total-desc">Class 11-12 · ₹999 → ₹349 saved + any add-on</div>
+    </div>
+    <div class="total-amount">₹<span id="total-amt">349</span></div>
+  </div>
+
+  <!-- PAYMENT -->
+  <div class="pay-section">
+    <div class="pay-card">
+      <div class="pay-card-title">How To Pay</div>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num">1</div>
+          <div class="how-text"><strong>UPI se payment karo</strong> — QR scan karo ya UPI ID use karo</div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">2</div>
+          <div class="how-text"><strong>Screenshot WhatsApp karo</strong> — payment proof + INWANG ID bhejo</div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">3</div>
+          <div class="how-text"><strong>Coupon code milega</strong> — 15-30 minutes mein WhatsApp/Email pe</div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">4</div>
+          <div class="how-text"><strong>Coupon enter karo</strong> — neeche box mein → Full Report unlock!</div>
+        </div>
+      </div>
+      <br>
+      <a id="wa-btn" href="https://wa.me/919470659224" target="_blank" class="wa-btn">
+        📱 Payment Screenshot WhatsApp Karo →
+      </a>
+    </div>
+    <div class="pay-card">
+      <div class="pay-card-title">Scan & Pay</div>
+      <div class="qr-wrap">
+        <img class="qr-img" id="qr-img" src="" alt="QR Code">
+        <div class="qr-upi">9470659224@hdfc</div>
+        <div class="qr-name">Mohammed Meraj · Acurate Multi Services</div>
+        <div style="margin-top:12px;font-size:11px;color:var(--muted)">Total: <strong style="color:var(--gold)">₹<span id="qr-amt">349</span></strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COUPON -->
+  <div class="coupon-wrap">
+    <div class="coupon-label">Coupon Code Mila? Yahan Enter Karo</div>
+    <div class="coupon-row">
+      <input type="text" class="coupon-input" id="coupon-input" placeholder="INWANG-XXXX" maxlength="12">
+      <button class="coupon-btn" onclick="verifyCoupon()">Unlock →</button>
+    </div>
+    <div class="coupon-err" id="couponErr">❌ Invalid coupon. Please check and try again.</div>
+    <div class="coupon-ok" id="couponOk">✅ Coupon verified! Redirecting to full report...</div>
+  </div>
+
+  <!-- TRUST -->
+  <div class="trust">
+    <div class="trust-item">🔒 Secure UPI</div>
+    <div class="trust-item">⚡ Instant Access</div>
+    <div class="trust-item">🤖 AI-Powered Report</div>
+    <div class="trust-item">📱 All Devices</div>
+  </div>
 </div>
 
 <script>
 var WEBAPP = 'https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec';
+var leadId = '';
+var selectedPkg = 'standard';
+var selectedPkgAmt = 349;
+var selectedAddon = null;
+var selectedAddonAmt = 0;
 
-// Get ID from URL
-var params = new URLSearchParams(window.location.search);
-var inwangId = params.get('id') || '';
+// Init
+window.onload = function(){
+  var params = new URLSearchParams(location.search);
+  leadId = params.get('id') || '';
+  if(leadId){
+    document.getElementById('id-pill').textContent = leadId;
+    var waMsg = 'Hi! Maine INWANG payment kiya hai. Mera INWANG ID: ' + leadId + ' — please coupon bhejiye.';
+    document.getElementById('wa-btn').href = 'https://wa.me/919470659224?text=' + encodeURIComponent(waMsg);
+  }
+  updateQR();
+};
 
-if(inwangId){
-  document.getElementById('displayId').textContent = inwangId;
-  // Update WhatsApp link
-  document.getElementById('waBtn').href = 
-    'https://wa.me/919470659224?text=Hi+INWANG,+Maine+%E2%82%B9149+payment+kar+diya.+Mera+INWANG+ID+hai:+' + encodeURIComponent(inwangId);
+function selectPkg(pkg, amt){
+  selectedPkg = pkg;
+  selectedPkgAmt = amt;
+  document.querySelectorAll('.pkg').forEach(function(el){ el.classList.remove('selected'); });
+  document.getElementById('pkg-'+pkg).classList.add('selected');
+  updateTotal();
+  updateQR();
+}
+
+function selectAddon(sessions, amt){
+  var el = document.getElementById('addon-'+sessions);
+  if(el.classList.contains('selected')){
+    el.classList.remove('selected');
+    selectedAddon = null;
+    selectedAddonAmt = 0;
+  } else {
+    document.querySelectorAll('.addon').forEach(function(a){ a.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedAddon = sessions;
+    selectedAddonAmt = amt;
+  }
+  updateTotal();
+  updateQR();
+}
+
+function updateTotal(){
+  var total = selectedPkgAmt + selectedAddonAmt;
+  document.getElementById('total-amt').textContent = total;
+  document.getElementById('qr-amt').textContent = total;
+  var names = {basic:'Stream Intelligence Report',standard:'Career Intelligence Report',premium:'Career Acceleration Report'};
+  document.getElementById('total-label').textContent = names[selectedPkg] + (selectedAddon ? ' + ' + selectedAddon + ' Mentorship Sessions' : '');
+}
+
+function updateQR(){
+  var total = selectedPkgAmt + selectedAddonAmt;
+  var upiUrl = 'upi://pay?pa=9470659224@hdfc&pn=Mohammed+Meraj&am=' + total + '&cu=INR&tn=INWANG+Report+' + (leadId||'');
+  var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(upiUrl);
+  document.getElementById('qr-img').src = qrUrl;
 }
 
 function verifyCoupon(){
-  var code = document.getElementById('couponInput').value.trim().toUpperCase();
+  var code = document.getElementById('coupon-input').value.trim().toUpperCase();
   var err = document.getElementById('couponErr');
   var ok = document.getElementById('couponOk');
-  
   err.style.display = 'none';
   ok.style.display = 'none';
   
-  if(!code || code.length < 6){
-    err.textContent = '❌ Valid coupon code enter karo.';
-    err.style.display = 'block';
-    return;
-  }
+  if(!code){ err.textContent = '❌ Coupon code enter karo.'; err.style.display='block'; return; }
+  if(!leadId){ err.textContent = '❌ INWANG ID missing. Register page se try karo.'; err.style.display='block'; return; }
   
-  // Verify coupon via AppScript
-  var cbName = 'verifyCb_' + Date.now();
-  var script = document.createElement('script');
-  
-  window[cbName] = function(d){
-    delete window[cbName];
-    document.head.removeChild(script);
-    
+  fetch(WEBAPP + '?action=verify_coupon&id=' + encodeURIComponent(leadId) + '&code=' + encodeURIComponent(code))
+  .then(function(r){ return r.json(); })
+  .then(function(d){
     if(d.valid){
       ok.style.display = 'block';
       setTimeout(function(){
-        window.location.href = 'https://inwangai.com/report?id=' + encodeURIComponent(inwangId) + '&code=' + encodeURIComponent(code);
+        window.location.href = 'https://inwangai.com/report?id=' + encodeURIComponent(leadId) + '&code=' + encodeURIComponent(code);
       }, 1500);
     } else {
-      err.textContent = '❌ ' + (d.message || 'Invalid coupon code. Please check and try again.');
+      err.textContent = '❌ ' + (d.message || 'Invalid coupon code.');
       err.style.display = 'block';
     }
-  };
-  
-  script.src = WEBAPP + '?action=verify_coupon&id=' + encodeURIComponent(inwangId) + '&code=' + encodeURIComponent(code) + '&callback=' + cbName;
-  document.head.appendChild(script);
+  })
+  .catch(function(){
+    err.textContent = '❌ Network error. Please try again.';
+    err.style.display = 'block';
+  });
 }
-
-// Enter key on coupon
-document.getElementById('couponInput').addEventListener('keydown', function(e){
-  if(e.key === 'Enter') verifyCoupon();
-});
 </script>
 </body>
 </html>
