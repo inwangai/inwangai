@@ -1088,6 +1088,12 @@ function renderDashboard(){
 // ══ LEADS ══
 function renderLeads(){
   var filtered = getFilteredLeads();
+  // Newest first
+  if(!sortKey){
+    filtered.sort(function(a,b){
+      return (b.ts||'').localeCompare(a.ts||'');
+    });
+  }
   document.getElementById('leads-sub').textContent = filtered.length+' of '+LEADS.length+' leads';
   var tb = document.getElementById('leads-tbody');
   if(!filtered.length){tb.innerHTML='<tr><td colspan="9" class="empty"><div class="ei">👥</div><div class="et">No leads match</div></td></tr>';return;}
@@ -1531,9 +1537,14 @@ function buildActionsTab(l,a){
     <div class="ds"><div class="dst">Package</div>
       <select class="qa-select" style="width:100%;padding:8px;font-size:11px;margin-top:2px" onchange="updatePkg('${l.id}',this.value)">
         <option value="">Select Package</option>
-        <option value="149" ${l.pkg==='₹149'?'selected':''}>₹149 — Report Only</option>
-        <option value="249" ${l.pkg==='₹249'?'selected':''}>₹249 — Report + Counselling</option>
-        <option value="399" ${l.pkg==='₹399'?'selected':''}>₹399 — Premium Package</option>
+        <option value="0" ${l.pkg==='₹0'||l.pkg==='FREE'?'selected':''}>🎁 FREE — Demo / Event / Complimentary</option>
+        <option value="149" ${l.pkg==='₹149'?'selected':''}>₹149 — Stream Intelligence (Class 9-10)</option>
+        <option value="349" ${l.pkg==='₹349'?'selected':''}>₹349 — Career Intelligence (Class 11-12)</option>
+        <option value="599" ${l.pkg==='₹599'?'selected':''}>₹599 — Career Acceleration (Graduate+)</option>
+        <option value="199" ${l.pkg==='₹199'?'selected':''}>₹199 — Upgrade (Basic→Standard)</option>
+        <option value="addon-199" ${l.pkg==='₹addon-199'?'selected':''}>₹199 — Add-on: 1 Mentorship Session</option>
+        <option value="addon-499" ${l.pkg==='₹addon-499'?'selected':''}>₹499 — Add-on: 3 Mentorship Sessions</option>
+        <option value="addon-899" ${l.pkg==='₹addon-899'?'selected':''}>₹899 — Add-on: 6 Mentorship Sessions</option>
       </select>
     </div>`;
 }
