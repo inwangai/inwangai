@@ -2170,5 +2170,380 @@ window.onload = function(){
   </div>
 </div>
 
+
+<script>
+// This will be injected into register and assess pages
+// INWANG Cinematic Processing Animation
+
+const INWANG_ANIM_CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+/* ── PROCESSING OVERLAY ── */
+#inwang-processing {
+  display:none;
+  position:fixed;inset:0;z-index:99999;
+  background:#08090d;
+  flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+#inwang-processing.active { display:flex; }
+
+/* Grid */
+.ip-grid {
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,255,0.03) 1px,transparent 1px);
+  background-size:50px 50px;
+  animation:ipGrid 15s linear infinite;
+}
+@keyframes ipGrid { to { background-position:50px 50px; } }
+
+/* Orbs */
+.ip-orb {
+  position:absolute;border-radius:50%;filter:blur(100px);
+  animation:ipOrb 10s ease-in-out infinite;
+}
+.ip-orb1{width:600px;height:600px;background:#00e5ff;opacity:0.08;top:-200px;right:-200px}
+.ip-orb2{width:500px;height:500px;background:#9c5fff;opacity:0.08;bottom:-150px;left:-150px;animation-delay:-3s}
+.ip-orb3{width:300px;height:300px;background:#00ffb2;opacity:0.06;top:40%;left:40%;animation-delay:-6s}
+@keyframes ipOrb{0%,100%{transform:scale(1) translate(0,0)}50%{transform:scale(1.2) translate(20px,-20px)}}
+
+/* Particles */
+.ip-particles{position:absolute;inset:0;overflow:hidden}
+.ip-particle{
+  position:absolute;width:2px;height:2px;border-radius:50%;opacity:0;
+  animation:ipParticle 6s ease-in-out infinite;
+}
+@keyframes ipParticle{
+  0%{opacity:0;transform:translateY(100vh) scale(0)}
+  20%{opacity:0.8}
+  80%{opacity:0.3}
+  100%{opacity:0;transform:translateY(-50px) scale(1.5)}
+}
+
+/* Scan line */
+.ip-scan{
+  position:absolute;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,#00e5ff,transparent);
+  box-shadow:0 0 20px #00e5ff,0 0 60px rgba(0,229,255,0.3);
+  animation:ipScan 3s ease-in-out infinite;
+  top:0;
+}
+@keyframes ipScan{0%{top:0;opacity:1}100%{top:100%;opacity:0}}
+
+/* Neural network */
+.ip-neural{
+  position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 50%, rgba(0,229,255,0.03) 0%, transparent 70%);
+}
+
+/* Main content */
+.ip-content{
+  position:relative;z-index:10;
+  display:flex;flex-direction:column;align-items:center;
+  max-width:600px;width:100%;padding:40px;
+}
+
+/* Logo ring */
+.ip-logo-wrap{
+  position:relative;width:140px;height:140px;margin-bottom:32px;
+}
+.ip-ring{
+  position:absolute;inset:0;border-radius:50%;
+  border:1px solid transparent;animation:ipRing 2s linear infinite;
+}
+.ip-ring1{
+  border-image:conic-gradient(from 0deg,#00e5ff,transparent,transparent) 1;
+  border-radius:50%;border:2px solid transparent;
+  background:linear-gradient(#08090d,#08090d) padding-box,
+  conic-gradient(from 0deg,#00e5ff 0deg,transparent 120deg,transparent 360deg) border-box;
+}
+.ip-ring2{
+  inset:12px;animation-duration:1.5s;animation-direction:reverse;
+  background:linear-gradient(#08090d,#08090d) padding-box,
+  conic-gradient(from 0deg,#9c5fff 0deg,transparent 90deg,transparent 360deg) border-box;
+}
+.ip-ring3{
+  inset:24px;animation-duration:2.5s;
+  background:linear-gradient(#08090d,#08090d) padding-box,
+  conic-gradient(from 0deg,#00ffb2 0deg,transparent 60deg,transparent 360deg) border-box;
+}
+@keyframes ipRing{to{transform:rotate(360deg)}}
+
+/* Center brain */
+.ip-brain{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:56px;height:56px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;
+  animation:ipBrain 2s ease-in-out infinite;
+}
+@keyframes ipBrain{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.15)}}
+
+/* Stage label */
+.ip-stage{
+  font-family:'Space Mono',monospace;
+  font-size:10px;letter-spacing:4px;text-transform:uppercase;
+  color:#00e5ff;margin-bottom:12px;
+  opacity:0;animation:ipFadeIn 0.5s forwards;
+}
+@keyframes ipFadeIn{to{opacity:1}}
+
+/* Main text */
+.ip-main{
+  font-size:clamp(18px,4vw,28px);font-weight:700;
+  text-align:center;margin-bottom:8px;
+  background:linear-gradient(135deg,#00e5ff,#00ffb2,#9c5fff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  min-height:40px;
+}
+.ip-sub{
+  font-size:14px;color:#6b7280;text-align:center;margin-bottom:32px;
+  min-height:20px;
+}
+
+/* Progress bar */
+.ip-prog-wrap{
+  width:100%;max-width:400px;margin-bottom:24px;
+}
+.ip-prog-track{
+  height:3px;background:rgba(255,255,255,0.05);
+  border-radius:100px;overflow:hidden;position:relative;
+}
+.ip-prog-fill{
+  height:100%;width:0%;border-radius:100px;
+  background:linear-gradient(90deg,#00e5ff,#9c5fff,#00ffb2);
+  transition:width 0.5s ease;
+  box-shadow:0 0 10px rgba(0,229,255,0.5);
+  animation:ipProgShimmer 2s linear infinite;
+}
+@keyframes ipProgShimmer{
+  0%{background-position:0% 50%}
+  100%{background-position:100% 50%}
+}
+.ip-prog-pct{
+  font-family:'Space Mono',monospace;
+  font-size:11px;color:#00e5ff;
+  text-align:right;margin-top:6px;
+}
+
+/* Steps */
+.ip-steps{
+  display:flex;flex-direction:column;gap:8px;
+  width:100%;max-width:400px;
+}
+.ip-step{
+  display:flex;align-items:center;gap:12px;
+  font-size:12px;color:#6b7280;
+  transition:color 0.3s;
+}
+.ip-step.done{color:#00ffb2}
+.ip-step.active{color:#00e5ff}
+.ip-step-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:#3a3f4a;flex-shrink:0;transition:background 0.3s;
+}
+.ip-step.done .ip-step-dot{background:#00ffb2;box-shadow:0 0 6px rgba(0,255,178,0.5)}
+.ip-step.active .ip-step-dot{background:#00e5ff;animation:ipDot 1s ease-in-out infinite}
+@keyframes ipDot{0%,100%{transform:scale(1)}50%{transform:scale(1.5)}}
+
+/* Hex grid bg */
+.ip-hex{
+  position:absolute;inset:0;opacity:0.03;
+  background-image:url("data:image/svg+xml,%3Csvg width='60' height='52' viewBox='0 0 60 52' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 17.3v17.4L30 52 0 34.7V17.3z' fill='none' stroke='%2300e5ff' stroke-width='1'/%3E%3C/svg%3E");
+  background-size:60px 52px;
+}
+
+/* Data stream */
+.ip-data{
+  position:absolute;right:40px;top:0;bottom:0;
+  width:200px;overflow:hidden;opacity:0.06;
+  font-family:'Space Mono',monospace;font-size:10px;
+  color:#00e5ff;line-height:1.6;
+  animation:ipData 20s linear infinite;
+  pointer-events:none;
+}
+@keyframes ipData{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
+
+/* Corner accents */
+.ip-corner{position:absolute;width:20px;height:20px}
+.ip-corner1{top:20px;left:20px;border-top:2px solid #00e5ff;border-left:2px solid #00e5ff}
+.ip-corner2{top:20px;right:20px;border-top:2px solid #00e5ff;border-right:2px solid #00e5ff}
+.ip-corner3{bottom:20px;left:20px;border-bottom:2px solid #9c5fff;border-left:2px solid #9c5fff}
+.ip-corner4{bottom:20px;right:20px;border-bottom:2px solid #9c5fff;border-right:2px solid #9c5fff}
+`;
+
+// Generate random data stream
+function genDataStream() {
+  const chars = '01アイウエオabcdef0123456789ABCDEF';
+  let out = '';
+  for(let i = 0; i < 200; i++) {
+    out += chars[Math.floor(Math.random() * chars.length)];
+    if(i % 20 === 19) out += '\n';
+  }
+  return out + out; // double for seamless loop
+}
+
+// Generate particles
+function genParticles(count = 40) {
+  return Array.from({length: count}, (_, i) => {
+    const colors = ['#00e5ff','#9c5fff','#00ffb2','#c8a84b'];
+    return `<div class="ip-particle" style="
+      left:${Math.random()*100}%;
+      background:${colors[i%4]};
+      animation-delay:${Math.random()*6}s;
+      animation-duration:${4+Math.random()*6}s;
+    "></div>`;
+  }).join('');
+}
+
+// Create overlay HTML
+function createProcessingOverlay(type) {
+  const isReg = type === 'registration';
+  const steps = isReg ? [
+    'Validating your information...',
+    'Generating INWANG ID...',
+    'Setting up your profile...',
+    'Sending confirmation email...',
+    'Preparing assessment link...',
+  ] : [
+    'Processing 40 responses...',
+    'Running 6D Scoring Engine...',
+    'Mapping career clusters...',
+    'Analyzing skill gaps...',
+    'Generating your report...',
+  ];
+
+  const stepsHTML = steps.map((s, i) => `
+    <div class="ip-step" id="ip-step-${i}">
+      <div class="ip-step-dot"></div>
+      <span>${s}</span>
+    </div>
+  `).join('');
+
+  return `
+  <div id="inwang-processing">
+    <div class="ip-hex"></div>
+    <div class="ip-grid"></div>
+    <div class="ip-neural"></div>
+    <div class="ip-orb ip-orb1"></div>
+    <div class="ip-orb ip-orb2"></div>
+    <div class="ip-orb ip-orb3"></div>
+    <div class="ip-particles">${genParticles()}</div>
+    <div class="ip-scan"></div>
+    <div class="ip-data" id="ip-data-stream">${genDataStream()}</div>
+    <div class="ip-corner ip-corner1"></div>
+    <div class="ip-corner ip-corner2"></div>
+    <div class="ip-corner ip-corner3"></div>
+    <div class="ip-corner ip-corner4"></div>
+    
+    <div class="ip-content">
+      <div class="ip-logo-wrap">
+        <div class="ip-ring ip-ring1"></div>
+        <div class="ip-ring ip-ring2"></div>
+        <div class="ip-ring ip-ring3"></div>
+        <div class="ip-brain">${isReg ? '⚡' : '🧠'}</div>
+      </div>
+      
+      <div class="ip-stage" id="ip-stage-label">
+        ${isReg ? 'INWANG · REGISTRATION' : 'INWANG · AI ANALYSIS'}
+      </div>
+      
+      <div class="ip-main" id="ip-main-text">
+        ${isReg ? 'Initializing...' : 'Analyzing Profile...'}
+      </div>
+      <div class="ip-sub" id="ip-sub-text">
+        ${isReg ? 'Creating your INWANG profile' : 'Processing 6-Dimension Career Model'}
+      </div>
+      
+      <div class="ip-prog-wrap">
+        <div class="ip-prog-track">
+          <div class="ip-prog-fill" id="ip-progress"></div>
+        </div>
+        <div class="ip-prog-pct" id="ip-pct">0%</div>
+      </div>
+      
+      <div class="ip-steps">${stepsHTML}</div>
+    </div>
+  </div>`;
+}
+
+// Main animation controller
+function runProcessingAnimation(type, onComplete) {
+  // Inject CSS if not already done
+  if(!document.getElementById('ip-style')) {
+    const style = document.createElement('style');
+    style.id = 'ip-style';
+    style.textContent = INWANG_ANIM_CSS;
+    document.head.appendChild(style);
+  }
+  
+  // Inject HTML
+  if(!document.getElementById('inwang-processing')) {
+    document.body.insertAdjacentHTML('beforeend', createProcessingOverlay(type));
+  }
+  
+  const overlay = document.getElementById('inwang-processing');
+  const progress = document.getElementById('ip-progress');
+  const pct = document.getElementById('ip-pct');
+  const mainText = document.getElementById('ip-main-text');
+  const subText = document.getElementById('ip-sub-text');
+  
+  const messages = type === 'registration' ? [
+    {main: 'Validating Data...', sub: 'Checking your information', pct: 10},
+    {main: 'Generating INWANG ID...', sub: 'Creating unique profile ID', pct: 30},
+    {main: 'Setting Up Profile...', sub: 'Saving to secure database', pct: 55},
+    {main: 'Sending Email...', sub: 'Assessment link on its way', pct: 75},
+    {main: 'Almost Ready!', sub: 'Finalizing your profile', pct: 90},
+    {main: 'Registration Complete!', sub: 'Redirecting to Thank You page', pct: 100},
+  ] : [
+    {main: 'Processing Responses...', sub: '40 answers being analyzed', pct: 15},
+    {main: 'Running 6D Engine...', sub: 'Analytical · Communication · Learning', pct: 30},
+    {main: 'Scoring Dimensions...', sub: 'Decision · Motivation · Clarity', pct: 45},
+    {main: 'Mapping Career Clusters...', sub: '11 career domains being evaluated', pct: 60},
+    {main: 'Analyzing Skill Gaps...', sub: 'Identifying development areas', pct: 75},
+    {main: 'Generating Report...', sub: 'Personalizing your career intelligence', pct: 90},
+    {main: 'Report Ready!', sub: 'Redirecting to your Career Report', pct: 100},
+  ];
+  
+  // Show overlay
+  overlay.classList.add('active');
+  
+  let step = 0;
+  const interval = setInterval(() => {
+    if(step < messages.length) {
+      const msg = messages[step];
+      mainText.textContent = msg.main;
+      subText.textContent = msg.sub;
+      progress.style.width = msg.pct + '%';
+      pct.textContent = msg.pct + '%';
+      
+      // Update steps
+      const stepEl = document.getElementById('ip-step-' + step);
+      if(stepEl) {
+        // Previous steps done
+        for(let i = 0; i < step; i++) {
+          const prev = document.getElementById('ip-step-' + i);
+          if(prev) { prev.className = 'ip-step done'; prev.querySelector('.ip-step-dot').style.background = '#00ffb2'; }
+        }
+        stepEl.className = 'ip-step active';
+      }
+      
+      step++;
+      if(step === messages.length) {
+        clearInterval(interval);
+        setTimeout(() => {
+          overlay.classList.remove('active');
+          if(onComplete) onComplete();
+        }, 800);
+      }
+    }
+  }, type === 'registration' ? 600 : 700);
+}
+
+console.log('INWANG Processing Animation loaded!');
+
+</script>
 </body>
 </html>
