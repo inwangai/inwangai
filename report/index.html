@@ -1232,9 +1232,51 @@ function RND(d){
   if(d.stream && IP) document.getElementById('stmCard').style.display=IP?'block':'none';
   // Paid
   if(IP){
-    ['radCard','lsCard','sutCard','crsCard','rolCard','kitCard','salCard','tlCard','govCard','actCard','conCard','rmCard','parCard','cnCard','disCard'].forEach(function(id){
+    // ── STAGE-BASED SECTIONS ──
+    var qs = d.qualStatus || 'other';
+    var is9_10 = (qs === 'class_9_10');
+    var is11   = (qs === 'class_11');
+    var is12   = (qs === '12_appearing' || qs === '12_pass');
+    var isDip  = (qs === 'diploma');
+    var isGrad = (qs === 'graduation' || qs === 'other');
+    var isSchool  = is9_10 || is11;
+    var isSenior  = is12 || isDip;
+    
+    // Common sections — ALL stages
+    ['lsCard','actCard','conCard','parCard','cnCard'].forEach(function(id){
       var el=document.getElementById(id);if(el)el.style.display='block';
     });
+    
+    if(is9_10){
+      // Class 9-10 → Stream recommendation focus
+      ['sutCard','stmCard','radCard'].forEach(function(id){
+        var el=document.getElementById(id);if(el)el.style.display='block';
+      });
+      ['crsCard','rolCard','salCard','tlCard','govCard','rmCard','disCard','kitCard'].forEach(function(id){
+        var el=document.getElementById(id);if(el)el.style.display='none';
+      });
+    } else if(is11){
+      // Class 11 → Same as 12 full report, roadmap different
+      ['radCard','sutCard','crsCard','rolCard','kitCard','salCard','tlCard','govCard','actCard','conCard','rmCard','parCard','cnCard','disCard'].forEach(function(id){
+        var el=document.getElementById(id);if(el)el.style.display='block';
+      });
+      // Update roadmap title for class 11
+      var rmTitle = document.querySelector('#rmCard .sl');
+      if(rmTitle) rmTitle.textContent = hi?'Class 12 ke Baad — Roadmap':'After Class 12 — Your Roadmap';
+    } else if(isSenior){
+      // 12th, Diploma → Full career report
+      ['radCard','sutCard','crsCard','rolCard','kitCard','salCard','tlCard','govCard','rmCard','disCard'].forEach(function(id){
+        var el=document.getElementById(id);if(el)el.style.display='block';
+      });
+    } else {
+      // Graduate/Working → Career acceleration
+      ['radCard','sutCard','crsCard','rolCard','kitCard','salCard','tlCard','govCard','rmCard','disCard'].forEach(function(id){
+        var el=document.getElementById(id);if(el)el.style.display='block';
+      });
+      // Update titles for grad
+      var salTitle = document.querySelector('#salCard .sl');
+      if(salTitle) salTitle.textContent = hi?'Salary & Career ROI Analysis':'Salary & Career ROI Analysis';
+    }
     var ca=document.getElementById('crsArea');
     (d.courses||[]).forEach(function(c){ca.innerHTML+='<span class="chip cg2">'+c+'</span>';});
     var ra=document.getElementById('rolArea');
@@ -1385,8 +1427,50 @@ function AL(){
   });
   // Skill kit
   var kit=cl.kit||DFCL.kit;
-  document.getElementById('kitIntro').textContent=hi?d.pri+' ke liye ye foundational skills develop karo — college se pehle shuru karo toh advantage milega.':'Develop these foundational skills for '+d.pri+' — starting before college gives a significant advantage.';
-  var ka=document.getElementById('kitArea');ka.innerHTML='<div class="kg">'+kit.map(function(s){return '<div class="ki2"><div class="kic">'+s.i+'</div><div><div class="kn">'+s.n+'</div><div class="kd">'+(hi?s.d.hi:s.d.en)+'</div><div class="kb" style="background:rgba(200,168,75,.1);border:1px solid var(--gb);color:var(--gold2)">'+s.p+'</div></div></div>';}).join('')+'</div>';
+  
+  // Add skill gap based skills
+  var gapSkills = [];
+  var scores = d.scores || {};
+  var DIM_SKILLS = {
+    analytical: {i:'🧠', n:hi?'Analytical Thinking':'Analytical Thinking', 
+      d:{hi:'Logical problems, puzzles, case studies practice karo. Structured thinking develop hogi.',en:'Practice logical problems, puzzles, case studies. Develops structured thinking.'},
+      p:'Priority — Foundational'},
+    communication: {i:'🗣️', n:hi?'Communication Skills':'Communication Skills',
+      d:{hi:'Public speaking, group discussions, debates join karo. Career mein sabse zyada kaam aata hai.',en:'Join public speaking, group discussions, debates. Most valuable career skill.'},
+      p:'Priority — Career Critical'},
+    decision: {i:'⚖️', n:hi?'Decision Making':'Decision Making',
+      d:{hi:'Pros-cons analysis practice karo. Real life problems mein options evaluate karo.',en:'Practice pros-cons analysis. Evaluate options in real life problems.'},
+      p:'Priority — Leadership Skill'},
+    motivation: {i:'🎯', n:hi?'Goal Setting & Self-Discipline':'Goal Setting & Self-Discipline',
+      d:{hi:'Daily habits banao, goals write karo, progress track karo. Consistency hi success hai.',en:'Build daily habits, write goals, track progress. Consistency is success.'},
+      p:'Priority — Success Habit'},
+    clarity: {i:'🧭', n:hi?'Career Awareness':'Career Awareness',
+      d:{hi:'Different careers explore karo, professionals se baat karo, LinkedIn use karo.',en:'Explore different careers, talk to professionals, use LinkedIn.'},
+      p:'Priority — Direction'},
+  };
+  
+  // Add gap-based skills (score < 5)
+  ['analytical','communication','decision','motivation','clarity'].forEach(function(dim){
+    if((scores[dim]||0) < 5 && DIM_SKILLS[dim]){
+      gapSkills.push(DIM_SKILLS[dim]);
+    }
+  });
+  
+  // Combine cluster skills + gap skills (gap skills first)
+  var allKit = gapSkills.concat(kit.filter(function(k){
+    return !gapSkills.find(function(g){return g.n === k.n;});
+  }));
+  
+  document.getElementById('kitIntro').textContent=hi?
+    d.pri+' ke liye foundational skills + aapke personal skill gaps ke basis par — ye specifically aapke liye select ki gayi hain.':
+    'Foundational skills for '+d.pri+' + based on your personal skill gaps — these are specifically selected for you.';
+  var ka=document.getElementById('kitArea');
+  ka.innerHTML='<div class="kg">'+allKit.map(function(s){
+    var isGap = gapSkills.indexOf(s) >= 0;
+    var border = isGap ? 'border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.05)' : '';
+    var badge = isGap ? '<div class="kb" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444">⚡ Skill Gap — Priority</div>' : '<div class="kb" style="background:rgba(200,168,75,.1);border:1px solid var(--gb);color:var(--gold2)">'+s.p+'</div>';
+    return '<div class="ki2" style="'+border+'"><div class="kic">'+s.i+'</div><div><div class="kn">'+s.n+'</div><div class="kd">'+(hi?s.d.hi:s.d.en)+'</div>'+badge+'</div></div>';
+  }).join('')+'</div>';
   // Salary
   var sal=cl.sal||DFCL.sal;
   document.getElementById('salArea').innerHTML=
@@ -1633,30 +1717,186 @@ function AL(){
   },
   'class_9_10':{
     hi:[
-      {p:'Abhi (School)',i:['INWANG assessment complete karo','Different careers explore karo','Extracurricular activities join karo','Apni strengths identify karo']},
-      {p:'Class 10 Boards',i:['Boards par 100% focus karo','Maths aur Science strong karo','Previous year papers solve karo','Study routine set karo']},
-      {p:'Post Result',i:['Board marks ke basis par stream decide karo','INWANG counselling lo — Science/Commerce/Arts','Subject combination carefully choose karo','Entrance exams research karo']},
-      {p:'Class 11-12',i:['Chosen stream mein foundation banao','Entrance exam preparation shuru karo','Career goal set karo','Regular INWANG guidance lo']},
+      {p:'Abhi (Class 9-10)',i:[
+        'INWANG Stream Intelligence Report se stream clarity lo',
+        'Maths aur Science strong karo — ye sab streams mein kaam aata hai',
+        'Reading habit banao — newspapers + career articles',
+        'Different professions ke baare mein research karo',
+        'Extracurricular activities join karo — strengths discover karni hain',
+      ]},
+      {p:'Class 10 Boards (2-3 Months Pehle)',i:[
+        'Boards par 100% focus karo — percentage matter karti hai',
+        'Previous year papers solve karo daily',
+        'Weak subjects pe extra time do',
+        'Stream decision final karo — INWANG report ke hisaab se',
+        'Parents ke saath stream discussion karo',
+      ]},
+      {p:'Class 10 Result ke Baad — Stream Choice',i:[
+        '📚 Science (PCM/PCB) → JEE/NEET ki taiyari ke liye',
+        '💼 Commerce → CA/MBA/Finance career ke liye',
+        '🎨 Arts/Humanities → Law/Civil Services/Design ke liye',
+        '🔧 Diploma/ITI → Practical skills + Job-ready path:',
+        '   • Diploma in Engineering (3 years) → Lateral entry B.Tech',
+        '   • ITI (1-2 years) → Government jobs + Private sector',
+        '   • Polytechnic → AICTE approved, good placement',
+        '🔔 INWANG Class 11/Diploma Assessment — updated guidance',
+        'INWANG Upgrade: ~~₹999~~ ₹199 mein full Career Intelligence Report',
+      ]},
+      {p:'Diploma/ITI Path — Agar Ye Choose Karo',i:[
+        'Cluster ke hisaab se best ITI/Diploma trade choose karo:',
+        '   • Engineering cluster → Mechanical/Electrical/Civil diploma',
+        '   • IT cluster → Computer Science diploma',
+        '   • Healthcare → Pharmacy/Lab technician diploma',
+        '   • Defence → NCC + ITI combination',
+        'AICTE approved college select karo — placement record dekho',
+        'Diploma ke baad lateral entry B.Tech possible hai (2nd year)',
+        'Govt jobs ke liye ITI certificate bahut valuable hai',
+        '✅ INWANG Skill Gap Report — trade selection mein help',
+      ]},
+      {p:'Class 11 (Next Phase)',i:[
+        'NCERT thoroughly padho',
+        'Target entrance exam identify karo',
+        'Study routine establish karo',
+        'Coaching decision karo — online ya offline',
+        'INWANG Counselling Session lo — detailed career roadmap',
+      ]},
     ],
     en:[
-      {p:'Now (School)',i:['Complete INWANG assessment','Explore different careers','Join extracurricular activities','Identify your strengths']},
-      {p:'Class 10 Boards',i:['Give 100% to boards','Strengthen Maths and Science','Solve previous year papers','Set a study routine']},
-      {p:'Post Result',i:['Decide stream based on board marks','Take INWANG counselling — Science/Commerce/Arts','Carefully choose subject combination','Research entrance exams']},
-      {p:'Class 11-12',i:['Build foundation in chosen stream','Start entrance exam preparation','Set career goal','Take regular INWANG guidance']},
+      {p:'Now (Class 9-10)',i:[
+        'Get stream clarity from INWANG Stream Intelligence Report',
+        'Strengthen Maths and Science — useful in all streams',
+        'Build reading habit — newspapers and career articles',
+        'Research different professions',
+        'Join extracurricular activities — discover your strengths',
+      ]},
+      {p:'Class 10 Boards (2-3 Months Before)',i:[
+        'Focus 100% on boards — percentage matters',
+        'Solve previous year papers daily',
+        'Give extra time to weak subjects',
+        'Finalize stream decision based on INWANG report',
+        'Discuss stream choice with parents',
+      ]},
+      {p:'After Class 10 Result — Stream Choice',i:[
+        '📚 Science (PCM/PCB) → For JEE/NEET preparation',
+        '💼 Commerce → For CA/MBA/Finance career',
+        '🎨 Arts/Humanities → For Law/Civil Services/Design',
+        '🔧 Diploma/ITI → Practical skills + Job-ready path:',
+        '   • Diploma in Engineering (3 years) → Lateral entry B.Tech',
+        '   • ITI (1-2 years) → Government jobs + Private sector',
+        '   • Polytechnic → AICTE approved, good placement',
+        '🔔 INWANG Class 11/Diploma Assessment — updated guidance',
+        'INWANG Upgrade: ~~₹999~~ ₹199 for full Career Intelligence Report',
+      ]},
+      {p:'Diploma/ITI Path — If You Choose This',i:[
+        'Choose best ITI/Diploma trade based on your cluster:',
+        '   • Engineering cluster → Mechanical/Electrical/Civil diploma',
+        '   • IT cluster → Computer Science diploma',
+        '   • Healthcare → Pharmacy/Lab technician diploma',
+        '   • Defence → NCC + ITI combination',
+        'Select AICTE approved college — check placement record',
+        'Lateral entry B.Tech possible after Diploma (2nd year)',
+        'ITI certificate very valuable for government jobs',
+        '✅ INWANG Skill Gap Report — help in trade selection',
+      ]},
+      {p:'Class 11 (Next Phase)',i:[
+        'Read NCERT thoroughly',
+        'Identify target entrance exam',
+        'Establish a study routine',
+        'Decide on coaching — online or offline',
+        'Take INWANG Counselling Session — detailed career roadmap',
+      ]},
     ],
   },
   'class_11':{
     hi:[
-      {p:'Abhi (Class 11)',i:['New subjects ke fundamentals deeply samjho','Weak topics identify karo aur address karo','Study schedule banao — boards + entrance dono ke liye','NCERT thoroughly complete karo']},
-      {p:'3-6 Months',i:['Target entrance exam decide karo','Basic entrance preparation shuru karo','Reference books add karo','Mock tests practice karo']},
-      {p:'Class 12 Start',i:['Boards + entrance dual strategy banao','Coaching ya self-study decide karo','Previous year papers solve karo','INWANG counselling mein roadmap finalize karo']},
-      {p:'Class 12 End',i:['Boards strong karo','Entrance mein best performance do','College shortlist banao','INWANG se college counselling lo']},
+      {p:'Abhi (Class 11 — Shuruat)',i:[
+        'NCERT har subject ka thoroughly padho — ye base hai sab ka',
+        'Weak topics identify karo aur tutor/YouTube se address karo',
+        'Study schedule banao — Daily 6-8 hours minimum',
+        'INWANG report ke cluster ke hisaab se target exam decide karo',
+        'Extracurricular activities join karo — personality build hogi',
+      ]},
+      {p:'3-6 Months (Preparation Phase)',i:[
+        'Target entrance exam confirm karo (JEE/NEET/CLAT/CUET/NDA etc.)',
+        'Entrance exam syllabus download karo aur compare karo boards se',
+        'Coaching join karo ya online platform (Unacademy/PW/Allen) decide karo',
+        'Reference books add karo (cluster ke hisaab se)',
+        'Weekly mock tests practice shuru karo',
+        '🔔 INWANG 6-Month Follow-up Assessment recommended',
+      ]},
+      {p:'Class 11 End (June-July)',i:[
+        'Class 11 ka poora syllabus revise karo',
+        'Class 12 ka syllabus preview karo — 1 month pehle se',
+        'Summer mein internship ya skill course karo',
+        'College shortlist karna shuru karo (INWANG College Mapping)',
+        'Parent ke saath career discussion karo — budget + location',
+      ]},
+      {p:'Class 12 Shuruat (August-October)',i:[
+        'Dual strategy — Boards 70% + Entrance 30% focus',
+        'NCERT Class 12 complete karo October tak',
+        'Previous 10 years question papers practice karo',
+        'CUET registration dates track karo (Oct-Nov mein open hoti hai)',
+        'NDA/Defence ke liye physical training shuru karo (agar relevant)',
+      ]},
+      {p:'Class 12 Mid (November-January)',i:[
+        'Boards ki serious preparation shuru karo',
+        'Entrance mock tests weekly 2-3 dena zaroori hai',
+        'College applications research karo',
+        'INWANG Counselling Session — college final shortlist',
+        'Scholarship opportunities dhundo',
+      ]},
+      {p:'Class 12 End (February-May)',i:[
+        'Boards mein best performance do',
+        'JEE/NEET/CLAT/CUET April-May mein — full preparation',
+        'Backup colleges list ready rakho',
+        'Result ke baad seedha INWANG Career Counselling lo',
+        '✅ INWANG Re-Assessment — updated career direction milegi',
+      ]},
     ],
     en:[
-      {p:'Now (Class 11)',i:['Deeply understand fundamentals of new subjects','Identify and address weak topics','Build study schedule for both boards and entrance','Complete NCERT thoroughly']},
-      {p:'3-6 Months',i:['Decide target entrance exam','Start basic entrance preparation','Add reference books','Practice mock tests']},
-      {p:'Class 12 Start',i:['Build dual boards + entrance strategy','Decide coaching or self-study','Solve previous year papers','Finalise roadmap in INWANG counselling']},
-      {p:'Class 12 End',i:['Excel in boards','Give best performance in entrance','Build college shortlist','Take INWANG college counselling']},
+      {p:'Now (Class 11 — Beginning)',i:[
+        'Read NCERT thoroughly for every subject — this is the base for everything',
+        'Identify weak topics and address them through tutor/YouTube',
+        'Build a study schedule — minimum 6-8 hours daily',
+        'Decide target exam based on your INWANG cluster',
+        'Join extracurricular activities — personality development',
+      ]},
+      {p:'3-6 Months (Preparation Phase)',i:[
+        'Confirm target entrance exam (JEE/NEET/CLAT/CUET/NDA etc.)',
+        'Download entrance exam syllabus and compare with boards',
+        'Decide on coaching or online platform (Unacademy/PW/Allen)',
+        'Add reference books based on your cluster',
+        'Start weekly mock test practice',
+        '🔔 INWANG 6-Month Follow-up Assessment recommended',
+      ]},
+      {p:'End of Class 11 (June-July)',i:[
+        'Revise complete Class 11 syllabus',
+        'Preview Class 12 syllabus 1 month in advance',
+        'Do internship or skill course in summer',
+        'Start college shortlisting (INWANG College Mapping)',
+        'Career discussion with parents — budget + location',
+      ]},
+      {p:'Class 12 Start (August-October)',i:[
+        'Dual strategy — Boards 70% + Entrance 30% focus',
+        'Complete Class 12 NCERT by October',
+        'Practice previous 10 years question papers',
+        'Track CUET registration dates (opens Oct-Nov)',
+        'Start physical training for NDA/Defence if relevant',
+      ]},
+      {p:'Class 12 Mid (November-January)',i:[
+        'Begin serious board exam preparation',
+        'Give 2-3 entrance mock tests weekly',
+        'Research college applications',
+        'INWANG Counselling Session — final college shortlist',
+        'Look for scholarship opportunities',
+      ]},
+      {p:'Class 12 End (February-May)',i:[
+        'Give best performance in boards',
+        'JEE/NEET/CLAT/CUET April-May — full preparation',
+        'Keep backup college list ready',
+        'After results — take INWANG Career Counselling immediately',
+        '✅ INWANG Re-Assessment — get updated career direction',
+      ]},
     ],
   },
   'diploma':{
@@ -2184,41 +2424,20 @@ window.onload = function(){
   document.getElementById('ltxt').textContent = 'Report load ho rahi hai...';
 
   // JSONP fetch
-  var cbName = 'inwangCb_' + Date.now();
-  var script = document.createElement('script');
-  
-  var timer = setTimeout(function(){
-    if(window[cbName]) delete window[cbName];
-    document.getElementById('ls').innerHTML = 
-      '<div style="text-align:center;padding:40px 20px">' +
-      '<div style="font-size:32px;margin-bottom:16px">⚠️</div>' +
-      '<div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px">Report Load Nahi Ho Saki</div>' +
-      '<div style="font-size:13px;color:#6b7a99;margin-bottom:20px">Internet check karo ya thodi der baad try karo.</div>' +
-      '<a href="https://wa.me/919470659224?text=Hi+INWANG,+Report+load+nahi+ho+rahi.+ID:+' + leadId + '" target="_blank" ' +
-      'style="display:inline-block;background:#25D366;color:#fff;padding:12px 24px;border-radius:10px;font-weight:700;text-decoration:none">💬 WhatsApp Help</a>' +
-      '</div>';
-  }, 12000);
-
-  window[cbName] = function(d){
-    clearTimeout(timer);
-    delete window[cbName];
-    try{ document.head.removeChild(script); } catch(e){}
-    if(d && d.error){
-      try{ RND(demo); } catch(e){ showError(e); }
+  fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?action=report&id=' + encodeURIComponent(leadId))
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(!d || d.error){
+      try{ RND(demo); } catch(e2){ showError(e2); }
       return;
     }
     try{
-      var reportData = mergeWithDefaults(d);
-      RND(reportData);
-    } catch(e){ showError(e); }
-  };
-
-  script.src = 'https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?action=report&id=' + encodeURIComponent(leadId) + '&callback=' + cbName;
-  script.onerror = function(){
-    clearTimeout(timer);
-    try{ RND(demo); } catch(e){ showError(e); }
-  };
-  document.head.appendChild(script);
+      RND(mergeWithDefaults(d));
+    } catch(e2){ showError(e2); }
+  })
+  .catch(function(){
+    try{ RND(demo); } catch(e2){ showError(e2); }
+  });
 };
 
 function showError(e){
