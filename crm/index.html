@@ -1116,6 +1116,8 @@ function renderLeads(){
           <button class="ab ab-view" onclick="openLead('${l.id}')">👁</button>
           <button class="ab ab-wa" onclick="openWA('${l.smob}','${l.name}')">💬</button>
           ${ASSESSMENTS.find(a=>a.id===l.id)?`<button class="ab ab-report" onclick="generateRpt('${l.id}')">📄</button>`:''}
+          <button class="ab" onclick="openEditLead('${l.id}')" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:#60a5fa" title="Edit">✏️</button>
+          <button class="ab" onclick="if(confirm('Delete ${l.name}?'))deleteLead('${l.id}')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444" title="Delete">🗑</button>
         </div>
       </td>
     </tr>`).join('');
