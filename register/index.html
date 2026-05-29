@@ -1399,13 +1399,63 @@ function submitForm1() {
   var qual   = document.getElementById('f1-qual').value;
   var err    = document.getElementById('form1-error');
 
+  var father  = document.getElementById('f1-father')?document.getElementById('f1-father').value.trim():'';
+  var pmobile = document.getElementById('f1-pmobile')?document.getElementById('f1-pmobile').value.trim():'';
+  var stream  = document.getElementById('f1-stream')?document.getElementById('f1-stream').value:'';
+  var marks   = document.getElementById('f1-marks')?document.getElementById('f1-marks').value.trim():'';
+  var goal    = document.getElementById('f1-goal')?document.getElementById('f1-goal').value.trim():'';
+  var confusion = document.getElementById('f1-confusion')?document.getElementById('f1-confusion').value.trim():'';
+  var concern = document.getElementById('f1-concern')?document.getElementById('f1-concern').value.trim():'';
+
+  // Tier 1 — Basic mandatory
   if(!name||!mobile||!email||!city||!state||!qual){
-    err.textContent='* Fields zaroori hain.';
+    err.textContent='* Name, Mobile, Email, City, State, Qualification zaroori hain.';
     err.style.display='block';
     return;
   }
   if(!/^\d{10}$/.test(mobile)){
     err.textContent='Mobile 10 digits ka hona chahiye.';
+    err.style.display='block';
+    return;
+  }
+  // Tier 2 — Important mandatory
+  if(!father){
+    err.textContent='* Father ka naam zaroori hai.';
+    err.style.display='block';
+    return;
+  }
+  if(!pmobile){
+    err.textContent='* Parent mobile number zaroori hai.';
+    err.style.display='block';
+    return;
+  }
+  if(!/^\d{10}$/.test(pmobile)){
+    err.textContent='Parent mobile 10 digits ka hona chahiye.';
+    err.style.display='block';
+    return;
+  }
+  if(!stream){
+    err.textContent='* Stream / Background zaroori hai.';
+    err.style.display='block';
+    return;
+  }
+  if(!marks){
+    err.textContent='* Marks / CGPA zaroori hai.';
+    err.style.display='block';
+    return;
+  }
+  if(!goal){
+    err.textContent='* Career goal zaroori hai.';
+    err.style.display='block';
+    return;
+  }
+  if(!confusion){
+    err.textContent='* Main confusion / doubt zaroori hai.';
+    err.style.display='block';
+    return;
+  }
+  if(!concern){
+    err.textContent='* Parent concern zaroori hai.';
     err.style.display='block';
     return;
   }
@@ -1470,11 +1520,11 @@ function doRedirect(id, name){
   localStorage.removeItem('inwang_reg_draft');
   if(typeof runProcessingAnimation !== 'undefined'){
     runProcessingAnimation('registration', function(){
-      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name);
+      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name)+'&qual='+encodeURIComponent(qual||'');
     });
   } else {
     setTimeout(function(){
-      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name);
+      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name)+'&qual='+encodeURIComponent(qual||'');
     }, 1000);
   }
 }
@@ -1497,11 +1547,11 @@ function doRedirect(id, name){
   localStorage.removeItem('inwang_reg_draft');
   if(typeof runProcessingAnimation !== 'undefined'){
     runProcessingAnimation('registration', function(){
-      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name);
+      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name)+'&qual='+encodeURIComponent(qual||'');
     });
   } else {
     setTimeout(function(){
-      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name);
+      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name)+'&qual='+encodeURIComponent(qual||'');
     }, 1000);
   }
 }
