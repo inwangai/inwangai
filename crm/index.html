@@ -1511,6 +1511,8 @@ function buildActionsTab(l,a){
         ${a?`<button class="btn-primary" onclick="generateRpt('${l.id}');closeModal('lead-modal')">📄 Generate Report</button>
         <button class="btn-sec" onclick="generateAndSendCoupon('${l.id}')" style="background:rgba(200,168,75,0.15);border-color:rgba(200,168,75,0.4);color:#c8a84b">🎟️ Generate Coupon</button>`:'<button class="btn-sec" disabled style="opacity:.4">📄 No Assessment Yet</button>'}
         <button class="btn-sec" onclick="markPaid('${l.id}')">✅ Mark Paid</button>
+        <button class="btn-sec" onclick="openEditLead('${l.id}')" style="background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);color:#60a5fa">✏️ Edit Lead</button>
+        <button class="btn-sec" onclick="if(confirm('Delete this lead?'))deleteLead('${l.id}')" style="background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.3);color:#ef4444">🗑️ Delete</button>
       </div>
     </div>
     <div class="ds"><div class="dst">Update Status & Counsellor</div>
