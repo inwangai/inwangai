@@ -2039,7 +2039,8 @@ function showReport() {
   }
   var ql = qual.toLowerCase();
   if(ql.includes('class 9')||ql.includes('class 10')) detectedStage = 'class_9_10';
-  else if(ql.includes('class 11')) detectedStage = 'class_11';
+  else if((ql.includes('class 11')||ql.includes('11th'))&&(ql.includes('pass')||ql.includes('complete'))) detectedStage = '12_appearing';
+  else if(ql.includes('class 11')||ql.includes('11th')) detectedStage = 'class_11';
   else if(ql.includes('class 12')||ql.includes('12th')) detectedStage = '12_appearing';
   else if(ql.includes('iti')||ql.includes('diploma')) detectedStage = 'diploma';
   else if(ql.includes('ug')||ql.includes('graduate')||ql.includes('b.tech')||ql.includes('bca')) detectedStage = 'graduation';
