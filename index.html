@@ -405,6 +405,10 @@ footer{position:relative;z-index:2;border-top:1px solid rgba(200,168,75,.1);padd
 #cubeCanvas{width:210px;height:210px}
 @media(max-width:880px){#cubeCanvas{width:160px;height:160px}}
 @media(max-width:480px){#cubeCanvas{width:130px;height:130px}}
+
+@media(max-width:768px){
+  .pricing-grid{grid-template-columns:1fr!important}
+}
 </style>
 </head>
 <body>
@@ -604,7 +608,136 @@ footer{position:relative;z-index:2;border-top:1px solid rgba(200,168,75,.1);padd
   </div>
 </section>
 
-<!-- FINAL CTA -->
+
+  <!-- PRICING SECTION -->
+  <section class="section" id="pricing" style="padding:80px 0;position:relative;z-index:1">
+    <div class="container" style="max-width:1100px;margin:0 auto;padding:0 24px">
+      
+      <!-- Header -->
+      <div style="text-align:center;margin-bottom:48px">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(200,168,75,0.1);border:1px solid rgba(200,168,75,0.2);border-radius:100px;padding:6px 16px;font-size:11px;font-weight:700;color:#c8a84b;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px">
+          <div style="width:6px;height:6px;background:#c8a84b;border-radius:50%;animation:pulse 2s infinite"></div>
+          Simple, Transparent Pricing
+        </div>
+        <h2 style="font-family:'Outfit',sans-serif;font-size:clamp(28px,4vw,44px);font-weight:900;margin-bottom:12px;line-height:1.1">
+          World-Class Report.<br>
+          <span style="background:linear-gradient(135deg,#c8a84b,#e8c96d);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Honest Pricing.</span>
+        </h2>
+        <p style="font-size:15px;color:#6b7a99;max-width:480px;margin:0 auto;line-height:1.7">
+          India's First Hybrid AI + Human Career Coach — A Complete <strong style="color:#fff">Campus-to-Corporate Journey</strong> for Tier-2 & Tier-3 India
+        </p>
+      </div>
+
+      <!-- Package Cards -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:32px">
+        
+        <!-- Basic -->
+        <div style="background:#0a1929;border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:28px;position:relative;overflow:hidden;transition:transform 0.2s,border-color 0.2s" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='rgba(200,168,75,0.2)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(255,255,255,0.06)'">
+          <div style="font-size:10px;font-weight:700;color:#6b7a99;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Class 9 – 10</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:4px">Stream Intelligence</div>
+          <div style="font-size:12px;color:#6b7a99;margin-bottom:16px;font-style:italic">Stream Discovery Report</div>
+          <div style="font-size:12px;color:#6b7a99;text-decoration:line-through">₹499</div>
+          <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px">
+            <div style="font-family:'Outfit',sans-serif;font-size:40px;font-weight:900;color:#c8a84b">₹149</div>
+            <div style="font-size:12px;color:#6b7a99">one-time</div>
+          </div>
+          <div style="display:inline-block;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#10b981;font-size:9px;font-weight:700;padding:2px 8px;border-radius:100px;margin-bottom:16px">70% OFF</div>
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:16px;display:flex;flex-direction:column;gap:7px">
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#c8a84b;font-size:8px;margin-top:3px">✦</span>6D AI Personality Scoring</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#c8a84b;font-size:8px;margin-top:3px">✦</span>Stream Suitability Analysis</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#c8a84b;font-size:8px;margin-top:3px">✦</span>10-Year Career Preview</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#c8a84b;font-size:8px;margin-top:3px">✦</span>Diploma/ITI Path Guide</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#c8a84b;font-size:8px;margin-top:3px">✦</span>Parent Guidance Section</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#c8a84b;font-size:8px;margin-top:3px">✦</span>Digital PDF Download</div>
+          </div>
+          <div style="background:rgba(200,168,75,0.05);border:1px dashed rgba(200,168,75,0.2);border-radius:8px;padding:10px;margin-top:12px;font-size:11px;color:rgba(200,168,75,0.8)">
+            🔄 Upgrade to Standard: <span style="text-decoration:line-through;opacity:0.5">₹999</span> <strong style="color:#c8a84b">₹199</strong>
+          </div>
+          <a href="https://inwangai.com/register" style="display:block;width:100%;padding:13px;border:1.5px solid rgba(200,168,75,0.3);border-radius:10px;color:#c8a84b;font-size:13px;font-weight:800;text-align:center;text-decoration:none;margin-top:16px;transition:all 0.2s" onmouseover="this.style.background='rgba(200,168,75,0.08)'" onmouseout="this.style.background=''">Get Stream Report →</a>
+        </div>
+
+        <!-- Standard - Popular -->
+        <div style="background:linear-gradient(135deg,#0a1929,#0d1f38);border:2px solid rgba(200,168,75,0.4);border-radius:20px;padding:28px;position:relative;overflow:hidden;transform:scale(1.02)">
+          <div style="position:absolute;top:14px;right:14px;background:linear-gradient(135deg,#c8a84b,#e8c96d);color:#020408;font-size:9px;font-weight:800;padding:3px 10px;border-radius:100px">MOST POPULAR</div>
+          <div style="font-size:10px;font-weight:700;color:#6b7a99;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Class 11 – 12</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:4px">Career Intelligence</div>
+          <div style="font-size:12px;color:#6b7a99;margin-bottom:16px;font-style:italic">Full Career Direction Report</div>
+          <div style="font-size:12px;color:#6b7a99;text-decoration:line-through">₹999</div>
+          <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px">
+            <div style="font-family:'Outfit',sans-serif;font-size:40px;font-weight:900;color:#c8a84b">₹349</div>
+            <div style="font-size:12px;color:#6b7a99">one-time</div>
+          </div>
+          <div style="display:inline-block;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#10b981;font-size:9px;font-weight:700;padding:2px 8px;border-radius:100px;margin-bottom:16px">65% OFF</div>
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:16px;display:flex;flex-direction:column;gap:7px">
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#00d4ff;font-size:8px;margin-top:3px">✦</span>Everything in Basic</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#00d4ff;font-size:8px;margin-top:3px">✦</span>Career Cluster Deep Analysis</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#00d4ff;font-size:8px;margin-top:3px">✦</span>College & Course Mapping</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#00d4ff;font-size:8px;margin-top:3px">✦</span>Entrance Exam Roadmap</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#00d4ff;font-size:8px;margin-top:3px">✦</span>Salary Ladder 0–10 Years</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#00d4ff;font-size:8px;margin-top:3px">✦</span>Govt Job Opportunities</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#00d4ff;font-size:8px;margin-top:3px">✦</span>Print + Digital Report</div>
+          </div>
+          <div style="background:rgba(200,168,75,0.05);border:1px dashed rgba(200,168,75,0.2);border-radius:8px;padding:10px;margin-top:12px;font-size:11px;color:rgba(200,168,75,0.8)">
+            💛 Already have Basic? Upgrade: <span style="text-decoration:line-through;opacity:0.5">₹999</span> <strong style="color:#c8a84b">₹199</strong>
+          </div>
+          <a href="https://inwangai.com/register" style="display:block;width:100%;padding:13px;background:linear-gradient(135deg,#c8a84b,#e8c96d);color:#020408;border:none;border-radius:10px;font-size:13px;font-weight:800;text-align:center;text-decoration:none;margin-top:16px">Get Career Report →</a>
+        </div>
+
+        <!-- Premium -->
+        <div style="background:#0a1929;border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:28px;position:relative;overflow:hidden;transition:transform 0.2s,border-color 0.2s" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='rgba(16,185,129,0.2)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(255,255,255,0.06)'">
+          <div style="font-size:10px;font-weight:700;color:#6b7a99;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Graduate & Working</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:4px">Career Acceleration</div>
+          <div style="font-size:12px;color:#6b7a99;margin-bottom:16px;font-style:italic">Advanced Career Intelligence</div>
+          <div style="font-size:12px;color:#6b7a99;text-decoration:line-through">₹1499</div>
+          <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px">
+            <div style="font-family:'Outfit',sans-serif;font-size:40px;font-weight:900;color:#c8a84b">₹599</div>
+            <div style="font-size:12px;color:#6b7a99">one-time</div>
+          </div>
+          <div style="display:inline-block;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#10b981;font-size:9px;font-weight:700;padding:2px 8px;border-radius:100px;margin-bottom:16px">60% OFF</div>
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:16px;display:flex;flex-direction:column;gap:7px">
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#10b981;font-size:8px;margin-top:3px">✦</span>Everything in Standard</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#10b981;font-size:8px;margin-top:3px">✦</span>Career Pivot Intelligence</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#10b981;font-size:8px;margin-top:3px">✦</span>Private Sector Job Mapping</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#10b981;font-size:8px;margin-top:3px">✦</span>ROI Analysis</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#10b981;font-size:8px;margin-top:3px">✦</span>90-Day Action Plan</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#10b981;font-size:8px;margin-top:3px">✦</span>30-Day Follow-up Support</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.65);display:flex;gap:8px"><span style="color:#10b981;font-size:8px;margin-top:3px">✦</span>Priority WhatsApp Support</div>
+          </div>
+          <a href="https://inwangai.com/register" style="display:block;width:100%;padding:13px;border:1.5px solid rgba(16,185,129,0.3);border-radius:10px;color:#10b981;font-size:13px;font-weight:800;text-align:center;text-decoration:none;margin-top:32px;transition:all 0.2s" onmouseover="this.style.background='rgba(16,185,129,0.08)'" onmouseout="this.style.background=''">Get Premium Report →</a>
+        </div>
+      </div>
+
+      <!-- Add-on -->
+      <div style="text-align:center;margin-bottom:16px;font-size:11px;font-weight:700;color:#6b7a99;letter-spacing:2px;text-transform:uppercase">➕ Add-On — Human Mentorship Sessions</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:40px">
+        <div style="background:#0a1929;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;text-align:center">
+          <div style="font-size:20px;margin-bottom:6px">🧑‍💼</div>
+          <div style="font-size:13px;font-weight:700;color:#fff">1 Session</div>
+          <div style="font-size:11px;color:#6b7a99;text-decoration:line-through">₹499</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:#00d4ff">₹199</div>
+          <div style="font-size:10px;color:#6b7a99;margin-top:4px">45 min · 1-on-1 · Parent can join</div>
+        </div>
+        <div style="background:#0a1929;border:1px solid rgba(0,212,255,0.15);border-radius:12px;padding:16px;text-align:center">
+          <div style="font-size:20px;margin-bottom:6px">🎯</div>
+          <div style="font-size:13px;font-weight:700;color:#fff">3 Sessions</div>
+          <div style="font-size:11px;color:#6b7a99;text-decoration:line-through">₹999</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:#00d4ff">₹499</div>
+          <div style="font-size:10px;color:#6b7a99;margin-top:4px">College shortlist + Exam strategy</div>
+        </div>
+        <div style="background:#0a1929;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;text-align:center">
+          <div style="font-size:20px;margin-bottom:6px">🚀</div>
+          <div style="font-size:13px;font-weight:700;color:#fff">6 Sessions</div>
+          <div style="font-size:11px;color:#6b7a99;text-decoration:line-through">₹1999</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:#00d4ff">₹899</div>
+          <div style="font-size:10px;color:#6b7a99;margin-top:4px">Full mentorship + Admission support</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+  <!-- END PRICING -->
+
+  <!-- FINAL CTA -->
 <section class="cta-section">
   <div class="cta-title reveal">Your Career.<br><span>Starts Here.</span></div>
   <p class="cta-sub reveal">Join students across Tier-2 & Tier-3 India discovering their true career direction with INWANG AI.</p>
