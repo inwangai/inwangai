@@ -1095,20 +1095,28 @@ function renderLeads(){
       // Parse dates like "6/2/2026 12:28:51" or "02-06-2026"
       function parseTs(ts){
         if(!ts) return 0;
-        // Indian format: D/M/YYYY or DD/MM/YYYY HH:MM:SS
-        var parts = ts.split(/[\s]/)[0].split(/[\/\-]/);
+        // Handle Indian format: D/M/YYYY HH:MM:SS
+        var dateStr = ts.toString().trim().split(' ')[0]; // get date part only
+        var parts = dateStr.split('/');
         if(parts.length === 3){
-          var day = parseInt(parts[0]), mon = parseInt(parts[1]), yr = parseInt(parts[2]);
-          // Validate - if day > 12, definitely D/M/YYYY
-          if(day > 12 || (day <= 12 && mon <= 12)){
-            // D/M/YYYY format (Indian)
-            var d2 = new Date(yr, mon-1, day);
-            if(!isNaN(d2)) return d2.getTime();
+          var day = parseInt(parts[0],10);
+          var mon = parseInt(parts[1],10);
+          var yr  = parseInt(parts[2],10);
+          if(yr > 2000 && mon >= 1 && mon <= 12 && day >= 1 && day <= 31){
+            // Valid D/M/YYYY — return timestamp
+            return new Date(yr, mon-1, day).getTime();
           }
+        }
+        // Try dash format DD-MM-YYYY
+        var parts2 = dateStr.split('-');
+        if(parts2.length === 3){
+          var d2=parseInt(parts2[0],10),m2=parseInt(parts2[1],10),y2=parseInt(parts2[2],10);
+          if(y2>2000) return new Date(y2,m2-1,d2).getTime();
         }
         var d = new Date(ts);
         if(!isNaN(d)) return d.getTime();
-        // Fallback M/D/YYYY
+        return 0;
+        // dead code below kept for syntax
         if(parts.length >= 3){
           var d3 = new Date(parts[2]+'-'+parts[0]+'-'+parts[1]);
           if(!isNaN(d2)) return d2.getTime();
@@ -2105,8 +2113,11 @@ function openEditLead(id){
     ['el-state','State',l.state||''],
     ['el-qual','Qualification',l.qual||''],
     ['el-stream','Stream',l.stream||''],
-    ['el-marks','Marks',l.marks||''],
+    ['el-marks','Marks / %',l.marks||''],
     ['el-goal','Career Goal',l.goal||''],
+    ['el-confusion','Main Confusion',l.confusion||''],
+    ['el-concern','Parent Concern',l.concern||''],
+    ['el-priority','Student Priority',l.priority||''],
     ['el-source','Source',l.source||'']
   ];
   
@@ -2135,7 +2146,7 @@ function openEditLead(id){
 function saveEditLead(id){
   var l=LEADS.find(function(x){return x.id===id;});
   if(!l)return;
-  var map={name:'el-name',father:'el-father',smob:'el-smob',pmob:'el-pmob',email:'el-email',city:'el-city',state:'el-state',qual:'el-qual',stream:'el-stream',marks:'el-marks',goal:'el-goal',source:'el-source'};
+  var map={name:'el-name',father:'el-father',smob:'el-smob',pmob:'el-pmob',email:'el-email',city:'el-city',state:'el-state',qual:'el-qual',stream:'el-stream',marks:'el-marks',goal:'el-goal',confusion:'el-confusion',concern:'el-concern',priority:'el-priority',source:'el-source'};
   Object.keys(map).forEach(function(k){
     var el=document.getElementById(map[k]);
     if(el)l[k]=el.value.trim();
@@ -2144,7 +2155,7 @@ function saveEditLead(id){
   if(m)m.remove();
   render();stats();
   notif('Lead updated: '+id);
-  pushToSheet('update_lead',{id:id,name:l.name,father:l.father,mobile:l.smob,pmobile:l.pmob,email:l.email,city:l.city,state:l.state,qual:l.qual,stream:l.stream,marks:l.marks,goal:l.goal,source:l.source});
+  pushToSheet('update_lead',{id:id,name:l.name,father:l.father,mobile:l.smob,pmobile:l.pmob,email:l.email,city:l.city,state:l.state,qual:l.qual,stream:l.stream,marks:l.marks,goal:l.goal,confusion:l.confusion,concern:l.concern,priority:l.priority,source:l.source});
 }
 
 function deleteLead(id){
