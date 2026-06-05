@@ -1726,10 +1726,13 @@ function generateAndSendCoupon(id){
 }
 
 function generateRpt(id){
-  var l=LEADS.find(x=>x.id===id);
-  notif('📄 Opening report template for '+l.name+'…');
-  // Open report HTML with ID param
-  setTimeout(()=>{ window.open('https://inwangai.com/report?id='+id+'&paid=true','_blank'); },500);
+  var url = 'https://inwangai.com/report?id='+encodeURIComponent(id)+'&paid=true';
+  notif('📄 Opening report for '+id+'...');
+  var win = window.open(url, '_blank');
+  if(!win || win.closed){
+    // Popup blocked - open in same tab
+    window.location.href = url;
+  }
 }
 function openAssDetail(id){
   openLead(id);
