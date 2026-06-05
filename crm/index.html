@@ -489,6 +489,7 @@ tr:hover td{background:rgba(200,168,75,.025)}
             <button class="ft on" onclick="setStatusFilter('ALL',this)">All</button>
             <button class="ft" onclick="setStatusFilter('NEW',this)">New</button>
             <button class="ft" onclick="setStatusFilter('HOT',this)">🔥 Hot</button>
+            <button class="ft" onclick="setStatusFilter('WARM',this)">Warm</button>
             <button class="ft" onclick="setStatusFilter('FOLLOW-UP',this)">Follow-up</button>
             <button class="ft" onclick="setStatusFilter('ASSESSMENT DONE',this)">Assessed</button>
             <button class="ft" onclick="setStatusFilter('PAID',this)">Paid</button>
@@ -1088,10 +1089,29 @@ function renderDashboard(){
 // ══ LEADS ══
 function renderLeads(){
   var filtered = getFilteredLeads();
-  // Newest first
+  // Sort newest first - parse date properly
   if(!sortKey){
     filtered.sort(function(a,b){
-      return (b.ts||'').localeCompare(a.ts||'');
+      // Parse dates like "6/2/2026 12:28:51" or "02-06-2026"
+      function parseTs(ts){
+        if(!ts) return 0;
+        var d = new Date(ts);
+        if(!isNaN(d)) return d.getTime();
+        // Try DD/MM/YYYY format
+        var parts = ts.split(/[\/\-\s]/);
+        if(parts.length >= 3){
+          // Try M/D/YYYY
+          var d2 = new Date(parts[2]+'-'+parts[0]+'-'+parts[1]);
+          if(!isNaN(d2)) return d2.getTime();
+        }
+        return 0;
+      }
+      return parseTs(b.ts) - parseTs(a.ts);
+    });
+  } else {
+    filtered.sort(function(a,b){
+      var av=a[sortKey]||'', bv=b[sortKey]||'';
+      return sortDir*(av>bv?1:av<bv?-1:0);
     });
   }
   document.getElementById('leads-sub').textContent = filtered.length+' of '+LEADS.length+' leads';
@@ -1124,17 +1144,29 @@ function renderLeads(){
 }
 
 function getFilteredLeads(){
-  return LEADS.filter(l=>{
-    // Role-based: counsellor sees only own leads; admin sees all
+  var q = (document.getElementById('gsearch')||{value:''}).value.toLowerCase().trim();
+  return LEADS.filter(function(l){
+    // Role-based filter
     if(currentUser && currentUser.username!=='admin' && currentUser.username!=='meraj'){
       if(l.counsellor !== currentUser.counsellor) return false;
     }
-    if(statusFilter==='ALL') return true;
-    if(statusFilter==='UNASSIGNED') return !l.counsellor||l.counsellor==='UNASSIGNED';
-    return l.status===statusFilter;
-  }).filter(l=>!counsellorFilter||l.counsellor===counsellorFilter)
-    .filter(l=>!sourceFilter||l.source===sourceFilter)
-    .filter(l=>!qualFilter||l.qual===qualFilter);
+    // Status filter
+    var statusOk = false;
+    if(statusFilter==='ALL') statusOk = true;
+    else if(statusFilter==='UNASSIGNED') statusOk = !l.counsellor||l.counsellor==='UNASSIGNED';
+    else statusOk = (l.status||'').toUpperCase() === statusFilter.toUpperCase();
+    if(!statusOk) return false;
+    // Dropdown filters
+    if(counsellorFilter && l.counsellor !== counsellorFilter) return false;
+    if(sourceFilter && l.source !== sourceFilter) return false;
+    if(qualFilter && l.qual !== qualFilter) return false;
+    // Search
+    if(q){
+      var searchable = [l.id,l.name,l.smob,l.email,l.city,l.qual,l.status,l.counsellor].join(' ').toLowerCase();
+      if(!searchable.includes(q)) return false;
+    }
+    return true;
+  });
 }
 
 function setStatusFilter(s,btn){
