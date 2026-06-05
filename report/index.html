@@ -563,7 +563,29 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;display:flex;ali
     <div class="rc" id="clusterCard">
       <div class="sl">Career Cluster Recommendation</div>
       <div class="clp"><div class="clpl" id="lPri">Primary Cluster</div><div class="clpn" id="clPri">—</div></div>
-      <div class="clr"><div class="cls"><div class="clsl" id="lSec">Secondary</div><div class="clsn" id="clSec">—</div></div><div class="cls"><div class="clsl" id="lEm">Emerging</div><div class="clsn" id="clEm">—</div></div></div>
+      <div class="clr">
+        <div class="cls" onclick="toggleClusterDetail('sec')" style="cursor:pointer">
+          <div class="clsl" id="lSec">Secondary ▾</div>
+          <div class="clsn" id="clSec">—</div>
+        </div>
+        <div class="cls" onclick="toggleClusterDetail('em')" style="cursor:pointer">
+          <div class="clsl" id="lEm">Emerging ▾</div>
+          <div class="clsn" id="clEm">—</div>
+        </div>
+      </div>
+      
+      <!-- Secondary cluster detail -->
+      <div id="secDetail" style="display:none;margin-top:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px">
+        <div style="font-size:10px;font-weight:700;color:#6b7a99;letter-spacing:1px;margin-bottom:8px">SECONDARY CLUSTER DETAIL</div>
+        <div id="secDetailContent"></div>
+      </div>
+      
+      <!-- Emerging cluster detail -->
+      <div id="emDetail" style="display:none;margin-top:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px">
+        <div style="font-size:10px;font-weight:700;color:#6b7a99;letter-spacing:1px;margin-bottom:8px">EMERGING CLUSTER DETAIL</div>
+        <div id="emDetailContent"></div>
+      </div>
+      
       <div class="air" style="margin-top:10px"><div class="air-lbl" id="lCR">🎯 Ye cluster kyun suggest hua</div><div class="air-txt" id="clRea">—</div></div>
     </div>
     <div class="rc"><div class="sl">Interest & Energy Profile</div><div id="intArea"></div></div>
@@ -1342,6 +1364,37 @@ function AL(){
   document.getElementById('lSec').textContent=hi?'Secondary':'Secondary';
   document.getElementById('lEm').textContent=hi?'Emerging':'Emerging';
   document.getElementById('lCR').textContent=hi?'🎯 Ye cluster kyun suggest hua':'🎯 Why this cluster was suggested';
+  // Show alignment message
+  var alignEl = document.getElementById('alignMsg');
+  if(!alignEl){
+    var clCard = document.getElementById('clusterCard');
+    if(clCard){
+      alignEl = document.createElement('div');
+      alignEl.id = 'alignMsg';
+      alignEl.style.cssText = 'margin:12px 0;padding:12px;border-radius:10px;font-size:12px;line-height:1.6;background:rgba(200,168,75,0.08);border:1px solid rgba(200,168,75,0.15)';
+      clCard.appendChild(alignEl);
+    }
+  }
+  if(alignEl && (hi ? alignMsg.hi : alignMsg.en)){
+    alignEl.textContent = hi ? alignMsg.hi : alignMsg.en;
+    alignEl.style.display = 'block';
+  }
+  
+  // Parent concern in report
+  var pcEl = document.getElementById('parentConcernText');
+  if(!pcEl){
+    var parCard = document.getElementById('parCard');
+    if(parCard){
+      pcEl = document.createElement('div');
+      pcEl.id = 'parentConcernText';
+      pcEl.style.cssText = 'margin-top:12px;padding:12px;background:rgba(200,168,75,0.06);border:1px solid rgba(200,168,75,0.15);border-radius:10px;font-size:12px;color:rgba(255,255,255,0.8);line-height:1.6';
+      parCard.appendChild(pcEl);
+    }
+  }
+  if(pcEl && d.pconcern){
+    pcEl.innerHTML = (hi ? '<strong style="color:#c8a84b">Parent Concern:</strong> "' : '<strong style="color:#c8a84b">Parent Concern:</strong> "') + d.pconcern + '"<br><span style="color:rgba(255,255,255,0.5);font-size:11px">' + (hi ? 'Ye concern valid hai — INWANG counselling mein address kiya jaayega.' : 'This concern is valid and will be addressed in INWANG counselling.') + '</span>';
+  }
+
   document.getElementById('clRea').textContent=hi?'Analytical '+vals[0].toFixed(1)+'/7 aur Learning '+vals[2].toFixed(1)+'/7 — '+d.pri+' field ke core skills hain. Assessment responses is direction ko indicate karte hain.':'Analytical '+vals[0].toFixed(1)+'/7 and Learning '+vals[2].toFixed(1)+'/7 — core skills for '+d.pri+'. Assessment responses indicate this direction.';
   // Interest
   var int=hi?d.interest.hi:d.interest.en;
@@ -1463,6 +1516,27 @@ function AL(){
     return !gapSkills.find(function(g){return g.n === k.n;});
   }));
   
+  // Goal-based override note
+  var goalNote = '';
+  if(d.goal && d.goal.trim()){
+    var g = d.goal.toLowerCase();
+    var goalCluster = '';
+    if(g.includes('ca') || g.includes('chartered') || g.includes('accountant')) goalCluster = 'Commerce / Finance';
+    else if(g.includes('doctor') || g.includes('mbbs') || g.includes('medical')) goalCluster = 'Medical / Healthcare';
+    else if(g.includes('ias') || g.includes('upsc') || g.includes('civil')) goalCluster = 'Civil Services / Govt Jobs';
+    else if(g.includes('engineer') || g.includes('jee')) goalCluster = 'Engineering / Technical';
+    else if(g.includes('army') || g.includes('nda') || g.includes('defence')) goalCluster = 'Defence / Uniform Services';
+    else if(g.includes('mba') || g.includes('business')) goalCluster = 'Management / Business';
+    else if(g.includes('software') || g.includes('coding') || g.includes('it')) goalCluster = 'IT / Computer Applications';
+    
+    if(goalCluster && goalCluster !== d.pri){
+      goalNote = hi ? 
+        '⚡ Note: Aapne "'+d.goal+'" ka goal bataya hai — ye '+goalCluster+' cluster se align hota hai. INWANG counselling mein is direction ko explore karo.' :
+        '⚡ Note: You mentioned "'+d.goal+'" as your goal — this aligns with '+goalCluster+' cluster. Explore this direction in INWANG counselling.';
+      var goalEl = document.getElementById('kitIntro');
+      if(goalEl) goalEl.style.background = 'rgba(200,168,75,0.08)';
+    }
+  }
   document.getElementById('kitIntro').textContent=hi?
     d.pri+' ke liye foundational skills + aapke personal skill gaps ke basis par — ye specifically aapke liye select ki gayi hain.':
     'Foundational skills for '+d.pri+' + based on your personal skill gaps — these are specifically selected for you.';
@@ -2154,6 +2228,104 @@ function mergeWithDefaults(d){
   var sec = d.c2 || demo.sec;
   var em  = d.c3 || demo.em;
   
+  // ══════════════════════════════════════
+  // INTELLIGENCE LAYER — Stream + Goal + Stage
+  // ══════════════════════════════════════
+  
+  var stream = (d.stream || '').toLowerCase();
+  var goal = (d.goal || '').toLowerCase();
+  var qual = (d.qual || '').toLowerCase();
+  var marks = parseFloat(d.marks) || 0;
+  
+  // ── STREAM → ALLOWED CLUSTERS ──
+  var streamClusters = [];
+  var streamLabel = '';
+  if(stream.includes('pcm') || stream.includes('maths') || (stream.includes('science') && !stream.includes('bio'))){
+    // PCM — Engineering/IT + shared with PCB (Pharma/Biotech/Forensic)
+    streamClusters = ['Engineering / Technical','IT / Computer Applications','Research / Science','Defence / Uniform Services','Civil Services / Govt Jobs','Medical / Healthcare'];
+    streamLabel = 'Science (PCM)';
+    // PCM overlap note
+  } else if(stream.includes('pcmb') || (stream.includes('pcm') && stream.includes('bio'))){
+    // PCMB — All science clusters
+    streamClusters = ['Engineering / Technical','IT / Computer Applications','Medical / Healthcare','Research / Science','Defence / Uniform Services'];
+    streamLabel = 'Science (PCMB)';
+  } else if(stream.includes('pcb') || stream.includes('bio')){
+    // PCB — Medical + shared (Pharma/Biotech/Forensic/Research)
+    streamClusters = ['Medical / Healthcare','Research / Science','Civil Services / Govt Jobs','Teaching / Education','Engineering / Technical'];
+    streamLabel = 'Science (PCB)';
+  } else if(stream.includes('commerce') || stream.includes('accounts') || stream.includes('economics')){
+    streamClusters = ['Commerce / Finance','Management / Business','Law / Legal Studies','Civil Services / Govt Jobs'];
+    streamLabel = 'Commerce';
+  } else if(stream.includes('arts') || stream.includes('humanities') || stream.includes('history') || stream.includes('political')){
+    streamClusters = ['Law / Legal Studies','Civil Services / Govt Jobs','Teaching / Education','Arts / Humanities / Creative','Management / Business'];
+    streamLabel = 'Arts / Humanities';
+  }
+  
+  // ── GOAL → TARGET CLUSTER ──
+  var goalCluster = '';
+  var goalMatch = false;
+  if(goal){
+    if(goal.includes('ca') || goal.includes('chartered') || goal.includes('accountant') || goal.includes('finance') || goal.includes('stock')) goalCluster = 'Commerce / Finance';
+    else if(goal.includes('doctor') || goal.includes('mbbs') || goal.includes('medical') || goal.includes('surgeon')) goalCluster = 'Medical / Healthcare';
+    else if(goal.includes('ias') || goal.includes('upsc') || goal.includes('civil service') || goal.includes('collector')) goalCluster = 'Civil Services / Govt Jobs';
+    else if(goal.includes('engineer') || goal.includes('iit') || goal.includes('jee') || goal.includes('mechanical') || goal.includes('electrical')) goalCluster = 'Engineering / Technical';
+    else if(goal.includes('army') || goal.includes('nda') || goal.includes('defence') || goal.includes('military') || goal.includes('airforce')) goalCluster = 'Defence / Uniform Services';
+    else if(goal.includes('mba') || goal.includes('business') || goal.includes('entrepreneur') || goal.includes('startup')) goalCluster = 'Management / Business';
+    else if(goal.includes('software') || goal.includes('coding') || goal.includes('programmer') || goal.includes('it ') || goal.includes('tech')) goalCluster = 'IT / Computer Applications';
+    else if(goal.includes('lawyer') || goal.includes('advocate') || goal.includes('law') || goal.includes('judge')) goalCluster = 'Law / Legal Studies';
+    else if(goal.includes('teacher') || goal.includes('professor') || goal.includes('education')) goalCluster = 'Teaching / Education';
+    else if(goal.includes('research') || goal.includes('scientist') || goal.includes('isro') || goal.includes('drdo')) goalCluster = 'Research / Science';
+    
+    goalMatch = goalCluster === pri;
+  }
+  
+  // ── CLUSTER VALIDATION ──
+  var clusterValid = streamClusters.length === 0 || streamClusters.indexOf(pri) >= 0;
+  var suggestedCluster = pri; // default keep assessment cluster
+  
+  // If stream says something different AND goal is clear → trust goal
+  if(!clusterValid && goalCluster){
+    suggestedCluster = goalCluster;
+    pri = goalCluster; // Override with goal-based cluster
+  } else if(!clusterValid && streamClusters.length > 0){
+    // Assessment cluster doesn't match stream → warn but keep
+    // Don't override - just flag it
+  }
+  
+  // ── ALIGNMENT STATUS ──
+  var alignmentStatus = 'aligned'; // aligned / goal_mismatch / stream_mismatch / both_mismatch
+  if(goalCluster && !goalMatch){
+    if(!clusterValid) alignmentStatus = 'both_mismatch';
+    else alignmentStatus = 'goal_mismatch';
+  } else if(!clusterValid){
+    alignmentStatus = 'stream_mismatch';
+  }
+  
+  // ── ALIGNMENT MESSAGE ──
+  var alignMsg = {hi:'', en:''};
+  if(alignmentStatus === 'goal_mismatch'){
+    alignMsg.hi = '⚡ Aapne "'+d.goal+'" ka goal bataya hai. Assessment '+pri+' cluster suggest kar raha hai. INWANG counselling session mein dono directions ko explore karo.';
+    alignMsg.en = '⚡ You mentioned "'+d.goal+'" as your goal. Assessment suggests '+pri+' cluster. Explore both directions in INWANG counselling session.';
+  } else if(alignmentStatus === 'stream_mismatch'){
+    // Special case - PCM/PCB overlap courses
+    var overlapNote = '';
+    if((streamLabel==='Science (PCM)' && pri==='Medical / Healthcare') || 
+       (streamLabel==='Science (PCB)' && pri==='Engineering / Technical')){
+      overlapNote = ' B.Pharma, Biotechnology, Forensic Science jaise courses dono ke liye eligible hain.';
+    }
+    alignMsg.hi = '⚠️ Aapka '+streamLabel+' stream aur assessment cluster ('+pri+') mein thoda gap hai.'+overlapNote+' INWANG counselling mein clarify karo.';
+    alignMsg.en = '⚠️ Your '+streamLabel+' stream and assessment cluster ('+pri+') have a slight gap.'+overlapNote+' Clarify in INWANG counselling.';
+  } else if(alignmentStatus === 'both_mismatch'){
+    alignMsg.hi = '🎯 Aapka goal "'+d.goal+'" — ye '+goalCluster+' cluster se align karta hai. INWANG counselling mein detailed guidance lo.';
+    alignMsg.en = '🎯 Your goal "'+d.goal+'" aligns with '+goalCluster+' cluster. Get detailed guidance in INWANG counselling.';
+  } else {
+    alignMsg.hi = goalCluster ? '✅ Aapka goal aur assessment cluster perfectly aligned hain!' : '';
+    alignMsg.en = goalCluster ? '✅ Your goal and assessment cluster are perfectly aligned!' : '';
+  }
+  
+  // ── STAGE from qual ──
+  var qualStatus = detectStageKey(d.qual || '');
+  
   // Stream alignment
   var streamAlign = d.align || 'Aligned';
   var streamPrimary = d.sp || 'Science / General';
@@ -2449,5 +2621,79 @@ function showError(e){
     '<strong>Error:</strong><br>' + (e.message||e) + '</div>';
 }
 
+
+function toggleClusterDetail(type){
+  var el = document.getElementById(type+'Detail');
+  if(!el) return;
+  var isHidden = el.style.display === 'none';
+  el.style.display = isHidden ? 'block' : 'none';
+  if(isHidden) renderClusterDetail(type);
+}
+
+function renderClusterDetail(type){
+  if(!D) return;
+  var hi = typeof L !== 'undefined' ? L === 'hi' : true;
+  var clusterName = type === 'sec' ? D.sec : D.em;
+  var cl = CLDATA[clusterName];
+  var contentEl = document.getElementById(type+'DetailContent');
+  if(!cl || !contentEl){ 
+    if(contentEl) contentEl.innerHTML = '<div style="font-size:12px;color:#6b7a99">'+clusterName+' — detailed data loading soon.</div>';
+    return;
+  }
+  
+  var html = '';
+  
+  // Salary
+  if(cl.sal){
+    html += '<div style="margin-bottom:12px">'
+      +'<div style="font-size:10px;font-weight:700;color:#c8a84b;letter-spacing:1px;margin-bottom:6px">💰 SALARY RANGE</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +'<div style="background:rgba(200,168,75,0.08);border:1px solid rgba(200,168,75,0.15);border-radius:8px;padding:6px 10px;font-size:11px"><span style="color:#6b7a99">Entry</span> <strong style="color:#c8a84b">'+cl.sal.e+'</strong></div>'
+      +'<div style="background:rgba(200,168,75,0.08);border:1px solid rgba(200,168,75,0.15);border-radius:8px;padding:6px 10px;font-size:11px"><span style="color:#6b7a99">Mid</span> <strong style="color:#c8a84b">'+cl.sal.m+'</strong></div>'
+      +'<div style="background:rgba(200,168,75,0.08);border:1px solid rgba(200,168,75,0.15);border-radius:8px;padding:6px 10px;font-size:11px"><span style="color:#6b7a99">Senior</span> <strong style="color:#c8a84b">'+cl.sal.s+'</strong></div>'
+      +'</div></div>';
+  }
+  
+  // Top govt opportunities
+  var govData = cl.gov ? (hi ? cl.gov.hi : cl.gov.en) : null;
+  if(govData && govData.length){
+    html += '<div style="margin-bottom:12px">'
+      +'<div style="font-size:10px;font-weight:700;color:#10b981;letter-spacing:1px;margin-bottom:6px">🏛️ TOP GOVT OPPORTUNITIES</div>';
+    govData.slice(0,3).forEach(function(g){
+      html += '<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04)">'
+        +'<div style="font-size:12px;font-weight:600;color:#fff">'+g.n+'</div>'
+        +'<div style="font-size:11px;color:#6b7a99">'+g.d+'</div>'
+        +'</div>';
+    });
+    html += '</div>';
+  }
+  
+  // Top private opportunities
+  var pvtData = cl.pvt ? (hi ? cl.pvt.hi : cl.pvt.en) : null;
+  if(pvtData && pvtData.length){
+    html += '<div style="margin-bottom:12px">'
+      +'<div style="font-size:10px;font-weight:700;color:#00d4ff;letter-spacing:1px;margin-bottom:6px">🏢 TOP PRIVATE OPPORTUNITIES</div>';
+    pvtData.slice(0,2).forEach(function(g){
+      html += '<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04)">'
+        +'<div style="font-size:12px;font-weight:600;color:#fff">'+g.n+'</div>'
+        +'<div style="font-size:11px;color:#6b7a99">'+g.d+'</div>'
+        +'</div>';
+    });
+    html += '</div>';
+  }
+  
+  // Key skills
+  if(cl.kit && cl.kit.length){
+    html += '<div>'
+      +'<div style="font-size:10px;font-weight:700;color:#9c5fff;letter-spacing:1px;margin-bottom:6px">⚡ KEY SKILLS</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    cl.kit.slice(0,4).forEach(function(k){
+      html += '<span style="background:rgba(156,95,255,0.1);border:1px solid rgba(156,95,255,0.2);color:#c4a0ff;padding:3px 8px;border-radius:100px;font-size:11px">'+k.i+' '+k.n+'</span>';
+    });
+    html += '</div></div>';
+  }
+  
+  contentEl.innerHTML = html || '<div style="font-size:12px;color:#6b7a99">Loading...</div>';
+}
 </script>
 </body></html>
