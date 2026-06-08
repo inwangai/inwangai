@@ -1690,21 +1690,9 @@ function generateAndSendCoupon(id){
   if(!l){notif('Lead not found');return;}
   notif('Generating coupon for '+l.name+'...');
   
-  // Use GET with callback - reliable!
-  var cbName = 'cpCb_' + Date.now();
-  var script = document.createElement('script');
-  
-  var timer = setTimeout(function(){
-    delete window[cbName];
-    try{document.head.removeChild(script);}catch(e){}
-    notif('Error: Timeout. Check AppScript!');
-  }, 10000);
-  
-  window[cbName] = function(d){
-    clearTimeout(timer);
-    delete window[cbName];
-    try{document.head.removeChild(script);}catch(e){}
-    
+  fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?action=generate_coupon&id='+encodeURIComponent(id))
+  .then(function(r){return r.json();})
+  .then(function(d){
     if(d && d.success && d.coupon){
       notif('Coupon: '+d.coupon+' — Email sent!');
       navigator.clipboard.writeText(d.coupon).catch(function(){});
@@ -1719,10 +1707,10 @@ function generateAndSendCoupon(id){
     } else {
       notif('Error: '+(d&&d.error ? d.error : 'Failed'));
     }
-  };
-  
-  script.src = 'https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?action=generate_coupon&id='+encodeURIComponent(id)+'&callback='+cbName;
-  document.head.appendChild(script);
+  })
+  .catch(function(e){
+    notif('Network error — check AppScript!');
+  });
 }
 
 function generateRpt(id){
