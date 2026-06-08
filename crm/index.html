@@ -2156,7 +2156,7 @@ function saveEditLead(id){
   });
   var m=document.getElementById('modal-edit-lead');
   if(m)m.remove();
-  render();stats();
+  renderLeads();renderKanban();renderDashboard();
   notif('Lead updated: '+id);
   pushToSheet('update_lead',{id:id,name:l.name,father:l.father,mobile:l.smob,pmobile:l.pmob,email:l.email,city:l.city,state:l.state,qual:l.qual,stream:l.stream,marks:l.marks,goal:l.goal,confusion:l.confusion,concern:l.concern,priority:l.priority,source:l.source});
 }
@@ -2166,7 +2166,7 @@ function deleteLead(id){
   LEADS=LEADS.filter(function(l){return l.id!==id;});
   var m1=document.getElementById('modal-edit-lead');if(m1)m1.remove();
   var m2=document.getElementById('lead-modal');if(m2)m2.style.display='none';
-  render();stats();
+  renderLeads();renderKanban();renderDashboard();
   notif('Deleted: '+id);
   pushToSheet('delete_lead',{id:id});
 }
