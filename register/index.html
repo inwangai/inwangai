@@ -956,17 +956,17 @@ a{color:inherit!important;text-decoration:none!important}
     </div>
 
     <div class="field-group">
-      <label class="field-label"><span>*</span> <span id="lbl-email">Email ID</span></label>
+      <label class="field-label"><span>*</span> <span id="lbl-email">* Email ID</span></label>
       <input class="field-input" type="email" id="f1-email" autocomplete="email" placeholder="Report is email pe aayegi">
     </div>
 
     <div class="field-row">
       <div class="field-group">
-        <label class="field-label"><span>*</span> <span id="lbl-city">City / District</span></label>
+        <label class="field-label"><span>*</span> <span id="lbl-city">* City / District</span></label>
         <input class="field-input" type="text" id="f1-city" autocomplete="address-level2" placeholder="Muzaffarpur">
       </div>
       <div class="field-group">
-        <label class="field-label"><span>*</span> <span id="lbl-state">State</span></label>
+        <label class="field-label"><span>*</span> <span id="lbl-state">* State</span></label>
         <input class="field-input" type="text" id="f1-state" placeholder="Bihar">
       </div>
     </div>
@@ -979,7 +979,7 @@ a{color:inherit!important;text-decoration:none!important}
 
     <div class="field-row">
       <div class="field-group">
-        <label class="field-label"><span>*</span> <span id="lbl-qual">Qualification</span></label>
+        <label class="field-label"><span>*</span> <span id="lbl-qual">* Qualification</span></label>
         <select class="field-input" id="f1-qual" onchange="onQualChange()">
           <option value="">Select karo</option>
           <option value="Class 9">Class 9 (Studying)</option>
@@ -1044,13 +1044,14 @@ a{color:inherit!important;text-decoration:none!important}
     <div class="field-group">
       <label class="field-label">Target Course (agar pata ho)</label>
       <input class="field-input" type="text" id="f1-target" 
-        placeholder="e.g. MBBS, B.Tech CSE, BBA, CA, Not sure">
+        placeholder="e.g. MBBS, B.Tech CSE, BBA, CA, Not sure"
+        oninput="checkMedicalGoal()">
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="field-group">
         <label class="field-label">Competitive Exam</label>
-        <select class="field-input" id="f1-exam" onchange="onExamChange()">
+        <select class="field-input" id="f1-exam" onchange="onExamChange();checkMedicalGoal();">
           <option value="">Select karo</option>
           <option value="JEE">JEE (Engineering)</option>
           <option value="NEET">NEET (Medical)</option>
@@ -1170,6 +1171,16 @@ a{color:inherit!important;text-decoration:none!important}
       <label class="field-label" id="lbl-confusion">* Main Confusion / Doubt</label>
       <input class="field-input" type="text" id="f1-confusion" 
         placeholder="e.g. Kaun sa stream loon, Medical ya Engineering...">
+    </div>
+
+    <div class="field-group">
+      <label class="field-label"><span>*</span> <span>Father / Guardian Ka Naam</span></label>
+      <input class="field-input" type="text" id="f1-father" placeholder="e.g. Ramesh Kumar" autocomplete="off">
+    </div>
+
+    <div class="field-group">
+      <label class="field-label"><span>*</span> <span>Parent / Guardian Mobile</span></label>
+      <input class="field-input" type="tel" id="f1-pmobile" placeholder="10 digit mobile number" maxlength="10" autocomplete="off">
     </div>
 
     <div class="field-group">
@@ -1419,8 +1430,23 @@ function setLang(l) {
 function renderQuestions() {
   const c = document.getElementById('questionsContainer');
   c.innerHTML = '';
-  questions.forEach((q, i) => {
-    const txt = lang === 'hi' ? q.hi : q.en;
+
+  // Detect medical track from goal OR target course (double safety)
+  var goalVal   = (document.getElementById('f1-goal')||{value:''}).value||'';
+  var targetVal = (document.getElementById('f1-target')||{value:''}).value||'';
+  var examVal   = (document.getElementById('f1-exam')||{value:''}).value||'';
+  var combined  = (goalVal + ' ' + targetVal + ' ' + examVal).toLowerCase();
+  isMedicalTrack = _MEDICAL_KEYWORDS.some(function(k){ return combined.includes(k); });
+
+  // Build question list: medical first (if medical), then general
+  var allQ = isMedicalTrack ? medicalQuestions.concat(questions) : questions;
+
+  // Show MEDVERSE badge if medical track
+  var badge = document.getElementById('medverse-track-badge');
+  if(badge) badge.style.display = isMedicalTrack ? 'flex' : 'none';
+
+  allQ.forEach((q, i) => {
+    const txt = lang === 'hi' ? (q.hi||q.en) : (q.en||q.hi);
     const selected = assessmentAnswers[q.id] || 0;
     const div = document.createElement('div');
     div.className = 'scale-q' + (selected ? ' answered' : '');
@@ -2518,9 +2544,11 @@ var _MEDICAL_KEYWORDS = [
 ];
 
 function checkMedicalGoal(){
-  var goal = (document.getElementById('f1-goal')||{}).value || '';
-  var gl = goal.toLowerCase();
-  var isMedical = _MEDICAL_KEYWORDS.some(function(k){ return gl.includes(k); });
+  var goal   = (document.getElementById('f1-goal')||{value:''}).value||'';
+  var target = (document.getElementById('f1-target')||{value:''}).value||'';
+  var exam   = (document.getElementById('f1-exam')||{value:''}).value||'';
+  var combined = (goal+' '+target+' '+exam).toLowerCase();
+  var isMedical = _MEDICAL_KEYWORDS.some(function(k){ return combined.includes(k); });
   
   var mf = document.getElementById('medical-fields');
   if(mf) mf.style.display = isMedical ? 'block' : 'none';
