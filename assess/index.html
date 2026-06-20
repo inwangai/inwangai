@@ -1853,6 +1853,14 @@ function saveAssessmentToSheet(scores, results){
     readinessLevel: results ? (results.readinessLevel||'') : '',
     skillGaps: results ? (results.skillGaps||'') : '',
     strengths: results ? (results.strengths||'') : '',
+    behaviour: results ? (results.behaviour||'') : '',
+    streamPrimary: results ? (results.streamPrimary||'') : '',
+    streamAlternative: results ? (results.streamAlternative||'') : '',
+    streamConfidence: results ? (results.streamConfidence||'') : '',
+    streamAlignment: results ? (results.streamAlignment||'') : '',
+    recommendedCourses: results ? (results.recommendedCourses||'') : '',
+    careerRoles: results ? (results.careerRoles||'') : '',
+    recommendedPathway: results ? (results.recommendedPathway||'') : '',
     stage: results ? (results.stage||'') : '',
     q40: assessmentAnswers['q40'] || '',
     q41: assessmentAnswers['q41'] || '',
@@ -2038,25 +2046,136 @@ function showReport() {
     qual = params.get('qual') || localStorage.getItem('inwang_qual') || '';
   }
   var ql = qual.toLowerCase();
-  if(ql.includes('class 9')||ql.includes('class 10')) detectedStage = 'class_9_10';
-  else if((ql.includes('class 11')||ql.includes('11th'))&&(ql.includes('pass')||ql.includes('complete'))) detectedStage = '12_appearing';
-  else if(ql.includes('class 11')||ql.includes('11th')) detectedStage = 'class_11';
-  else if(ql.includes('class 12')||ql.includes('12th')) detectedStage = '12_appearing';
-  else if(ql.includes('iti')||ql.includes('diploma')) detectedStage = 'diploma';
-  else if(ql.includes('ug')||ql.includes('graduate')||ql.includes('b.tech')||ql.includes('bca')) detectedStage = 'graduation';
-  else if(ql.includes('pg')||ql.includes('working')) detectedStage = 'graduation';
-  else detectedStage = '12_appearing'; // default
+  // Class 9-10
+  if(ql.includes('class 9')||ql.includes('9th')||ql.includes('class 10')||ql.includes('10th')) detectedStage='class_9_10';
+  // Class 10 Pass
+  else if(ql.includes('class 10 pass')||ql.includes('10th pass')||ql.includes('10 pass')) detectedStage='class_11';
+  // Class 11 Pass = 12 Appearing
+  else if((ql.includes('class 11')||ql.includes('11th'))&&(ql.includes('pass')||ql.includes('passed')||ql.includes('complete'))) detectedStage='12_appearing';
+  // Class 11 Studying
+  else if(ql.includes('class 11')||ql.includes('11th')) detectedStage='class_11';
+  // Class 12 Pass
+  else if(ql.includes('12 pass')||ql.includes('12th pass')||ql.includes('12 result')||ql.includes('result awaited')||ql.includes('12 complete')) detectedStage='12_pass';
+  // Class 12 Appearing
+  else if(ql.includes('12 appear')||ql.includes('12th appear')||ql.includes('board exam')||ql.includes('class 12 appear')) detectedStage='12_appearing';
+  // Class 12 general
+  else if(ql.includes('class 12')||ql.includes('12th')) detectedStage='12_appearing';
+  // ITI / Diploma
+  else if(ql.includes('iti pursuing')||ql.includes('diploma pursuing')) detectedStage='diploma';
+  else if(ql.includes('iti completed')||ql.includes('iti pass')) detectedStage='diploma';
+  else if(ql.includes('iti')||ql.includes('diploma')||ql.includes('polytechnic')) detectedStage='diploma';
+  // UG
+  else if(ql.includes('ug pursuing')||ql.includes('1st year')||ql.includes('2nd year')||ql.includes('3rd year')) detectedStage='ug_pursuing';
+  else if(ql.includes('ug completed')||ql.includes('graduation completed')||ql.includes('graduate')) detectedStage='ug_completed';
+  else if(ql.includes('b.tech')||ql.includes('bca')||ql.includes('bsc')||ql.includes('b.com')||ql.includes('ba ')||ql.includes('bba')) detectedStage='ug_pursuing';
+  // PG
+  else if(ql.includes('pg pursuing')||ql.includes('mba pursuing')||ql.includes('m.tech')) detectedStage='pg_pursuing';
+  else if(ql.includes('pg completed')||ql.includes('mba completed')||ql.includes('post graduate')) detectedStage='pg_completed';
+  // Working
+  else if(ql.includes('pg pursuing')||ql.includes('mba pursuing')||ql.includes('m.tech pursuing')||ql.includes('msc pursuing')||ql.includes('mca pursuing')) detectedStage='pg_pursuing';
+  else if(ql.includes('pg completed')||ql.includes('pg pass')||ql.includes('mba completed')||ql.includes('mba pass')||ql.includes('post graduate completed')||ql.includes('pg complete')) detectedStage='pg_completed';
+  else if(ql.includes('pg')||ql.includes('post graduate')||ql.includes('mba')||ql.includes('m.tech')||ql.includes('msc')||ql.includes('mca')||ql.includes('llm')) detectedStage='pg_pursuing';
+  else if(ql.includes('working')||ql.includes('professional')||ql.includes('employed')||ql.includes('job')) detectedStage='working';
+  else detectedStage='12_appearing'; // safe default
 
+  // ── Dimension scores (English only) ──
+  var dimScoresEn = [
+    {k:'analytical',    n:'Analytical Thinking',  v:s.analytical},
+    {k:'communication', n:'Communication Skills',  v:s.communication},
+    {k:'learning',      n:'Learning Agility',      v:s.learning},
+    {k:'decision',      n:'Decision Making',       v:s.decision},
+    {k:'motivation',    n:'Motivation & Drive',    v:s.motivation},
+    {k:'clarity',       n:'Career Clarity',        v:s.clarity},
+  ];
+  dimScoresEn.sort(function(a,b){return b.v-a.v;});
+  var top3En = dimScoresEn.slice(0,3);
+  var bot3En = dimScoresEn.slice(-3).reverse(); // LOWEST = gaps
+  
+  // ── Stream from qual ──
+  var streamPri = '';
+  var qlForStream = qual.toLowerCase();
+  if(qlForStream.includes('pcm')||qlForStream.includes('maths')) streamPri='Science (PCM)';
+  else if(qlForStream.includes('pcb')||qlForStream.includes('bio')) streamPri='Science (PCB)';
+  else if(qlForStream.includes('commerce')) streamPri='Commerce';
+  else if(qlForStream.includes('arts')||qlForStream.includes('humanities')) streamPri='Arts / Humanities';
+  
+  // ── Behaviour profile ──
+  var behaviourStr = '';
+  if(s.analytical>=5 && s.learning>=5) behaviourStr = 'Analytical & Strategic Thinker';
+  else if(s.communication>=5 && s.motivation>=5) behaviourStr = 'People-Oriented Leader';
+  else if(s.clarity>=5 && s.decision>=5) behaviourStr = 'Focused & Goal-Driven';
+  else if(s.motivation>=5) behaviourStr = 'High-Energy Achiever';
+  else if(s.learning>=5) behaviourStr = 'Curious & Adaptive Learner';
+  else behaviourStr = 'Balanced & Versatile';
+  
+  // ── Recommended courses from cluster ──
+  var topCluster = clusterScores.length > 0 ? clusterScores[0].name : '';
+  var courseMap = {
+    'Engineering / Technical':['B.Tech CSE','B.Tech Mechanical','B.Tech Civil','Diploma Engineering'],
+    'IT / Computer Applications':['BCA','B.Tech CSE','B.Sc CS','MCA'],
+    'Medical / Healthcare':['MBBS','BDS','BPT','BSc Nursing','B.Pharm'],
+    'Management / Business':['BBA','MBA','PGDM'],
+    'Commerce / Finance':['BCom','CA Foundation','BBA Finance'],
+    'Law / Legal Studies':['BA LLB','BBA LLB','LLB'],
+    'Civil Services / Govt Jobs':['BA Political Science','BA History','UPSC Preparation'],
+    'Research / Science':['BSc PCM','BSc PCB','Integrated MSc'],
+    'Arts / Humanities / Creative':['BA English','BA Psychology','BJMC','BFA'],
+    'Teaching / Education':['BA + B.Ed','BSc + B.Ed','B.El.Ed'],
+    'Defence / Uniform Services':['NDA','CDS','B.Tech + SSB'],
+    'Paramedical / Allied Health':['BSc Nursing','GNM','BPT','BSc MLT'],
+    'Media / Journalism / Communication':['BJMC','BA Mass Communication','BSc Animation'],
+    'Design / Architecture / Fine Arts':['B.Arch','B.Des','NIFT','BFA'],
+    'Skill / Vocational':['ITI Electrician','ITI Fitter','Polytechnic'],
+    'Agriculture / Environmental Sciences':['BSc Agriculture','BTech Agri Engineering'],
+    'Hotel Management / Hospitality':['BHM','BA Tourism','Diploma Hotel Mgmt'],
+    'Sports / Physical Education':['BSc Physical Education','BPEd','NIS Diploma'],
+    'Social Work / NGO':['BSW','BA Sociology','MSW'],
+    'Fashion / Retail / Lifestyle':['NIFT Fashion Design','BSc Fashion','BBA Retail'],
+  };
+  var roleMap = {
+    'Engineering / Technical':['Software Engineer','Mechanical Engineer','Civil Engineer'],
+    'IT / Computer Applications':['Software Developer','Data Analyst','Web Developer'],
+    'Medical / Healthcare':['Doctor','Dentist','Physiotherapist','Pharmacist'],
+    'Management / Business':['Business Analyst','Marketing Manager','HR Manager'],
+    'Commerce / Finance':['Chartered Accountant','Financial Analyst','Banker'],
+    'Law / Legal Studies':['Advocate','Legal Advisor','Corporate Lawyer'],
+    'Civil Services / Govt Jobs':['IAS Officer','IPS Officer','Bank PO'],
+    'Research / Science':['Research Scientist','Data Scientist','Professor'],
+    'Arts / Humanities / Creative':['Content Creator','Journalist','Graphic Designer'],
+    'Teaching / Education':['School Teacher','Lecturer','Education Counsellor'],
+    'Defence / Uniform Services':['Army Officer','Air Force Officer','Police Officer'],
+    'Paramedical / Allied Health':['Staff Nurse','Lab Technician','Physiotherapist'],
+    'Media / Journalism / Communication':['Journalist','Content Creator','PR Manager'],
+    'Design / Architecture / Fine Arts':['Architect','Fashion Designer','UX Designer'],
+    'Skill / Vocational':['Electrician','Fitter','Technician'],
+    'Agriculture / Environmental Sciences':['Agriculture Officer','Food Scientist'],
+    'Hotel Management / Hospitality':['Hotel Manager','Chef','Travel Consultant'],
+    'Sports / Physical Education':['PE Teacher','Sports Coach','Fitness Trainer'],
+    'Social Work / NGO':['Social Worker','Programme Manager','NGO Officer'],
+    'Fashion / Retail / Lifestyle':['Fashion Designer','Retail Manager','Stylist'],
+  };
+  
   var saveResults = {
     cluster1: clusterScores.length > 0 ? clusterScores[0].name : '',
     cluster2: clusterScores.length > 1 ? clusterScores[1].name : '',
     cluster3: clusterScores.length > 2 ? clusterScores[2].name : '',
     readinessLevel: readinessLevel || '',
     stage: detectedStage,
-    skillGaps: top3 ? top3.map(function(d){return d.name + ' → ' + (d.val<4?'Needs work':'Good');}).join('\n') : '',
-    strengths: top3 ? top3.map(function(d){return d.name;}).join(', ') : '',
-    behaviour: '',
-    streamPrimary: '',
+    // STRENGTHS = top 3 highest scores
+    strengths: top3En.map(function(d){return d.n;}).join(', '),
+    // SKILL GAPS = bottom 3 lowest scores
+    skillGaps: bot3En.map(function(d){
+      var level = d.v >= 5.5 ? 'Good' : d.v >= 4 ? 'Developing' : 'Needs Focus';
+      return d.n + ' → ' + level;
+    }).join('\n'),
+    behaviour: behaviourStr,
+    streamPrimary: streamPri,
+    streamAlternative: '',
+    streamConfidence: topCluster ? Math.round((clusterScores[0].score/7)*100)+'%' : '',
+    streamAlignment: topCluster ? 'Aligned' : '',
+    recommendedCourses: topCluster ? (courseMap[topCluster]||[]).join(', ') : '',
+    careerRoles: topCluster ? (roleMap[topCluster]||[]).join(', ') : '',
+    recommendedPathway: topCluster ? topCluster + ' → ' + (courseMap[topCluster]||[''])[0] : '',
   };
   saveAssessmentToSheet(scores, saveResults);
   
@@ -2562,5 +2681,15 @@ function runProcessingAnimation(type, onComplete) {
 console.log('INWANG Processing Animation loaded!');
 
 </script>
+
+  <!-- MEDVERSE Link -->
+  <div style="text-align:center;padding:16px;background:rgba(0,212,100,0.04);border-top:1px solid rgba(0,212,100,0.08)">
+    <a href="https://inwangai.com/medverse" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#00d464;text-decoration:none;font-weight:600">
+      <svg width="14" height="12" viewBox="0 0 16 14" fill="none"><polyline points="0,7 3,7 4.5,1 6,13 7.5,7 9,7 10,4.5 11.5,9.5 13,7 16,7" stroke="#00d464" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      MEDVERSE — Medical Career Intelligence
+    </a>
+    <span style="margin:0 10px;color:rgba(255,255,255,0.15)">|</span>
+    <a href="https://inwangai.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none">← INWANG Home</a>
+  </div>
 </body>
 </html>
