@@ -1822,11 +1822,11 @@ function doRedirect(id, name){
   localStorage.removeItem('inwang_reg_draft');
   if(typeof runProcessingAnimation !== 'undefined'){
     runProcessingAnimation('registration', function(){
-      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name)+'&qual='+encodeURIComponent(qual||'');
+      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name)+'&qual='+encodeURIComponent(qual||'')+'&goal='+encodeURIComponent((document.getElementById('f1-goal')||{value:''}).value||'')+'&target='+encodeURIComponent((document.getElementById('f1-target')||{value:''}).value||'')+'&goal='+encodeURIComponent((document.getElementById('f1-goal')||{value:''}).value||'')+'&target='+encodeURIComponent((document.getElementById('f1-target')||{value:''}).value||'');
     });
   } else {
     setTimeout(function(){
-      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name)+'&qual='+encodeURIComponent(qual||'');
+      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name)+'&qual='+encodeURIComponent(qual||'')+'&goal='+encodeURIComponent((document.getElementById('f1-goal')||{value:''}).value||'')+'&target='+encodeURIComponent((document.getElementById('f1-target')||{value:''}).value||'')+'&goal='+encodeURIComponent((document.getElementById('f1-goal')||{value:''}).value||'')+'&target='+encodeURIComponent((document.getElementById('f1-target')||{value:''}).value||'');
     }, 1000);
   }
 }
@@ -1849,11 +1849,11 @@ function doRedirect(id, name){
   localStorage.removeItem('inwang_reg_draft');
   if(typeof runProcessingAnimation !== 'undefined'){
     runProcessingAnimation('registration', function(){
-      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name)+'&qual='+encodeURIComponent(qual||'');
+      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name)+'&qual='+encodeURIComponent(qual||'')+'&goal='+encodeURIComponent((document.getElementById('f1-goal')||{value:''}).value||'')+'&target='+encodeURIComponent((document.getElementById('f1-target')||{value:''}).value||'')+'&goal='+encodeURIComponent((document.getElementById('f1-goal')||{value:''}).value||'')+'&target='+encodeURIComponent((document.getElementById('f1-target')||{value:''}).value||'');
     });
   } else {
     setTimeout(function(){
-      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name)+'&qual='+encodeURIComponent(qual||'');
+      window.location.href='https://inwangai.com/thankyou?id='+encodeURIComponent(id)+'&name='+encodeURIComponent(name)+'&qual='+encodeURIComponent(qual||'')+'&goal='+encodeURIComponent((document.getElementById('f1-goal')||{value:''}).value||'')+'&target='+encodeURIComponent((document.getElementById('f1-target')||{value:''}).value||'')+'&goal='+encodeURIComponent((document.getElementById('f1-goal')||{value:''}).value||'')+'&target='+encodeURIComponent((document.getElementById('f1-target')||{value:''}).value||'');
     }, 1000);
   }
 }
@@ -1862,7 +1862,7 @@ function doRedirect(id, name){
   localStorage.removeItem('inwang_reg_draft');
   showToast('Registration ho gaya! ✅');
   setTimeout(function(){
-    window.location.href = 'https://inwangai.com/thankyou?id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(name);
+    window.location.href = 'https://inwangai.com/thankyou?id=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(name) + '&goal=' + encodeURIComponent((document.getElementById('f1-goal')||{value:''}).value||'') + '&target=' + encodeURIComponent((document.getElementById('f1-target')||{value:''}).value||'');
   }, 1500);
 }
 
@@ -1916,6 +1916,23 @@ function runScoringEngine() {
   scores.clarity       = avg('q37','q38','q39');
   scores.readiness     = scores.learning*0.30 + scores.motivation*0.30 + scores.decision*0.20 + scores.clarity*0.20;
   scores.foundation    = scores.learning*0.25 + scores.motivation*0.20 + scores.decision*0.20 + scores.clarity*0.20 + scores.analytical*0.15;
+
+  // MEDVERSE scoring (only if medical track)
+  if(isMedicalTrack){
+    scores.investigative  = avg('m1','m2','m3');
+    scores.empathy        = avg('m4','m5','m6');
+    scores.resilience_med = avg('m7','m8','m9');
+    scores.med_motivation = avg('m10','m11','m12');
+    scores.medverse = Math.round((
+      scores.investigative  * 0.25 +
+      scores.empathy        * 0.30 +
+      scores.resilience_med * 0.25 +
+      scores.med_motivation * 0.20
+    ) * 100) / 100;
+    scores.medverseLevel = scores.medverse >= 5.5 ? 'High Suitability'
+                         : scores.medverse >= 4.0 ? 'Moderate Suitability'
+                         : 'Needs Counselling';
+  }
 
   // Animate loading steps
   const steps = [2,3,4,5];
