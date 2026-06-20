@@ -516,6 +516,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;display:flex;ali
     <button class="btn-p" onclick="window.print()" title="Print / Save white PDF">🖨 Print</button>
     <button class="btn-p" id="btnDigitalPDF" onclick="saveDigitalPDF()" title="Save dark digital PDF" style="background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.3);color:var(--cyan)">💾 Digital PDF</button>
   </div>
+
+  <a href="https://inwangai.com/medverse" style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#00d464;text-decoration:none;margin-left:auto;margin-right:12px">
+    <svg width="14" height="12" viewBox="0 0 16 14" fill="none"><polyline points="0,7 3,7 4.5,1 6,13 7.5,7 9,7 10,4.5 11.5,9.5 13,7 16,7" stroke="#00d464" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    MEDVERSE
+  </a>
 </nav>
 <div class="wrap">
   <!-- Print only header -->
@@ -2453,216 +2458,161 @@ function mergeWithDefaults(d){
   var em  = d.c3 || demo.em;
   var _derivedCluster = false;
   
-  // ══════════════════════════════════════
-  // INTELLIGENCE LAYER — Stream + Goal + Stage
-  // ══════════════════════════════════════
+  // ── ELIGIBILITY MATRIX 2026 + GOAL LOGIC ──
+  var _stream = (d.stream||'').toLowerCase();
+  var _goal   = (d.goal||'').toLowerCase();
+  var _isGrad = ['ug','graduate','pg','mba','b.tech','bca','bsc','working','diploma completed','iti completed']
+    .some(function(k){ return (d.qual||'').toLowerCase().includes(k); });
+
+  // Goal → Cluster map
+  var _GOAL_MAP = [
+    {kw:['doctor','mbbs','neet','surgeon','bds','dentist','bams','bhms'], cl:'Medical / Healthcare'},
+    {kw:['nursing','nurse','gnm','anm','bpt','physiotherapy','pharmacy','bpharm','mlt','lab tech','paramedical'], cl:'Paramedical / Allied Health'},
+    {kw:['ca','chartered','accountant','cma','bcom','b.com','banking','bank po','finance','ca foundation'], cl:'Commerce / Finance'},
+    {kw:['ias','upsc','civil service','collector','sdm','bdo','irs','bpsc','ssc','ibps'], cl:'Civil Services / Govt Jobs'},
+    {kw:['engineer','iit','jee','btech','b.tech','mechanical','electrical','civil engineer','chemical','aerospace'], cl:'Engineering / Technical'},
+    {kw:['software','coding','programmer','developer','bca','mca','data scientist','machine learning','cyber'], cl:'IT / Computer Applications'},
+    {kw:['army','nda','defence','military','airforce','navy','crpf','bsf','capf','agniveer','soldier'], cl:'Defence / Uniform Services'},
+    {kw:['mba','business','entrepreneur','startup','management'], cl:'Management / Business'},
+    {kw:['lawyer','advocate','law','clat','llb','judge'], cl:'Law / Legal Studies'},
+    {kw:['teacher','professor','b.ed','bed','ctet','tet','lecturer'], cl:'Teaching / Education'},
+    {kw:['scientist','research','isro','drdo','phd','csir','iiser'], cl:'Research / Science'},
+    {kw:['journalist','media','bjmc','content creator','youtuber'], cl:'Media / Journalism / Communication'},
+    {kw:['architect','nata','b.arch','designer','nid','nift','ux'], cl:'Design / Architecture / Fine Arts'},
+    {kw:['hotel','chef','hospitality','cabin crew','tourism'], cl:'Hotel Management / Hospitality'},
+    {kw:['sports','cricket','football','fitness trainer','coach','athlete'], cl:'Sports / Physical Education'},
+    {kw:['fashion','styling','nift','retail','boutique','makeup'], cl:'Fashion / Retail / Lifestyle'},
+    {kw:['agriculture','farming','icar','horticulture','agri'], cl:'Agriculture / Environmental Sciences'},
+    {kw:['social work','ngo','welfare','community'], cl:'Social Work / NGO'},
+  ];
   
-  var stream = (d.stream || '').toLowerCase();
-  var goal = (d.goal || '').toLowerCase();
-  var qual = (d.qual || '').toLowerCase();
-  var marks = parseFloat(d.marks) || 0;
+  var _goalCluster = '';
+  for(var _gi=0; _gi<_GOAL_MAP.length; _gi++){
+    for(var _gj=0; _gj<_GOAL_MAP[_gi].kw.length; _gj++){
+      if(_goal.includes(_GOAL_MAP[_gi].kw[_gj])){ _goalCluster=_GOAL_MAP[_gi].cl; break; }
+    }
+    if(_goalCluster) break;
+  }
+
+  // Stream type
+  var _sType='other';
+  if(_stream.includes('pcmb')||(_stream.includes('pcm')&&_stream.includes('bio'))) _sType='pcmb';
+  else if(_stream.includes('pcm')||(_stream.includes('maths')&&!_stream.includes('bio'))) _sType='pcm';
+  else if(_stream.includes('pcb')||_stream.includes('bio')||_stream.includes('biology')) _sType='pcb';
+  else if(_stream.includes('commerce')||_stream.includes('accounts')) _sType='commerce';
+  else if(_stream.includes('arts')||_stream.includes('humanities')) _sType='arts';
+  else if(_stream.includes('iti')||_stream.includes('vocational')) _sType='iti';
+  else if(_stream.includes('diploma')||_stream.includes('polytechnic')) _sType='diploma';
+
+  // Eligibility matrix [pcm,pcb,pcmb,commerce,arts,iti,diploma,other]
+  var _E = {
+    'Engineering / Technical':            [1.0,0.4,0.9,0.0,0.0,0.9,1.0,0.5],
+    'IT / Computer Applications':         [1.0,0.6,1.0,0.5,0.4,0.8,0.8,0.5],
+    'Medical / Healthcare':               [0.0,1.0,1.0,0.0,0.0,0.0,0.2,0.3],
+    'Paramedical / Allied Health':        [0.7,1.0,1.0,0.6,0.6,0.3,0.5,0.5],  // GNM/ANM open to all streams
+    'Research / Science':                 [1.0,1.0,1.0,0.2,0.3,0.3,0.4,0.4],
+    'Management / Business':              [0.8,0.7,0.8,1.0,0.8,0.5,0.6,0.7],
+    'Commerce / Finance':                 [0.6,0.4,0.6,1.0,0.5,0.2,0.3,0.4],
+    'Civil Services / Govt Jobs':         [1.0,1.0,1.0,1.0,1.0,0.5,0.6,0.7],
+    'Defence / Uniform Services':         [1.0,0.8,1.0,0.7,0.7,0.6,0.7,0.7],
+    'Law / Legal Studies':                [0.8,0.8,0.8,1.0,1.0,0.3,0.4,0.6],
+    'Teaching / Education':               [0.8,0.8,0.8,0.8,1.0,0.4,0.5,0.6],
+    'Arts / Humanities / Creative':       [0.4,0.4,0.4,0.6,1.0,0.4,0.5,0.5],
+    'Agriculture / Environmental Sciences':[0.8,0.9,1.0,0.3,0.3,0.4,0.5,0.5],
+    'Media / Journalism / Communication': [0.6,0.6,0.6,0.8,1.0,0.4,0.5,0.5],
+    'Design / Architecture / Fine Arts':  [0.9,0.5,0.8,0.6,1.0,0.5,0.6,0.6],
+    'Hotel Management / Hospitality':     [0.7,0.7,0.7,0.9,0.9,0.7,0.7,0.7],
+    'Sports / Physical Education':        [0.8,0.8,0.8,0.7,0.8,0.6,0.6,0.7],
+    'Social Work / NGO':                  [0.6,0.7,0.7,0.7,1.0,0.4,0.5,0.5],
+    'Fashion / Retail / Lifestyle':       [0.4,0.4,0.4,0.8,1.0,0.5,0.6,0.5],
+    'Skill / Vocational':                 [0.7,0.6,0.7,0.6,0.6,1.0,1.0,0.7],
+  };
+  var _SI = {pcm:0,pcb:1,pcmb:2,commerce:3,arts:4,iti:5,diploma:6,other:7};
   
-  // ── STREAM → ALLOWED CLUSTERS ──
-  var streamClusters = [];
-  var streamLabel = '';
-  if(stream.includes('pcmb') || (stream.includes('pcm') && stream.includes('bio'))){
-    streamClusters = ['Engineering / Technical','IT / Computer Applications','Medical / Healthcare','Research / Science','Defence / Uniform Services'];
-    streamLabel = 'Science (PCMB)';
-  } else if(stream.includes('pcm') || stream.includes('maths') || stream.includes('math') || 
-            (stream.includes('science') && !stream.includes('bio')) ||
-            stream.includes('physics') || stream.includes('chemistry') && stream.includes('maths')){
-    streamClusters = ['Engineering / Technical','IT / Computer Applications','Research / Science','Defence / Uniform Services','Civil Services / Govt Jobs','Medical / Healthcare'];
-    streamLabel = 'Science (PCM)';
-  } else if(stream.includes('pcb') || stream.includes('biology') || stream.includes('bio') ||
-            stream.includes('zoology') || stream.includes('botany')){
-    streamClusters = ['Medical / Healthcare','Research / Science','Civil Services / Govt Jobs','Teaching / Education','Engineering / Technical'];
-    streamLabel = 'Science (PCB)';
-  } else if(stream.includes('commerce') || stream.includes('accounts') || stream.includes('accountancy') ||
-            stream.includes('economics') || stream.includes('business studies')){
-    streamClusters = ['Commerce / Finance','Management / Business','Law / Legal Studies','Civil Services / Govt Jobs'];
-    streamLabel = 'Commerce';
-  } else if(stream.includes('arts') || stream.includes('humanities') || stream.includes('history') || 
-            stream.includes('political') || stream.includes('geography') || stream.includes('sociology') ||
-            stream.includes('psychology') || stream.includes('hindi') || stream.includes('english lit')){
-    streamClusters = ['Law / Legal Studies','Civil Services / Govt Jobs','Teaching / Education','Arts / Humanities / Creative','Management / Business'];
-    streamLabel = 'Arts / Humanities';
-  } else if(stream.includes('iti') || stream.includes('diploma') || stream.includes('vocational') ||
-            stream.includes('polytechnic')){
-    streamClusters = ['Engineering / Technical','Skill / Vocational','Defence / Uniform Services'];
-    streamLabel = 'ITI / Diploma';
+  function _getMult(cluster){
+    var eRow = _E[cluster];
+    var si = _SI[_sType] !== undefined ? _SI[_sType] : 7;
+    return eRow ? eRow[si] : 0.5;
   }
   
-  // ── GOAL → TARGET CLUSTER ──
-  var goalCluster = '';
-  var goalMatch = false;
-  if(goal){
-    // ── COMMERCE / FINANCE ──
-    if(goal.includes('ca') || goal.includes('chartered') || goal.includes('accountant') || 
-       goal.includes('finance') || goal.includes('stock') || goal.includes('trading') ||
-       goal.includes('banking') || goal.includes('bank') || goal.includes('cma') || 
-       goal.includes('cfa') || goal.includes('tax') || goal.includes('audit') ||
-       goal.includes('b.com') || goal.includes('bcom') || goal.includes('mcom') ||
-       goal.includes('commerce') || goal.includes('economist') || goal.includes('economics'))
-      goalCluster = 'Commerce / Finance';
-    
-    // ── MEDICAL / HEALTHCARE ──
-    else if(goal.includes('doctor') || goal.includes('mbbs') || goal.includes('medical') || 
-            goal.includes('surgeon') || goal.includes('bpt') || goal.includes('physiotherapy') || 
-            goal.includes('physio') || goal.includes('nursing') || goal.includes('nurse') ||
-            goal.includes('pharmacy') || goal.includes('pharma') || goal.includes('bpharm') || 
-            goal.includes('b.pharm') || goal.includes('paramedical') || goal.includes('healthcare') ||
-            goal.includes('neet') || goal.includes('dentist') || goal.includes('bds') || 
-            goal.includes('ayurveda') || goal.includes('bams') || goal.includes('bhms') ||
-            goal.includes('homeopathy') || goal.includes('unani') || goal.includes('radiology') ||
-            goal.includes('lab technician') || goal.includes('optometry') || goal.includes('speech') ||
-            goal.includes('occupational therapy') || goal.includes('dialysis') || goal.includes('ot tech'))
-      goalCluster = 'Medical / Healthcare';
-    
-    // ── CIVIL SERVICES / GOVT ──
-    else if(goal.includes('ias') || goal.includes('ips') || goal.includes('ifs') || 
-            goal.includes('upsc') || goal.includes('civil service') || goal.includes('collector') ||
-            goal.includes('sdo') || goal.includes('sdm') || goal.includes('bdo') ||
-            goal.includes('government job') || goal.includes('govt job') || goal.includes('ssc') ||
-            goal.includes('ibps') || goal.includes('sbi po') || goal.includes('bank po') ||
-            goal.includes('railway') || goal.includes('rrb') || goal.includes('psc') ||
-            goal.includes('state service') || goal.includes('pcs') || goal.includes('bpsc') ||
-            goal.includes('uppsc') || goal.includes('mpsc'))
-      goalCluster = 'Civil Services / Govt Jobs';
-    
-    // ── ENGINEERING / TECHNICAL ──
-    else if(goal.includes('engineer') || goal.includes('iit') || goal.includes('jee') || 
-            goal.includes('mechanical') || goal.includes('electrical') || goal.includes('civil engg') ||
-            goal.includes('chemical') || goal.includes('b.tech') || goal.includes('btech') ||
-            goal.includes('automobile') || goal.includes('aerospace') || goal.includes('robotics') ||
-            goal.includes('electronics') || goal.includes('instrumentation') || goal.includes('production') ||
-            goal.includes('gate') || goal.includes('diploma engineer') || goal.includes('polytechnic'))
-      goalCluster = 'Engineering / Technical';
-    
-    // ── DEFENCE ──
-    else if(goal.includes('army') || goal.includes('nda') || goal.includes('defence') || 
-            goal.includes('military') || goal.includes('airforce') || goal.includes('air force') ||
-            goal.includes('navy') || goal.includes('navy') || goal.includes('cds') ||
-            goal.includes('capf') || goal.includes('crpf') || goal.includes('bsf') ||
-            goal.includes('cisf') || goal.includes('itbp') || goal.includes('ssb') ||
-            goal.includes('agniveer') || goal.includes('soldier') || goal.includes('officer') ||
-            goal.includes('police') || goal.includes('ips') || goal.includes('paramilitary'))
-      goalCluster = 'Defence / Uniform Services';
-    
-    // ── MANAGEMENT / BUSINESS ──
-    else if(goal.includes('mba') || goal.includes('business') || goal.includes('entrepreneur') || 
-            goal.includes('startup') || goal.includes('management') || goal.includes('bba') ||
-            goal.includes('marketing') || goal.includes('hr') || goal.includes('human resource') ||
-            goal.includes('operations') || goal.includes('supply chain') || goal.includes('logistics') ||
-            goal.includes('businessmaan') || goal.includes('businessman') || goal.includes('ceo') ||
-            goal.includes('manager') || goal.includes('hotel management') || goal.includes('hospitality'))
-      goalCluster = 'Management / Business';
-    
-    // ── IT / COMPUTER ──
-    else if(goal.includes('software') || goal.includes('coding') || goal.includes('programmer') || 
-            goal.includes('developer') || goal.includes('web developer') || goal.includes('app developer') ||
-            goal.includes('it ') || goal.includes('tech') || goal.includes('computer') ||
-            goal.includes('bca') || goal.includes('mca') || goal.includes('data science') ||
-            goal.includes('ai') || goal.includes('machine learning') || goal.includes('cyber') ||
-            goal.includes('networking') || goal.includes('cloud') || goal.includes('database') ||
-            goal.includes('game developer') || goal.includes('animation'))
-      goalCluster = 'IT / Computer Applications';
-    
-    // ── LAW ──
-    else if(goal.includes('lawyer') || goal.includes('advocate') || goal.includes('law') || 
-            goal.includes('judge') || goal.includes('llb') || goal.includes('llm') ||
-            goal.includes('legal') || goal.includes('court') || goal.includes('barrister') ||
-            goal.includes('solicitor') || goal.includes('clat') || goal.includes('judiciary'))
-      goalCluster = 'Law / Legal Studies';
-    
-    // ── TEACHING / EDUCATION ──
-    else if(goal.includes('teacher') || goal.includes('professor') || goal.includes('education') || 
-            goal.includes('b.ed') || goal.includes('bed') || goal.includes('tet') ||
-            goal.includes('ctet') || goal.includes('lecturer') || goal.includes('principal') ||
-            goal.includes('tutor') || goal.includes('coaching') || goal.includes('academic'))
-      goalCluster = 'Teaching / Education';
-    
-    // ── RESEARCH / SCIENCE ──
-    else if(goal.includes('research') || goal.includes('scientist') || goal.includes('isro') || 
-            goal.includes('drdo') || goal.includes('csir') || goal.includes('iiser') ||
-            goal.includes('phd') || goal.includes('ph.d') || goal.includes('biotech') ||
-            goal.includes('biotechnology') || goal.includes('microbiology') || goal.includes('genetics') ||
-            goal.includes('forensic') || goal.includes('environmental') || goal.includes('agriculture'))
-      goalCluster = 'Research / Science';
-    
-    // ── ARTS / CREATIVE ──
-    else if(goal.includes('artist') || goal.includes('design') || goal.includes('fashion') || 
-            goal.includes('graphic') || goal.includes('photography') || goal.includes('film') ||
-            goal.includes('acting') || goal.includes('music') || goal.includes('dance') ||
-            goal.includes('writer') || goal.includes('journalism') || goal.includes('media') ||
-            goal.includes('nid') || goal.includes('nift') || goal.includes('mass comm') ||
-            goal.includes('architecture') || goal.includes('interior design') || goal.includes('fine arts'))
-      goalCluster = 'Arts / Humanities / Creative';
-    
-    // ── AGRICULTURE ──
-    else if(goal.includes('agriculture') || goal.includes('farming') || goal.includes('agri') || 
-            goal.includes('horticulture') || goal.includes('forestry') || goal.includes('soil') ||
-            goal.includes('icar') || goal.includes('food technology') || goal.includes('fisheries'))
-      goalCluster = 'Agriculture / Environmental Sciences';
-    
-    // ── PARAMEDICAL ──
-    else if(goal.includes('nursing') || goal.includes('nurse') || goal.includes('bpt') || 
-            goal.includes('physiotherapy') || goal.includes('lab tech') || goal.includes('mlt') ||
-            goal.includes('radiology') || goal.includes('gnm') || goal.includes('anm') ||
-            goal.includes('ot tech') || goal.includes('dialysis') || goal.includes('paramedical'))
-      goalCluster = 'Paramedical / Allied Health';
-    
-    // ── MEDIA / JOURNALISM ──
-    else if(goal.includes('journalist') || goal.includes('journalism') || goal.includes('media') || 
-            goal.includes('content creator') || goal.includes('youtuber') || goal.includes('anchor') ||
-            goal.includes('bjmc') || goal.includes('mass comm') || goal.includes('pr ') ||
-            goal.includes('animation') || goal.includes('vfx') || goal.includes('film maker'))
-      goalCluster = 'Media / Journalism / Communication';
-    
-    // ── DESIGN / ARCHITECTURE ──
-    else if(goal.includes('architect') || goal.includes('architecture') || goal.includes('interior') || 
-            goal.includes('product design') || goal.includes('ux') || goal.includes('ui ') ||
-            goal.includes('nata') || goal.includes('b.arch') || goal.includes('fine arts') ||
-            goal.includes('bfa') || goal.includes('graphic design') || goal.includes('animation'))
-      goalCluster = 'Design / Architecture / Fine Arts';
-    
-    // ── HOTEL / HOSPITALITY ──
-    else if(goal.includes('hotel') || goal.includes('hospitality') || goal.includes('chef') || 
-            goal.includes('cabin crew') || goal.includes('tourism') || goal.includes('travel') ||
-            goal.includes('nchmct') || goal.includes('culinary') || goal.includes('bhm'))
-      goalCluster = 'Hotel Management / Hospitality';
-    
-    // ── SPORTS ──
-    else if(goal.includes('sports') || goal.includes('athlete') || goal.includes('cricket') || 
-            goal.includes('football') || goal.includes('fitness trainer') || goal.includes('coach') ||
-            goal.includes('nis ') || goal.includes('physical education') || goal.includes('yoga'))
-      goalCluster = 'Sports / Physical Education';
-    
-    // ── SOCIAL WORK ──
-    else if(goal.includes('social work') || goal.includes('ngo') || goal.includes('welfare') || 
-            goal.includes('community') || goal.includes('development sector') || goal.includes('msw') ||
-            goal.includes('unicef') || goal.includes('ias social') || goal.includes('bsw'))
-      goalCluster = 'Social Work / NGO';
-    
-    // ── FASHION / RETAIL ──
-    else if(goal.includes('fashion') || goal.includes('nift') || goal.includes('styling') || 
-            goal.includes('retail') || goal.includes('makeup') || goal.includes('beauty') ||
-            goal.includes('merchandis') || goal.includes('boutique') || goal.includes('lifestyle'))
-      goalCluster = 'Fashion / Retail / Lifestyle';
-    
-    goalMatch = goalCluster === pri;
+  function _getGoalMult(){
+    if(!_goalCluster || _isGrad) return {mult:1.0, status:'ok'};
+    var m = _getMult(_goalCluster);
+    if(m >= 0.5) return {mult:1.5, status:'boosted'};   // Fully eligible
+    if(m > 0.0)  return {mult:0.0, status:'partial'};   // Partially eligible — warn
+    return {mult:0.0, status:'conflict'};                // Not eligible — conflict
   }
   
-  // ── CLUSTER VALIDATION ──
-  var clusterValid = streamClusters.length === 0 || streamClusters.indexOf(pri) >= 0;
-  var suggestedCluster = pri; // default keep assessment cluster
+  var _goalResult = _getGoalMult();
   
-  // If stream says something different AND goal is clear → trust goal
-  if(!clusterValid && goalCluster){
-    suggestedCluster = goalCluster;
-    pri = goalCluster; // Override with goal-based cluster
-  } else if(!clusterValid && streamClusters.length > 0){
-    // Assessment cluster doesn't match stream → warn but keep
-    // Don't override - just flag it
+  // Apply to sec and em clusters
+  if(!_isGrad && _sType !== 'other'){
+    // Filter sec
+    if(_getMult(sec) === 0.0){
+      var _secCandidates = ['Civil Services / Govt Jobs','Research / Science','Management / Business',
+        'Defence / Uniform Services','Law / Legal Studies','Teaching / Education',
+        'Agriculture / Environmental Sciences','Commerce / Finance'];
+      for(var _ci=0; _ci<_secCandidates.length; _ci++){
+        if(_secCandidates[_ci] !== pri && _getMult(_secCandidates[_ci]) >= 0.5){
+          sec = _secCandidates[_ci]; break;
+        }
+      }
+    }
+    // Filter em
+    if(_getMult(em) === 0.0){
+      var _emC = ['Research / Science','Civil Services / Govt Jobs','Management / Business',
+        'Teaching / Education','Defence / Uniform Services','Law / Legal Studies'];
+      for(var _ei=0; _ei<_emC.length; _ei++){
+        if(_emC[_ei] !== pri && _emC[_ei] !== sec && _getMult(_emC[_ei]) >= 0.5){
+          em = _emC[_ei]; break;
+        }
+      }
+    }
+  }
+  
+  // Goal alignment note for report
+  var _goalNote = '';
+  // Course-level specific notes
+  var _g_lower = _goal.toLowerCase();
+  
+  // BSc Nursing/BPT/MLT strictly PCB
+  var _needsPCBstrict = ['bsc nursing','bpt','physiotherapy','mlt','lab tech','radiology','ot tech','bmlt'];
+  var _wantsBSCNursing = _needsPCBstrict.some(function(k){ return _g_lower.includes(k); });
+  
+  // GNM/ANM open to all streams!
+  var _wantsGNM = _g_lower.includes('gnm') || _g_lower.includes('anm') || 
+                  (_g_lower.includes('nursing') && !_g_lower.includes('bsc'));
+  
+  if(_wantsBSCNursing && (_sType==='pcm' || _sType==='commerce' || _sType==='arts')){
+    _goalNote = '⚠️ BSc Nursing/BPT/MLT ke liye PCB stream compulsory hai. Lekin GNM/ANM aapke current stream se bhi possible hai — explore karo!';
+  } else if(_wantsGNM && (_sType==='commerce' || _sType==='arts' || _sType==='pcm')){
+    _goalNote = '✅ GNM/ANM aapke current stream se possible hai! Arts/Commerce/PCM sab eligible hain. Counselling mein explore karo.';
+  } else if(_goalCluster && _goalResult.status === 'conflict'){
+    _goalNote = '⚠️ Aapka goal "'+d.goal+'" aapke current stream se possible nahi hai. INWANG counselling session mein is par discuss karo.';
+  } else if(_goalCluster && _goalResult.status === 'partial'){
+    _goalNote = '⚠️ "'+d.goal+'" partially possible hai current stream se — limited seats/courses. Alternatives explore karo.';
+  } else if(_goalCluster && _goalResult.status === 'boosted' && _goalCluster !== pri){
+    _goalNote = '💡 Assessment aur goal dono explore karo — dono valid paths hain.';
+  }
+  
+
+  // ── GOAL NOTE — show in report ──
+  if(_goalNote){
+    // Add goal note to counsellor advisory
+    var _cnNote = document.getElementById('cnNote');
+    if(_cnNote && _cnNote.textContent.includes('[Counsellor note')){
+      _cnNote.textContent = _goalNote;
+      _cnNote.style.color = '#c8a84b';
+      _cnNote.style.fontStyle = 'normal';
+    }
+    // Also show banner at top
+    var _banner = document.createElement('div');
+    _banner.style.cssText = 'background:rgba(200,168,75,0.1);border:1px solid rgba(200,168,75,0.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#c8a84b;line-height:1.7';
+    _banner.textContent = _goalNote;
+    var _firstCard = document.querySelector('.card');
+    if(_firstCard && _firstCard.parentNode){
+      _firstCard.parentNode.insertBefore(_banner, _firstCard);
+    }
   }
   
   // ── ALIGNMENT STATUS ──
@@ -3037,6 +2987,15 @@ window.onload = function(){
         return;
       }
       RND(mergeWithDefaults(d));
+      
+      // ── LAYER 1: Report View Tracker ──
+      // Ping AppScript when report is opened
+      try{
+        fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?action=track_report_view&id='+encodeURIComponent(leadId)+'&paid='+encodeURIComponent(paid||''), {
+          method:'GET', mode:'no-cors'
+        });
+      } catch(e3){ /* silent */ }
+      
     } catch(e2){ showError(e2); }
   })
   .catch(function(){
@@ -3124,5 +3083,323 @@ function renderClusterDetail(type){
   
   contentEl.innerHTML = html || '<div style="font-size:12px;color:#6b7a99">Loading...</div>';
 }
+
+function predictNEET(){
+  var score = parseInt(document.getElementById('mv-score-input').value) || 0;
+  var cat   = document.getElementById('mv-category').value;
+  var pref  = document.getElementById('mv-preference').value;
+  var res   = document.getElementById('mv-predictor-result');
+  
+  if(score < 1 || score > 720){
+    res.style.display = 'block';
+    res.innerHTML = '<span style="color:#ff6b6b">Please enter valid NEET score (1-720)</span>';
+    return;
+  }
+  
+  // Category adjustment
+  var catBonus = {general:0, obc:20, sc:35, ews:20};
+  var adj = score + (catBonus[cat]||0);
+  
+  // Rank prediction (approx based on 2025 data)
+  var rank = 0;
+  if(adj >= 715) rank = 1;
+  else if(adj >= 700) rank = 50;
+  else if(adj >= 680) rank = 200;
+  else if(adj >= 660) rank = 800;
+  else if(adj >= 650) rank = 1500;
+  else if(adj >= 630) rank = 5000;
+  else if(adj >= 610) rank = 12000;
+  else if(adj >= 590) rank = 22000;
+  else if(adj >= 570) rank = 35000;
+  else if(adj >= 550) rank = 55000;
+  else if(adj >= 530) rank = 80000;
+  else if(adj >= 500) rank = 120000;
+  else if(adj >= 480) rank = 180000;
+  else if(adj >= 450) rank = 250000;
+  else if(adj >= 400) rank = 350000;
+  else if(adj >= 360) rank = 500000;
+  else rank = 700000;
+  
+  // College suggestions
+  var suggestions = [];
+  var abroad = [];
+  var backup = [];
+  
+  if(adj >= 650){
+    suggestions.push('✅ AIIMS / JIPMER / Top Govt MBBS (All India Quota)');
+    suggestions.push('✅ State Govt MBBS — Best colleges available');
+    if(pref !== 'abroad') suggestions.push('✅ BDS — Top Govt Dental Colleges');
+  } else if(adj >= 610){
+    suggestions.push('✅ Govt MBBS — State Quota (good options)');
+    suggestions.push('✅ VMMC, Maulana Azad, PGI Chandigarh zone');
+    suggestions.push('⚠️ AIQ seats limited — focus on state quota');
+  } else if(adj >= 570){
+    suggestions.push('⚠️ Govt MBBS — State quota possible, competitive');
+    suggestions.push('✅ Private MBBS — Mid-tier colleges (₹50-80L)');
+    suggestions.push('✅ BDS — Good govt dental colleges');
+  } else if(adj >= 530){
+    suggestions.push('⚠️ Govt MBBS — Difficult, try state quota');
+    suggestions.push('✅ Private MBBS — Many options (₹70L-1Cr)');
+    suggestions.push('✅ BDS — Private dental colleges');
+    suggestions.push('✅ BAMS/BHMS — Good govt options');
+  } else if(adj >= 480){
+    suggestions.push('✅ Private MBBS — Available (high fees)');
+    suggestions.push('✅ BAMS — Govt options available');
+    suggestions.push('✅ BDS — Private colleges');
+    suggestions.push('✅ Allied Health — BPT, BSc Nursing, MLT');
+  } else if(adj >= 400){
+    suggestions.push('✅ BAMS/BHMS/BUMS — Govt options');
+    suggestions.push('✅ Allied Health — BPT, BSc Nursing, MLT');
+    suggestions.push('✅ B.Pharm — Good scope');
+  } else if(adj >= 360){
+    suggestions.push('⚠️ MBBS India — Very difficult');
+    suggestions.push('✅ BAMS/BHMS — Best option India');
+    suggestions.push('✅ Allied Health — BPT/Nursing/Pharmacy');
+    abroad.push('✅ Abroad MBBS eligible (NEET qualify karo (General: 144+, OBC/SC/ST: 113+))');
+  } else {
+    suggestions.push('❌ Not eligible for Abroad MBBS (NMC min = 360)');
+    suggestions.push('✅ BAMS/BHMS/Allied Health — India options');
+    suggestions.push('⚠️ Consider re-NEET for better options');
+  }
+  
+  // Abroad options
+  if(pref !== 'india' && score >= 360){
+    if(score < 480){
+      abroad.push('🇷🇺 Russia — ₹22-45L (Recommended for your score)');
+      abroad.push('🇰🇿 Kazakhstan — ₹17-28L (Budget option)');
+      abroad.push('🇰🇬 Kyrgyzstan — ₹11-19L (Lowest cost)');
+      abroad.push('🇺🇿 Uzbekistan — ₹13-24L (Budget option)');
+    } else {
+      abroad.push('🇵🇭 Philippines — ₹20-34L (USMLE pathway)');
+      abroad.push('🇬🇪 Georgia — ₹32-51L (Europe standard)');
+      abroad.push('🇧🇩 Bangladesh — ₹28-45L (High FMGE rate)');
+      abroad.push('🇳🇵 Nepal — ₹25-40L (Nearest option)');
+    }
+  }
+  
+  // Build HTML
+  var catName = {general:'General',obc:'OBC',sc:'SC/ST',ews:'EWS'}[cat];
+  var html = '<div style="margin-bottom:10px">';
+  html += '<span style="color:#00d464;font-weight:700;font-size:13px">Score: '+score+' | Category: '+catName+' | Est. Rank: ~'+rank.toLocaleString('en-IN')+'</span>';
+  html += '</div>';
+  
+  if(suggestions.length > 0){
+    html += '<div style="color:#fff;font-weight:700;margin-bottom:5px;font-size:11px">🇮🇳 INDIA OPTIONS:</div>';
+    html += suggestions.map(function(s){return '<div style="padding:2px 0;color:var(--muted)">'+s+'</div>';}).join('');
+  }
+  
+  if(abroad.length > 0){
+    html += '<div style="color:#fff;font-weight:700;margin:8px 0 5px;font-size:11px">✈️ ABROAD OPTIONS:</div>';
+    html += abroad.map(function(s){return '<div style="padding:2px 0;color:var(--muted)">'+s+'</div>';}).join('');
+  }
+  
+  html += '<div style="margin-top:10px;padding:8px;background:rgba(200,168,75,0.1);border-radius:6px;font-size:10.5px;color:#c8a84b">';
+  html += '💡 Counselling Tip: INWANG ACURATE mein expert se detailed college list lo with actual cutoff data';
+  html += '</div>';
+  
+  res.innerHTML = html;
+  res.style.display = 'block';
+}
 </script>
-</body></html>
+</body></html<!-- MEDVERSE MEDICAL INTELLIGENCE CARD -->
+<div class="card" id="medverseCard" style="display:none;border:1px solid rgba(0,212,100,0.3);background:linear-gradient(135deg,rgba(0,212,100,0.05),rgba(0,0,0,0))">
+  
+  <!-- MEDVERSE Header -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(0,212,100,0.2)">
+    <div style="background:linear-gradient(135deg,#00d464,#00a050);width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🏥</div>
+    <div>
+      <div style="font-size:15px;font-weight:800;color:#00d464;letter-spacing:1px">MEDVERSE</div>
+      <div style="font-size:11px;color:var(--muted)">Medical Intelligence Report — Powered by INWANG AI</div>
+    </div>
+  </div>
+
+  <!-- 1. NEET PATHWAY ANALYSIS -->
+  <div style="background:rgba(0,212,100,0.06);border:1px solid rgba(0,212,100,0.15);border-radius:10px;padding:14px;margin-bottom:12px">
+    <div style="font-size:12px;font-weight:700;color:#00d464;margin-bottom:10px;display:flex;align-items:center;gap:6px">🎯 NEET PATHWAY ANALYSIS</div>
+    <div id="mv-pathway-content" style="font-size:12px;color:var(--fg);line-height:1.9;white-space:pre-line"></div>
+  </div>
+
+  <!-- 2. NEET SCORE / RANK PREDICTOR -->
+  <div style="background:rgba(0,212,100,0.06);border:1px solid rgba(0,212,100,0.15);border-radius:10px;padding:14px;margin-bottom:12px">
+    <div style="font-size:12px;font-weight:700;color:#00d464;margin-bottom:10px">📊 NEET SCORE → RANK → COLLEGE PREDICTOR</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:120px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">NEET Score (0-720)</div>
+        <input id="mv-score-input" type="number" min="0" max="720" placeholder="e.g. 580"
+          style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(0,212,100,0.3);border-radius:6px;padding:8px;color:var(--fg);font-size:13px;outline:none">
+      </div>
+      <div style="flex:1;min-width:120px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Category</div>
+        <select id="mv-category" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(0,212,100,0.3);border-radius:6px;padding:8px;color:var(--fg);font-size:12px;outline:none">
+          <option value="general">General</option>
+          <option value="obc">OBC</option>
+          <option value="sc">SC/ST</option>
+          <option value="ews">EWS</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:120px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Preference</div>
+        <select id="mv-preference" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(0,212,100,0.3);border-radius:6px;padding:8px;color:var(--fg);font-size:12px;outline:none">
+          <option value="india">India Only</option>
+          <option value="abroad">Abroad Only</option>
+          <option value="both">Both Options</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <button onclick="predictNEET()" style="background:linear-gradient(135deg,#00d464,#00a050);color:#000;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer">PREDICT</button>
+      </div>
+    </div>
+    <div id="mv-predictor-result" style="display:none;background:rgba(0,0,0,0.3);border-radius:8px;padding:12px;font-size:12px;line-height:1.9"></div>
+  </div>
+
+  <!-- 3. COMPLETE MEDICAL COURSES TABLE -->
+  <div style="background:rgba(0,212,100,0.06);border:1px solid rgba(0,212,100,0.15);border-radius:10px;padding:14px;margin-bottom:12px">
+    <div style="font-size:12px;font-weight:700;color:#00d464;margin-bottom:10px">📚 COMPLETE MEDICAL COURSES — 2026</div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:10.5px">
+        <tr style="background:rgba(0,212,100,0.12)">
+          <th style="padding:6px 8px;text-align:left;color:#00d464;white-space:nowrap">Course</th>
+          <th style="padding:6px 8px;text-align:center;color:#00d464">Duration</th>
+          <th style="padding:6px 8px;text-align:center;color:#00d464">NEET?</th>
+          <th style="padding:6px 8px;text-align:center;color:#00d464">Min Score</th>
+          <th style="padding:6px 8px;text-align:center;color:#00d464">Fees (Govt)</th>
+          <th style="padding:6px 8px;text-align:center;color:#00d464">Scope</th>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">MBBS</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">5.5 yrs</td><td style="padding:6px 8px;text-align:center">✅</td><td style="padding:6px 8px;text-align:center;color:#00d464">540+</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹25K–1.5L/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">BDS</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">5 yrs</td><td style="padding:6px 8px;text-align:center">✅</td><td style="padding:6px 8px;text-align:center;color:#00d464">480+</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹30K–2L/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">BAMS (Ayurveda)</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">5.5 yrs</td><td style="padding:6px 8px;text-align:center">✅</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">400+</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹15K–80K/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">BHMS (Homeopathy)</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">5.5 yrs</td><td style="padding:6px 8px;text-align:center">✅</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">380+</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹10K–60K/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">BUMS (Unani)</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">5.5 yrs</td><td style="padding:6px 8px;text-align:center">✅</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">360+</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹10K–50K/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">BNYS (Naturopathy)</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">5.5 yrs</td><td style="padding:6px 8px;text-align:center">✅</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">360+</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹20K–1L/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">BVSc & AH</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">5.5 yrs</td><td style="padding:6px 8px;text-align:center">✅</td><td style="padding:6px 8px;text-align:center;color:#00d464">580+</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹20K–1L/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">BSc Nursing</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">4 yrs</td><td style="padding:6px 8px;text-align:center">⚠️</td><td style="padding:6px 8px;text-align:center;color:#00d464">PCB</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹20K–2L/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">GNM (Nursing)</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">3.5 yrs</td><td style="padding:6px 8px;text-align:center">❌</td><td style="padding:6px 8px;text-align:center;color:#00d464">Any</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹10K–1L/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">BPT (Physiotherapy)</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">4.5 yrs</td><td style="padding:6px 8px;text-align:center">❌</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">PCB</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹20K–2L/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">B.Pharm</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">4 yrs</td><td style="padding:6px 8px;text-align:center">❌</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">PCM/B</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹20K–1L/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">BSc MLT</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">3 yrs</td><td style="padding:6px 8px;text-align:center">❌</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">PCB</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹15K–80K/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">BSc Radiology</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">3 yrs</td><td style="padding:6px 8px;text-align:center">❌</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">PCB</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹15K–80K/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">BOT (Occupational)</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">4 yrs</td><td style="padding:6px 8px;text-align:center">❌</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">PCB</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹20K–1.5L/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">BSc Optometry</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">4 yrs</td><td style="padding:6px 8px;text-align:center">❌</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">PCB</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹15K–1L/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐</td></tr>
+        <tr><td style="padding:6px 8px;font-weight:700;color:#fff;white-space:nowrap">Pharm.D</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">6 yrs</td><td style="padding:6px 8px;text-align:center">❌</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">PCB/M</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">₹30K–2L/yr</td><td style="padding:6px 8px;text-align:center">⭐⭐⭐⭐</td></tr>
+      </table>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:8px">⚠️ = State CET/University entrance | ❌ = Direct/State CET | ✅ = NEET mandatory</div>
+  </div>
+
+  <!-- 4. INDIA vs ABROAD — COMPLETE -->
+  <div style="background:rgba(0,212,100,0.06);border:1px solid rgba(0,212,100,0.15);border-radius:10px;padding:14px;margin-bottom:12px">
+    <div style="font-size:12px;font-weight:700;color:#00d464;margin-bottom:10px">🌏 INDIA vs ABROAD MBBS — 2026 Complete Guide</div>
+    
+    <!-- India Options -->
+    <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">🇮🇳 India Options</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="background:rgba(0,0,0,0.25);border-radius:8px;padding:10px;border-left:3px solid #00d464">
+        <div style="color:#00d464;font-weight:700;font-size:11px;margin-bottom:5px">Govt Medical College</div>
+        <div style="color:var(--muted);font-size:10.5px;line-height:1.7">
+          Score: 610+ (General)<br>
+          Fees: ₹25K–1.5L/year<br>
+          Total: ₹1.5L–8L<br>
+          Seats: ~55,000<br>
+          Quality: ⭐⭐⭐⭐⭐
+        </div>
+      </div>
+      <div style="background:rgba(0,0,0,0.25);border-radius:8px;padding:10px;border-left:3px solid #c8a84b">
+        <div style="color:#c8a84b;font-weight:700;font-size:11px;margin-bottom:5px">Private Medical College</div>
+        <div style="color:var(--muted);font-size:10.5px;line-height:1.7">
+          Score: 400–540<br>
+          Fees: ₹8L–25L/year<br>
+          Total: ₹50L–1.5Cr<br>
+          Seats: ~55,000<br>
+          Quality: ⭐⭐⭐–⭐⭐⭐⭐
+        </div>
+      </div>
+    </div>
+
+    <!-- Abroad Options -->
+    <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">✈️ Abroad Options (NMC Approved)</div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:10.5px">
+        <tr style="background:rgba(255,255,255,0.05)">
+          <th style="padding:6px 8px;text-align:left;color:#00d464">Country</th>
+          <th style="padding:6px 8px;text-align:center;color:#00d464">Duration</th>
+          <th style="padding:6px 8px;text-align:center;color:#00d464">Total Cost</th>
+          <th style="padding:6px 8px;text-align:center;color:#00d464">Medium</th>
+          <th style="padding:6px 8px;text-align:center;color:#00d464">FMGE Rate</th>
+          <th style="padding:6px 8px;text-align:center;color:#00d464">Best For</th>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:6px 8px;font-weight:700;color:#fff">🇷🇺 Russia</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">6 yrs</td><td style="padding:6px 8px;text-align:center;color:#00d464">₹22–45L</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">English</td><td style="padding:6px 8px;text-align:center;color:#00d464">Good</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">Overall best</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:6px 8px;font-weight:700;color:#fff">🇺🇦 Ukraine</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">6 yrs</td><td style="padding:6px 8px;text-align:center;color:#00d464">₹20–35L</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">English</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">Moderate</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">Budget</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:6px 8px;font-weight:700;color:#fff">🇬🇪 Georgia</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">6 yrs</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">₹32–51L</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">English</td><td style="padding:6px 8px;text-align:center;color:#00d464">High</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">PLAB/Europe</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:6px 8px;font-weight:700;color:#fff">🇵🇭 Philippines</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">5.5 yrs</td><td style="padding:6px 8px;text-align:center;color:#00d464">₹20–34L</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">English</td><td style="padding:6px 8px;text-align:center;color:#00d464">Good</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">USMLE path</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:6px 8px;font-weight:700;color:#fff">🇰🇿 Kazakhstan</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">6 yrs</td><td style="padding:6px 8px;text-align:center;color:#00d464">₹17–28L</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">English</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">Moderate</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">Budget</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:6px 8px;font-weight:700;color:#fff">🇧🇩 Bangladesh</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">5.5 yrs</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">₹28–45L</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">English</td><td style="padding:6px 8px;text-align:center;color:#00d464">High</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">India FMGE</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:6px 8px;font-weight:700;color:#fff">🇳🇵 Nepal</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">5.5 yrs</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">₹25–40L</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">English</td><td style="padding:6px 8px;text-align:center;color:#00d464">High</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">Nearest</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04)"><td style="padding:6px 8px;font-weight:700;color:#fff">🇰🇬 Kyrgyzstan</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">6 yrs</td><td style="padding:6px 8px;text-align:center;color:#00d464">₹11–19L</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">English</td><td style="padding:6px 8px;text-align:center;color:#ff6b6b">Low</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">Lowest cost</td></tr>
+        <tr><td style="padding:6px 8px;font-weight:700;color:#fff">🇺🇿 Uzbekistan</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">6 yrs</td><td style="padding:6px 8px;text-align:center;color:#00d464">₹13–24L</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">English</td><td style="padding:6px 8px;text-align:center;color:#c8a84b">Moderate</td><td style="padding:6px 8px;text-align:center;color:var(--muted)">Budget</td></tr>
+      </table>
+    </div>
+    <div style="margin-top:10px;background:rgba(255,100,100,0.1);border:1px solid rgba(255,100,100,0.3);border-radius:8px;padding:10px;font-size:11px;color:#ff9999">
+      ⚠️ <b>NMC Important:</b> NEET minimum qualifying score required for Eligibility Certificate. 
+      Score below 360 → Not eligible for abroad MBBS + cannot practice in India after return.
+    </div>
+  </div>
+
+  <!-- 5. COMPLETE SPECIALIZATION PATHS -->
+  <div style="background:rgba(0,212,100,0.06);border:1px solid rgba(0,212,100,0.15);border-radius:10px;padding:14px;margin-bottom:12px">
+    <div style="font-size:12px;font-weight:700;color:#00d464;margin-bottom:10px">🔬 MEDICAL SPECIALIZATION — Complete Pathway</div>
+    
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:10.5px">
+      <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;border-top:2px solid #00d464">
+        <div style="color:#00d464;font-weight:700;margin-bottom:6px">🩺 Clinical Medicine (MD)</div>
+        <div style="color:var(--muted);line-height:1.8">General Medicine · Paediatrics · Gynaecology · Psychiatry · Dermatology · Cardiology · Neurology · Oncology · Pulmonology · Endocrinology</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;border-top:2px solid #ff6b6b">
+        <div style="color:#ff6b6b;font-weight:700;margin-bottom:6px">🏥 Surgery (MS/MCh)</div>
+        <div style="color:var(--muted);line-height:1.8">General Surgery · Orthopaedics · Neurosurgery · Cardiac Surgery · Plastic Surgery · Urology · Ophthalmology · ENT · Vascular</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;border-top:2px solid #c8a84b">
+        <div style="color:#c8a84b;font-weight:700;margin-bottom:6px">🔬 Diagnostic (MD)</div>
+        <div style="color:var(--muted);line-height:1.8">Radiology · Pathology · Microbiology · Biochemistry · Nuclear Medicine · Forensic Medicine · Community Medicine</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;border-top:2px solid #00a0ff">
+        <div style="color:#00a0ff;font-weight:700;margin-bottom:6px">🧪 Research & Public Health</div>
+        <div style="color:var(--muted);line-height:1.8">ICMR Researcher · Epidemiologist · WHO Officer · Public Health Specialist · Clinical Trials · Pharmacology Research</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;border-top:2px solid #a855f7">
+        <div style="color:#a855f7;font-weight:700;margin-bottom:6px">💻 MedTech & Innovation</div>
+        <div style="color:var(--muted);line-height:1.8">Health AI/ML · Telemedicine · Medical Devices · Digital Health Startup · Hospital Informatics · HealthTech Product</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;border-top:2px solid #f59e0b">
+        <div style="color:#f59e0b;font-weight:700;margin-bottom:6px">🎓 Medical Education</div>
+        <div style="color:var(--muted);line-height:1.8">Medical College Professor · Dean · NMC Examiner · AIIMS Faculty · Medical Writer · NEET Educator</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;border-top:2px solid #10b981">
+        <div style="color:#10b981;font-weight:700;margin-bottom:6px">🏨 Hospital Management</div>
+        <div style="color:var(--muted);line-height:1.8">Hospital Administrator · MHA/MBA Healthcare · Operations Manager · Healthcare Consultant · Insurance Medical Officer</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;border-top:2px solid #ec4899">
+        <div style="color:#ec4899;font-weight:700;margin-bottom:6px">🚨 Emergency Medicine</div>
+        <div style="color:var(--muted);line-height:1.8">Emergency Physician · ICU Specialist · Trauma Surgeon · Critical Care · Anaesthesiology · Pain Management</div>
+      </div>
+    </div>
+
+    <!-- PG Pathway -->
+    <div style="margin-top:12px;background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;font-size:11px">
+      <div style="color:#00d464;font-weight:700;margin-bottom:6px">📋 PG / Super Speciality Pathway</div>
+      <div style="color:var(--muted);line-height:1.9">
+        MBBS (5.5yr) → Internship (1yr) → <b style="color:#fff">NEET PG</b> → MD/MS (3yr) → <b style="color:#fff">NEET SS</b> → DM/MCh (3yr) → Super Specialist<br>
+        MBBS → <b style="color:#fff">NExT Exam</b> → India Practice License → NEET PG eligible<br>
+        MBBS Abroad → <b style="color:#fff">FMGE/NExT</b> → India License → NEET PG eligible
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. NEET ROADMAP -->
+  <div style="background:rgba(0,212,100,0.06);border:1px solid rgba(0,212,100,0.15);border-radius:10px;padding:14px">
+    <div style="font-size:12px;font-weight:700;color:#00d464;margin-bottom:10px">🗓️ NEET PREPARATION ROADMAP</div>
+    <div id="mv-neet-roadmap" style="font-size:12px;color:var(--fg);line-height:1.9;white-space:pre-line"></div>
+  </div>
+
+</div>
+
+>
