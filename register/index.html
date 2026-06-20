@@ -980,7 +980,7 @@ a{color:inherit!important;text-decoration:none!important}
     <div class="field-row">
       <div class="field-group">
         <label class="field-label"><span>*</span> <span id="lbl-qual">Qualification</span></label>
-        <select class="field-input" id="f1-qual">
+        <select class="field-input" id="f1-qual" onchange="onQualChange()">
           <option value="">Select karo</option>
           <option value="Class 9">Class 9 (Studying)</option>
           <option value="Class 10">Class 10 (Studying)</option>
@@ -1008,153 +1008,226 @@ a{color:inherit!important;text-decoration:none!important}
         </select>
       </div>
       <div class="field-group">
-        <label class="field-label" id="lbl-stream">Stream / Background</label>
+        <label class="field-label" id="lbl-stream">* Stream / Background</label>
         <select class="field-input" id="f1-stream">
           <option value="">Select karo</option>
-          <option>Science (PCM)</option>
-          <option>Science (PCB)</option>
-          <option>Science (Both)</option>
-          <option>Commerce</option>
-          <option>Arts / Humanities</option>
-          <option>Diploma</option>
-          <option>Any / Not sure</option>
+          <option value="Science (PCM)">Science (PCM) — Physics, Chemistry, Maths</option>
+          <option value="Science (PCB)">Science (PCB) — Physics, Chemistry, Biology</option>
+          <option value="Science (PCMB)">Science (PCMB) — PCM + Biology dono</option>
+          <option value="Commerce">Commerce — Accounts / Business Studies</option>
+          <option value="Arts / Humanities">Arts / Humanities</option>
+          <option value="ITI / Vocational">ITI / Vocational Trade</option>
+          <option value="Diploma">Diploma / Polytechnic</option>
+          <option value="Any / Not sure">Any / Not decided yet</option>
+          <option value="Not applicable">Not applicable (Class 9-10)</option>
+        </select>
+        <div id="stream-type-row" style="display:none;margin-top:8px">
+          <input class="field-input" type="text" id="f1-stream-type" 
+            placeholder="Aapki degree/branch likhein — e.g. B.Tech CSE, BCA, B.Com">
+          <div style="font-size:10px;color:var(--muted);margin-top:3px" id="stream-type-hint"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" id="lbl-marks">* Marks / Percentage / CGPA</label>
+      <input class="field-input" type="text" id="f1-marks" placeholder="e.g. 78% ya 8.2 CGPA (latest score)">
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" id="lbl-goal">* Career Goal (1-2 lines)</label>
+      <input class="field-input" type="text" id="f1-goal" 
+        placeholder="e.g. Doctor banna hai, Software Engineer banana hai..." 
+        oninput="checkMedicalGoal()">
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Target Course (agar pata ho)</label>
+      <input class="field-input" type="text" id="f1-target" 
+        placeholder="e.g. MBBS, B.Tech CSE, BBA, CA, Not sure">
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field-group">
+        <label class="field-label">Competitive Exam</label>
+        <select class="field-input" id="f1-exam" onchange="onExamChange()">
+          <option value="">Select karo</option>
+          <option value="JEE">JEE (Engineering)</option>
+          <option value="NEET">NEET (Medical)</option>
+          <option value="CLAT">CLAT (Law)</option>
+          <option value="CUET">CUET (UG/PG)</option>
+          <option value="CAT">CAT (MBA)</option>
+          <option value="SSC">SSC CGL/CHSL</option>
+          <option value="UPSC">UPSC / State PSC</option>
+          <option value="NDA">NDA (Defence)</option>
+          <option value="GATE">GATE (PG Engg)</option>
+          <option value="Not decided">Not decided</option>
+          <option value="None">Koi nahi</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Exam Status</label>
+        <select class="field-input" id="f1-exam-status">
+          <option value="">Select Status</option>
+          <option value="Appearing">Appearing — Is Saal</option>
+          <option value="Appeared Score Available">Appeared — Score hai</option>
+          <option value="Appeared Result Awaited">Appeared — Result Awaited</option>
+          <option value="Preparing">Preparing — Next Year</option>
+          <option value="Not Started">Abhi shuru nahi</option>
         </select>
       </div>
     </div>
 
-    <div class="field-row">
+    <div class="field-group" id="score-field-group">
+      <label class="field-label" id="lbl-exam-score">Score / Percentile (agar available ho)</label>
+      <input class="field-input" type="text" id="f1-score" 
+        placeholder="e.g. NEET 520, JEE 85 percentile" oninput="updateScoreHint()">
+      <div id="score-hint" style="font-size:11px;margin-top:4px;display:none"></div>
+    </div>
+
+    <!-- BUDGET & ABROAD — After course info -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="field-group">
-        <label class="field-label" id="lbl-marks">Marks / CGPA</label>
-        <input class="field-input" type="text" id="f1-marks" placeholder="Jaise: 78% ya 8.2">
-      </div>
-      <div class="field-group">
-        <label class="field-label" id="lbl-budget">Budget (approx.)</label>
+        <label class="field-label">Budget (Total Fees Approx.)</label>
         <select class="field-input" id="f1-budget">
           <option value="">Select karo</option>
-          <option>Under ₹1 Lakh</option>
-          <option>₹1–3 Lakh</option>
-          <option>₹3–5 Lakh</option>
-          <option>₹5–10 Lakh</option>
-          <option>Above ₹10 Lakh</option>
+          <option value="Under ₹1 Lakh">Under ₹1 Lakh</option>
+          <option value="₹1–3 Lakh">₹1–3 Lakh</option>
+          <option value="₹3–5 Lakh">₹3–5 Lakh</option>
+          <option value="₹5–10 Lakh">₹5–10 Lakh</option>
+          <option value="₹10–25 Lakh">₹10–25 Lakh</option>
+          <option value="₹25–50 Lakh">₹25–50 Lakh</option>
+          <option value="Above ₹50 Lakh">Above ₹50 Lakh</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Abroad Studies?</label>
+        <select class="field-input" id="f1-abroad" onchange="toggleCountry()">
+          <option value="No">No</option>
+          <option value="Maybe">Maybe</option>
+          <option value="Yes">Yes</option>
         </select>
       </div>
     </div>
 
-    <div class="field-group">
-      <label class="field-label" id="lbl-goal">Career goal (1-2 lines)</label>
-      <input class="field-input" type="text" id="f1-goal" placeholder="Jaise: Software engineer banana hai ya doctor...">
+    <div class="field-group" id="country-group" style="display:none">
+      <label class="field-label">Preferred Country</label>
+      <input class="field-input" type="text" id="f1-country" 
+        placeholder="e.g. Russia, Canada, Germany, Australia">
+    </div>
+
+    <!-- MEDICAL FIELDS -->
+    <div id="medical-fields" style="display:none">
+      <div style="background:rgba(0,212,100,0.07);border:1px solid rgba(0,212,100,0.2);border-radius:10px;padding:12px;margin-bottom:4px">
+        <div style="font-size:11px;font-weight:700;color:#00d464;margin-bottom:10px">🏥 MEDVERSE — Medical Details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field-group" style="margin-bottom:8px">
+            <label class="field-label">NEET Status</label>
+            <select class="field-input" id="f1-neet-status">
+              <option value="">Select</option>
+              <option value="NEET 2026 Appearing">NEET 2026 Appearing</option>
+              <option value="NEET 2025 Appeared">NEET 2025 Appeared</option>
+              <option value="NEET 2024 Appeared">NEET 2024 Appeared</option>
+              <option value="Dropper">Dropper — Phir prepare kar raha</option>
+              <option value="Not Started">Abhi shuru nahi kiya</option>
+            </select>
+          </div>
+          <div class="field-group" style="margin-bottom:8px">
+            <label class="field-label">NEET Score (Expected/Actual)</label>
+            <input class="field-input" type="number" id="f1-neet-score" 
+              min="0" max="720" placeholder="0-720" oninput="showNEETHint()">
+            <div id="neet-hint" style="font-size:10px;margin-top:3px;display:none"></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field-group" style="margin-bottom:0">
+            <label class="field-label">Category (Reservation)</label>
+            <select class="field-input" id="f1-reservation">
+              <option value="">Select</option>
+              <option value="General">General</option>
+              <option value="OBC">OBC</option>
+              <option value="SC">SC</option>
+              <option value="ST">ST</option>
+              <option value="EWS">EWS</option>
+            </select>
+          </div>
+          <div class="field-group" style="margin-bottom:0">
+            <label class="field-label">India vs Abroad</label>
+            <select class="field-input" id="f1-india-abroad">
+              <option value="">Select</option>
+              <option value="India Only">India Only</option>
+              <option value="Govt Medical Only">Sirf Govt Medical</option>
+              <option value="Abroad Open">Abroad bhi consider</option>
+              <option value="Abroad Preferred">Abroad preferred</option>
+              <option value="Both Open">Dono open hain</option>
+            </select>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="field-group">
-      <label class="field-label" id="lbl-confusion">Main confusion kya hai?</label>
-      <input class="field-input" type="text" id="f1-confusion" placeholder="Jaise: Kaun sa stream loon, kya karna chahiye...">
+      <label class="field-label" id="lbl-confusion">* Main Confusion / Doubt</label>
+      <input class="field-input" type="text" id="f1-confusion" 
+        placeholder="e.g. Kaun sa stream loon, Medical ya Engineering...">
     </div>
 
+    <div class="field-group">
+      <label class="field-label">* Parent's Main Concern</label>
+      <input class="field-input" type="text" id="f1-concern" 
+        placeholder="e.g. Fees zyada hai, Job guarantee chahiye, Kaunsa college sahi rahega...">
+    </div>
 
     <div class="field-group">
-      <label class="field-label">Father's Name</label>
-      <input class="field-input" type="text" id="f1-father" autocomplete="off" placeholder="Father ka naam">
-    </div>
-    <div class="field-group">
-      <label class="field-label">Parent Mobile Number</label>
-      <input class="field-input" type="tel" id="f1-pmobile" placeholder="Parent ka mobile">
-    </div>
-    <div class="field-group">
-      <label class="field-label">Lead Source</label>
-      <select class="field-input" id="f1-source">
-        <option value="">Select Source</option>
-        <option value="Walk-in">Walk-in</option>
-        <option value="WhatsApp">WhatsApp</option>
-        <option value="Instagram">Instagram</option>
-        <option value="Facebook">Facebook</option>
-        <option value="YouTube">YouTube</option>
-        <option value="School Visit">School Visit</option>
-        <option value="Coaching Referral">Coaching Referral</option>
-        <option value="Friend Referral">Friend Referral</option>
-        <option value="Google">Google</option>
-        <option value="Other">Other</option>
-      </select>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Source Detail</label>
-      <input class="field-input" type="text" id="f1-source-detail" placeholder="School/Coaching/Person name">
-    </div>
-    <div class="field-group">
-      <label class="field-label">Preferred Course Category</label>
-      <select class="field-input" id="f1-category">
-        <option value="">Select Category</option>
-        <option value="Engineering">Engineering</option>
-        <option value="Medical">Medical</option>
-        <option value="Management">Management</option>
-        <option value="Law">Law</option>
-        <option value="Arts / Humanities">Arts / Humanities</option>
-        <option value="Commerce / Finance">Commerce / Finance</option>
-        <option value="IT / Computer">IT / Computer</option>
-        <option value="Defence / Govt">Defence / Govt</option>
-        <option value="Design / Creative">Design / Creative</option>
-        <option value="Not sure">Not sure</option>
-      </select>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Target Course (if known)</label>
-      <input class="field-input" type="text" id="f1-course" placeholder="B.Tech CSE, MBBS, BBA, etc.">
-    </div>
-    <div class="field-group">
-      <label class="field-label">Competitive Exam</label>
-      <select class="field-input" id="f1-exam">
-        <option value="">Select Exam</option>
-        <option value="JEE">JEE</option>
-        <option value="NEET">NEET</option>
-        <option value="CLAT">CLAT</option>
-        <option value="CUET">CUET</option>
-        <option value="CAT">CAT</option>
-        <option value="SSC">SSC</option>
-        <option value="UPSC">UPSC</option>
-        <option value="NDA">NDA</option>
-        <option value="Not decided">Not decided</option>
-        <option value="None">None</option>
-      </select>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Exam Score (if available)</label>
-      <input class="field-input" type="text" id="f1-score" placeholder="JEE 85 percentile, NEET 450...">
-    </div>
-    <div class="field-group">
-      <label class="field-label">Abroad Studies?</label>
-      <select class="field-input" id="f1-abroad">
-        <option value="No">No</option>
-        <option value="Yes">Yes</option>
-        <option value="Maybe">Maybe</option>
-      </select>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Preferred Country (if Abroad)</label>
-      <input class="field-input" type="text" id="f1-country" placeholder="USA, Canada, UK, Australia...">
-    </div>
-    <div class="field-group">
-      <label class="field-label">Parent's Main Concern</label>
-      <input class="field-input" type="text" id="f1-concern" placeholder="Parent ki tension kya hai?">
-    </div>
-    <div class="field-group">
-      <label class="field-label">Student Priority</label>
+      <label class="field-label">* Student Priority</label>
       <select class="field-input" id="f1-priority">
-        <option value="">Select Priority</option>
-        <option value="Good College">Good College</option>
-        <option value="High Salary">High Salary</option>
-        <option value="Govt Job">Govt Job</option>
-        <option value="Own Business">Own Business</option>
-        <option value="Abroad">Abroad</option>
-        <option value="Not sure">Not sure</option>
+        <option value="">Select karo</option>
+        <option value="Good College">Ek accha college chahiye</option>
+        <option value="High Salary">High salary job chahiye</option>
+        <option value="Govt Job">Govt job preferred</option>
+        <option value="Own Business">Khud ka business banana hai</option>
+        <option value="Abroad">Abroad jaana chahta hoon</option>
+        <option value="Parents Decision">Parents jo decide karein</option>
+        <option value="Not sure">Abhi decide nahi kiya</option>
       </select>
     </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field-group">
+        <label class="field-label">* Lead Source</label>
+        <select class="field-input" id="f1-source">
+          <option value="">Select Source</option>
+          <option value="Walk-in">Walk-in</option>
+          <option value="WhatsApp">WhatsApp</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Facebook">Facebook</option>
+          <option value="YouTube">YouTube</option>
+          <option value="School Visit">School Visit</option>
+          <option value="Coaching">Coaching Institute</option>
+          <option value="Referral Friend">Referral — Friend</option>
+          <option value="Referral Student">Referral — Old Student</option>
+          <option value="Google">Google Search</option>
+          <option value="Event">Event / Seminar</option>
+          <option value="MEDVERSE">MEDVERSE Event</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Source Detail</label>
+        <input class="field-input" type="text" id="f1-source-detail"
+          placeholder="School/Coaching/Referral name">
+      </div>
+    </div>
+
     <div class="field-group">
       <label class="field-label">Additional Notes (optional)</label>
-      <textarea class="field-input" id="f1-notes" rows="2" placeholder="Koi aur info..."></textarea>
+      <textarea class="field-input" id="f1-notes" rows="2" 
+        placeholder="Koi aur important baat ho to likhein"></textarea>
     </div>
 
-    <div id="form1-error" class="err"></div>
+    <div id="form1-error" class="err" style="display:none;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);border-radius:8px;padding:10px;font-size:12px;color:#ff6b6b;margin-top:8px"></div>
 
-    <button class="btn-primary" onclick="submitForm1()" id="btn-next1">
+    <button class="btn-primary" onclick="submitForm1()" id="btn-next1" style="width:100%;margin-top:16px;padding:14px;font-size:14px;font-weight:700">
       Register Karo →
     </button>
   </div>
@@ -1391,117 +1464,317 @@ function updateProgress() {
 
 // ── FORM 1 SUBMIT ──
 function submitForm1() {
-  var name   = document.getElementById('f1-name').value.trim();
-  var mobile = document.getElementById('f1-mobile').value.trim();
-  var email  = document.getElementById('f1-email').value.trim();
-  var city   = document.getElementById('f1-city').value.trim();
-  var state  = document.getElementById('f1-state').value.trim();
-  var qual   = document.getElementById('f1-qual').value;
-  var err    = document.getElementById('form1-error');
+  var err = document.getElementById('form1-error');
+  
+  // Get all values
+  var name     = (document.getElementById('f1-name')||{value:''}).value.trim();
+  var mobile   = (document.getElementById('f1-mobile')||{value:''}).value.trim();
+  var email    = (document.getElementById('f1-email')||{value:''}).value.trim();
+  var city     = (document.getElementById('f1-city')||{value:''}).value.trim();
+  var state    = (document.getElementById('f1-state')||{value:''}).value;
+  var qual     = (document.getElementById('f1-qual')||{value:''}).value;
+  var father   = (document.getElementById('f1-father')||{value:''}).value.trim();
+  var pmobile  = (document.getElementById('f1-pmobile')||{value:''}).value.trim();
+  var stream   = (document.getElementById('f1-stream')||{value:''}).value;
+  var marks    = (document.getElementById('f1-marks')||{value:''}).value.trim();
+  var goal     = (document.getElementById('f1-goal')||{value:''}).value.trim();
+  var confusion= (document.getElementById('f1-confusion')||{value:''}).value.trim();
+  var concern  = (document.getElementById('f1-concern')||{value:''}).value.trim();
+  var priority = (document.getElementById('f1-priority')||{value:''}).value;
+  var source   = (document.getElementById('f1-source')||{value:''}).value;
 
-  var father  = document.getElementById('f1-father')?document.getElementById('f1-father').value.trim():'';
-  var pmobile = document.getElementById('f1-pmobile')?document.getElementById('f1-pmobile').value.trim():'';
-  var stream  = document.getElementById('f1-stream')?document.getElementById('f1-stream').value:'';
-  var marks   = document.getElementById('f1-marks')?document.getElementById('f1-marks').value.trim():'';
-  var goal    = document.getElementById('f1-goal')?document.getElementById('f1-goal').value.trim():'';
-  var confusion = document.getElementById('f1-confusion')?document.getElementById('f1-confusion').value.trim():'';
-  var concern = document.getElementById('f1-concern')?document.getElementById('f1-concern').value.trim():'';
+  // ── VALIDATION ──
+  var errors = [];
+  if(!name)     errors.push('Student Ka Naam');
+  if(!mobile)   errors.push('Student Mobile');
+  if(!email)    errors.push('Email ID');
+  if(!city)     errors.push('City / District');
+  if(!state)    errors.push('State');
+  if(!qual)     errors.push('Qualification');
+  if(!father)   errors.push('Father Ka Naam');
+  if(!pmobile)  errors.push('Parent Mobile');
+  if(!stream)   errors.push('Stream / Background');
+  if(!marks)    errors.push('Marks / CGPA');
+  if(!goal)     errors.push('Career Goal');
+  if(!confusion)errors.push('Main Confusion');
+  if(!concern)  errors.push('Parent Concern');
+  if(!priority) errors.push('Student Priority');
+  if(!source)   errors.push('Lead Source');
 
-  // Tier 1 — Basic mandatory
-  if(!name||!mobile||!email||!city||!state||!qual){
-    err.textContent='* Name, Mobile, Email, City, State, Qualification zaroori hain.';
-    err.style.display='block';
+  if(errors.length > 0){
+    err.innerHTML = '<b>* Ye fields bharna zaroori hai:</b><br>' + errors.join(' &nbsp;|&nbsp; ');
+    err.style.display = 'block';
+    err.scrollIntoView({behavior:'smooth', block:'center'});
     return;
   }
+
   if(!/^\d{10}$/.test(mobile)){
-    err.textContent='Mobile 10 digits ka hona chahiye.';
-    err.style.display='block';
-    return;
-  }
-  // Tier 2 — Important mandatory
-  if(!father){
-    err.textContent='* Father ka naam zaroori hai.';
-    err.style.display='block';
-    return;
-  }
-  if(!pmobile){
-    err.textContent='* Parent mobile number zaroori hai.';
-    err.style.display='block';
-    return;
+    err.textContent = 'Student Mobile 10 digits ka hona chahiye.';
+    err.style.display = 'block'; return;
   }
   if(!/^\d{10}$/.test(pmobile)){
-    err.textContent='Parent mobile 10 digits ka hona chahiye.';
-    err.style.display='block';
-    return;
+    err.textContent = 'Parent Mobile 10 digits ka hona chahiye.';
+    err.style.display = 'block'; return;
   }
-  if(!stream){
-    err.textContent='* Stream / Background zaroori hai.';
-    err.style.display='block';
-    return;
+  if(!/^[^@]+@[^@]+\.[^@]+$/.test(email)){
+    err.textContent = 'Valid Email ID dalein.';
+    err.style.display = 'block'; return;
   }
-  if(!marks){
-    err.textContent='* Marks / CGPA zaroori hai.';
-    err.style.display='block';
-    return;
-  }
-  if(!goal){
-    err.textContent='* Career goal zaroori hai.';
-    err.style.display='block';
-    return;
-  }
-  if(!confusion){
-    err.textContent='* Main confusion / doubt zaroori hai.';
-    err.style.display='block';
-    return;
-  }
-  if(!concern){
-    err.textContent='* Parent concern zaroori hai.';
-    err.style.display='block';
-    return;
-  }
-  err.style.display='none';
+
+  err.style.display = 'none';
   studentName = name;
 
   var btn = document.getElementById('btn-next1');
-  if(btn){btn.textContent='Saving...';btn.disabled=true;}
+  if(btn){ btn.textContent = 'Saving...'; btn.disabled = true; }
 
-  // Build URL params for GET request
+  // Build params
   var params = new URLSearchParams({
-    action: 'register',
-    name: name,
-    mobile: mobile,
-    email: email,
-    city: city,
-    state: state,
-    qual: qual,
-    father: document.getElementById('f1-father')?document.getElementById('f1-father').value.trim():'',
-    pmobile: document.getElementById('f1-pmobile')?document.getElementById('f1-pmobile').value.trim():'',
-    stream: document.getElementById('f1-stream')?document.getElementById('f1-stream').value:'',
-    marks: document.getElementById('f1-marks')?document.getElementById('f1-marks').value.trim():'',
-    goal: document.getElementById('f1-goal')?document.getElementById('f1-goal').value.trim():'',
-    confusion: document.getElementById('f1-confusion')?document.getElementById('f1-confusion').value.trim():'',
-    concern: document.getElementById('f1-concern')?document.getElementById('f1-concern').value.trim():'',
-    priority: document.getElementById('f1-priority')?document.getElementById('f1-priority').value.trim():'',
-    source: 'Website'
+    action:        'register',
+    name:          name,
+    mobile:        mobile,
+    whatsapp:      (document.getElementById('f1-whatsapp')||{value:mobile}).value || mobile,
+    email:         email,
+    city:          city,
+    state:         state,
+    qual:          qual,
+    father:        father,
+    pmobile:       pmobile,
+    stream:        stream + ((document.getElementById('f1-stream-type')&&document.getElementById('f1-stream-type').value) ? ' — ' + document.getElementById('f1-stream-type').value.trim() : ''),
+    marks:         marks,
+    goal:          goal,
+    target:        (document.getElementById('f1-target')||{value:''}).value.trim(),
+    exam:          (document.getElementById('f1-exam')||{value:''}).value,
+    exam_status:   (document.getElementById('f1-exam-status')||{value:''}).value,
+    score:         (document.getElementById('f1-score')||{value:''}).value,
+    category:      (document.getElementById('f1-category')||{value:''}).value,
+    budget:        (document.getElementById('f1-budget')||{value:''}).value,
+    abroad:        (document.getElementById('f1-abroad')||{value:''}).value,
+    country:       (document.getElementById('f1-country')||{value:''}).value.trim(),
+    confusion:     confusion,
+    concern:       concern,
+    priority:      priority,
+    source:        source,
+    source_detail: (document.getElementById('f1-source-detail')||{value:''}).value.trim(),
+    notes:         (document.getElementById('f1-notes')||{value:''}).value.trim(),
+    // Medical fields
+    neet_status:   (document.getElementById('f1-neet-status')||{value:''}).value,
+    neet_score:    (document.getElementById('f1-neet-score')||{value:''}).value,
+    reservation:   (document.getElementById('f1-reservation')||{value:''}).value,
+    india_abroad:  (document.getElementById('f1-india-abroad')||{value:''}).value,
   });
 
-  // Use fetch GET - AppScript allows CORS on GET
-  fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?' + params.toString())
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    console.log('Register response:', d);
-    if(d && d.id){
-      inwangId = d.id;
-    } else {
-      inwangId = generateLocalId();
-    }
-    doRedirect(inwangId, name);
-  })
-  .catch(function(e){
-    console.warn('Register error:', e);
-    inwangId = generateLocalId();
-    doRedirect(inwangId, name);
-  });
+  fetch(WEBAPP_URL + '?' + params.toString())
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data.success){
+        inwangId = data.id;
+        studentName = data.name || name;
+        showScreen('screen2');
+        document.getElementById('s2-id').textContent = inwangId;
+        document.getElementById('s2-name').textContent = studentName;
+      } else {
+        err.textContent = data.error || 'Kuch error hua. Dobara try karo.';
+        err.style.display = 'block';
+        if(btn){ btn.textContent = 'Register Karo →'; btn.disabled = false; }
+      }
+    })
+    .catch(function(e){
+      err.textContent = 'Connection error. Internet check karo aur dobara try karo.';
+      err.style.display = 'block';
+      if(btn){ btn.textContent = 'Register Karo →'; btn.disabled = false; }
+    });
+}
+
+// ── HELPER FUNCTIONS ──
+function onQualChange(){
+  var qual = (document.getElementById('f1-qual')||{value:''}).value;
+  var sel  = document.getElementById('f1-stream');
+  var lbl  = document.getElementById('lbl-stream');
+  var typeRow  = document.getElementById('stream-type-row');
+  var typeHint = document.getElementById('stream-type-hint');
+  var typeInput = document.getElementById('f1-stream-type');
+  if(!sel) return;
+
+  // Clear current options
+  sel.innerHTML = '<option value="">Select karo</option>';
+
+  // ── CLASS 9-10 ──
+  if(qual==='Class 9'||qual==='Class 10'){
+    if(lbl) lbl.textContent = '* Class (Stream abhi nahi hai)';
+    [
+      ['Not applicable','Abhi stream nahi hai (Class 9-10)'],
+      ['Science','Science subjects le raha hoon'],
+      ['Any / Not sure','Abhi decide nahi kiya'],
+    ].forEach(function(o){ addOpt(sel, o[0], o[1]); });
+    sel.value = 'Not applicable';
+    if(typeRow) typeRow.style.display='none';
+    return;
+  }
+
+  // ── 12TH / CLASS 11-12 ──
+  if(qual==='Class 10 Pass'||qual==='Class 11'||qual==='Class 12 Appearing'||qual==='Class 12 Result Awaited'||qual==='Class 12 Pass'){
+    if(lbl) lbl.textContent = '* 12th Stream';
+    [
+      ['Science (PCM)','Science (PCM) — Physics, Chemistry, Maths'],
+      ['Science (PCB)','Science (PCB) — Physics, Chemistry, Biology'],
+      ['Science (PCMB)','Science (PCMB) — PCM + Biology dono'],
+      ['Commerce','Commerce — Accounts / Business Studies'],
+      ['Arts / Humanities','Arts / Humanities'],
+      ['Any / Not sure','Abhi decide nahi kiya'],
+    ].forEach(function(o){ addOpt(sel, o[0], o[1]); });
+    if(typeRow) typeRow.style.display='none';
+    return;
+  }
+
+  // ── ITI ──
+  if(qual.includes('ITI')){
+    if(lbl) lbl.textContent = '* ITI Trade';
+    [
+      ['ITI Electrician','Electrician'],
+      ['ITI Fitter','Fitter'],
+      ['ITI COPA','COPA — Computer Operator'],
+      ['ITI Mechanic','Mechanic Motor Vehicle'],
+      ['ITI Welder','Welder'],
+      ['ITI Turner','Turner'],
+      ['ITI Plumber','Plumber'],
+      ['ITI Stenographer','Stenographer'],
+      ['ITI Other','Other Trade'],
+    ].forEach(function(o){ addOpt(sel, o[0], o[1]); });
+    if(typeRow){ typeRow.style.display='block'; }
+    if(typeHint) typeHint.textContent = 'Trade ka poora naam likhein';
+    if(typeInput) typeInput.placeholder = 'e.g. Electrician, Fitter, COPA';
+    return;
+  }
+
+  // ── DIPLOMA / POLYTECHNIC ──
+  if(qual.includes('Diploma')){
+    if(lbl) lbl.textContent = '* Diploma Branch';
+    [
+      ['Diploma CSE','Computer Science & Engineering'],
+      ['Diploma Mechanical','Mechanical Engineering'],
+      ['Diploma Civil','Civil Engineering'],
+      ['Diploma Electrical','Electrical Engineering'],
+      ['Diploma ECE','Electronics & Communication'],
+      ['Diploma IT','Information Technology'],
+      ['Diploma Other','Other Branch'],
+    ].forEach(function(o){ addOpt(sel, o[0], o[1]); });
+    if(typeRow){ typeRow.style.display='block'; }
+    if(typeHint) typeHint.textContent = 'Diploma branch ka naam likhein';
+    if(typeInput) typeInput.placeholder = 'e.g. Mechanical, Civil, CSE';
+    return;
+  }
+
+  // ── UG PURSUING / COMPLETED ──
+  if(qual.includes('UG')||qual.includes('Graduate')){
+    if(lbl) lbl.textContent = '* Degree / Branch';
+    [
+      // Engineering
+      ['B.Tech CSE','B.Tech — Computer Science (CSE)'],
+      ['B.Tech ECE','B.Tech — Electronics & Communication (ECE)'],
+      ['B.Tech Mechanical','B.Tech — Mechanical Engineering'],
+      ['B.Tech Civil','B.Tech — Civil Engineering'],
+      ['B.Tech Electrical','B.Tech — Electrical Engineering'],
+      ['B.Tech AI/ML','B.Tech — AI / Machine Learning'],
+      ['B.Tech Data Science','B.Tech — Data Science'],
+      ['B.Tech Biotech','B.Tech — Biotechnology'],
+      ['B.Tech Other','B.Tech — Other Branch'],
+      // IT
+      ['BCA','BCA — Computer Applications'],
+      ['BSc CS','BSc — Computer Science'],
+      ['BSc IT','BSc — Information Technology'],
+      // Medical
+      ['MBBS','MBBS'],
+      ['BDS','BDS — Dentistry'],
+      ['BAMS','BAMS — Ayurveda'],
+      ['BSc Nursing','BSc Nursing'],
+      ['BPT','BPT — Physiotherapy'],
+      ['B.Pharm','B.Pharm — Pharmacy'],
+      // Commerce
+      ['B.Com','B.Com — Commerce'],
+      ['BBA','BBA — Business Administration'],
+      ['CA Pursuing','CA — Chartered Accountancy'],
+      // Arts & Others
+      ['BA','BA — Arts / Humanities'],
+      ['BA English','BA — English'],
+      ['BA Psychology','BA — Psychology'],
+      ['BA Economics','BA — Economics'],
+      ['BSc PCM','BSc — Physics/Chemistry/Maths'],
+      ['BSc PCB','BSc — Physics/Chemistry/Biology'],
+      ['LLB','LLB — Law'],
+      ['B.Arch','B.Arch — Architecture'],
+      ['BHM','BHM — Hotel Management'],
+      ['BSc Agriculture','BSc — Agriculture'],
+      ['Other Degree','Other Degree'],
+    ].forEach(function(o){ addOpt(sel, o[0], o[1]); });
+    if(typeRow){ typeRow.style.display='block'; }
+    if(typeHint) typeHint.textContent = 'Apni degree aur branch likhein (e.g. B.Tech CSE from XYZ College)';
+    if(typeInput) typeInput.placeholder = 'e.g. B.Tech CSE, BCA, B.Com, MBBS';
+    return;
+  }
+
+  // ── PG PURSUING / COMPLETED ──
+  if(qual.includes('PG')||qual.includes('Working')||qual.includes('PhD')){
+    if(lbl) lbl.textContent = '* PG Degree / Field';
+    [
+      ['MBA','MBA — Business Administration'],
+      ['MBA Marketing','MBA — Marketing'],
+      ['MBA Finance','MBA — Finance'],
+      ['MBA HR','MBA — Human Resources'],
+      ['M.Tech CSE','M.Tech — Computer Science'],
+      ['M.Tech Mechanical','M.Tech — Mechanical'],
+      ['MCA','MCA — Computer Applications'],
+      ['MSc','MSc — Science (any subject)'],
+      ['MA','MA — Arts (any subject)'],
+      ['M.Com','M.Com — Commerce'],
+      ['LLM','LLM — Law'],
+      ['MD/MS','MD/MS — Medical'],
+      ['PGDM','PGDM — Management'],
+      ['Other PG','Other PG Degree'],
+    ].forEach(function(o){ addOpt(sel, o[0], o[1]); });
+    if(typeRow){ typeRow.style.display='block'; }
+    if(typeHint) typeHint.textContent = 'Apni PG degree aur specialization likhein';
+    if(typeInput) typeInput.placeholder = 'e.g. MBA Finance, M.Tech CSE, MD Pediatrics';
+    return;
+  }
+
+  // ── DEFAULT ──
+  [
+    ['Science (PCM)','Science (PCM)'],
+    ['Science (PCB)','Science (PCB)'],
+    ['Science (PCMB)','Science (PCMB)'],
+    ['Commerce','Commerce'],
+    ['Arts / Humanities','Arts / Humanities'],
+    ['ITI / Vocational','ITI / Vocational'],
+    ['Diploma','Diploma / Polytechnic'],
+    ['Any / Not sure','Not sure yet'],
+  ].forEach(function(o){ addOpt(sel, o[0], o[1]); });
+  if(typeRow) typeRow.style.display='none';
+}
+
+function addOpt(sel, val, txt){
+  var o = document.createElement('option');
+  o.value = val; o.textContent = txt;
+  sel.appendChild(o);
+}
+
+function toggleCountry(){
+  var abroad = (document.getElementById('f1-abroad')||{value:'No'}).value;
+  var cg = document.getElementById('country-group');
+  if(cg) cg.style.display = (abroad === 'Yes' || abroad === 'Maybe') ? 'block' : 'none';
+}
+
+function showNEETHint(){
+  var score = parseInt((document.getElementById('f1-neet-score')||{value:''}).value)||0;
+  var hint = document.getElementById('neet-hint');
+  if(!hint) return;
+  var msg='', col='';
+  if(score>=650){msg='Govt MBBS possible!';col='#00d464';}
+  else if(score>=610){msg='State quota MBBS ho sakta hai';col='#00d464';}
+  else if(score>=480){msg='BAMS/BDS/Private zone';col='#c8a84b';}
+  else if(score>=360){msg='Abroad MBBS eligible';col='#c8a84b';}
+  else if(score>0){msg='NMC minimum qualifying marks chahiye';col='#ff6b6b';}
+  hint.textContent=msg; hint.style.color=col;
+  hint.style.display=msg?'block':'none';
 }
 
 
@@ -2236,6 +2509,112 @@ function runProcessingAnimation(type, onComplete) {
 
 console.log('INWANG Processing Animation loaded!');
 
+
+// ── MEDICAL GOAL DETECTION ──
+var _MEDICAL_KEYWORDS = [
+  'doctor','mbbs','neet','medical','bds','dentist','bams','bhms','bums',
+  'nursing','nurse','paramedical','pharmacy','pharmacist','surgeon',
+  'healthcare','health care','bpt','physiotherapy','gnm','anm'
+];
+
+function checkMedicalGoal(){
+  var goal = (document.getElementById('f1-goal')||{}).value || '';
+  var gl = goal.toLowerCase();
+  var isMedical = _MEDICAL_KEYWORDS.some(function(k){ return gl.includes(k); });
+  
+  var mf = document.getElementById('medical-fields');
+  if(mf) mf.style.display = isMedical ? 'block' : 'none';
+  
+  // Also check exam dropdown
+  if(isMedical){
+    var examEl = document.getElementById('f1-exam');
+    if(examEl && !examEl.value) examEl.value = 'NEET';
+    onExamChange();
+  }
+}
+
+function onExamChange(){
+  var exam = (document.getElementById('f1-exam')||{}).value || '';
+  var scoreLbl = document.getElementById('lbl-score');
+  var scoreEl = document.getElementById('f1-score');
+  var hint = document.getElementById('score-hint');
+  
+  if(exam === 'NEET'){
+    if(scoreLbl) scoreLbl.textContent = 'NEET Score (0-720)';
+    if(scoreEl){
+      scoreEl.type = 'number';
+      scoreEl.min = '0';
+      scoreEl.max = '720';
+      scoreEl.placeholder = 'Expected ya Actual NEET Score';
+    }
+    if(hint){
+      hint.style.display = 'block';
+      hint.textContent = 'Abroad MBBS ke liye NEET qualify karna zaroori — General: 144+, OBC/SC/ST: 113+ (NEET 2025)';
+    }
+    // Show medical fields
+    var mf = document.getElementById('medical-fields');
+    if(mf) mf.style.display = 'block';
+  } else if(exam === 'JEE'){
+    if(scoreLbl) scoreLbl.textContent = 'JEE Score / Percentile';
+    if(scoreEl){ scoreEl.type = 'text'; scoreEl.placeholder = 'e.g. 85 percentile ya JEE rank'; }
+    if(hint) hint.style.display = 'none';
+  } else {
+    if(scoreLbl) scoreLbl.textContent = 'Exam Score (if available)';
+    if(scoreEl){ scoreEl.type = 'text'; scoreEl.placeholder = 'Score ya percentile'; }
+    if(hint) hint.style.display = 'none';
+  }
+}
+
+function updateScoreHint(){
+  var exam = (document.getElementById('f1-exam')||{}).value || '';
+  if(exam !== 'NEET') return;
+  
+  var score = parseInt((document.getElementById('f1-score')||{}).value) || 0;
+  var hint = document.getElementById('score-hint');
+  if(!hint || !score) return;
+  
+  var msg = '';
+  if(score >= 650) msg = '🎉 Excellent! Top Govt MBBS possible';
+  else if(score >= 610) msg = '✅ Good! Govt MBBS — State quota likely';
+  else if(score >= 570) msg = '⚠️ Govt MBBS competitive — Private MBBS option';
+  else if(score >= 480) msg = '📝 BAMS/Private BDS/Private MBBS options';
+  else if(score >= 360) msg = '🌏 Abroad MBBS eligible — Consider options';
+  else if(score > 0) msg = '❌ Below NMC minimum (360) — Abroad MBBS not eligible';
+  
+  hint.textContent = msg;
+  hint.style.display = msg ? 'block' : 'none';
+  hint.style.color = score >= 610 ? '#00d464' : score >= 480 ? '#c8a84b' : '#ff6b6b';
+  
+  // Also fill NEET score in medical fields
+  var neetScore = document.getElementById('f1-neet-score');
+  if(neetScore && !neetScore.value) neetScore.value = score;
+}
+
+// ── SYNC NEET SCORE TO MEDICAL FIELDS ──
+function syncNEETScore(){
+  var neetScore = (document.getElementById('f1-neet-score')||{}).value || '';
+  var hint = document.getElementById('neet-score-hint');
+  if(!hint || !neetScore) return;
+  
+  var score = parseInt(neetScore) || 0;
+  var msg = '';
+  var col = '';
+  
+  if(score >= 650){ msg = 'Govt MBBS possible!'; col = '#00d464'; }
+  else if(score >= 610){ msg = 'State quota MBBS possible'; col = '#00d464'; }
+  else if(score >= 570){ msg = 'Private MBBS / Govt BDS zone'; col = '#c8a84b'; }
+  else if(score >= 480){ msg = 'BAMS/BDS/Private Medical zone'; col = '#c8a84b'; }
+  else if(score >= 360){ msg = 'Abroad MBBS eligible!'; col = '#c8a84b'; }
+  else if(score > 0){ msg = 'Below NMC minimum — Allied Health options better'; col = '#ff6b6b'; }
+  
+  hint.textContent = msg;
+  hint.style.color = col;
+  hint.style.display = msg ? 'block' : 'none';
+}
+
+// Auto-attach sync
+var neetScoreEl = document.getElementById('f1-neet-score');
+if(neetScoreEl) neetScoreEl.addEventListener('input', syncNEETScore);
 </script>
 </body>
 </html>
