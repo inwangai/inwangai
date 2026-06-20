@@ -1213,6 +1213,13 @@ a{color:inherit!important;text-decoration:none!important}
     </div>
   </div>
 
+  <div id="medverse-track-badge" style="display:none;align-items:center;gap:8px;background:rgba(0,212,100,0.08);border:1px solid rgba(0,212,100,0.2);border-radius:10px;padding:10px 14px;margin-bottom:16px">
+    <svg width="16" height="14" viewBox="0 0 16 14" fill="none"><polyline points="0,7 3,7 4.5,1 6,13 7.5,7 9,7 10,4.5 11.5,9.5 13,7 16,7" stroke="#00d464" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div>
+      <div style="font-size:12px;font-weight:700;color:#00d464">MEDVERSE Medical Track Active</div>
+      <div style="font-size:10px;color:rgba(0,212,100,0.7)">12 medical-specific questions pehle aayenge — report mein MEDVERSE analysis milegi</div>
+    </div>
+  </div>
   <div id="questionsContainer" style="max-width:560px;margin:0 auto;padding:0 16px 20px;width:100%;box-sizing:border-box;"></div>
 
   <div style="max-width:560px;margin:0 auto;padding:0 16px 20px;">
@@ -1412,6 +1419,32 @@ const questions = [
   { id:'q41', dim:'text', type:'text', en:"What kind of work do you think you would never enjoy doing, and why?", hi:"ऐसा कौन-सा काम है जिसे आप कभी करना पसंद नहीं करेंगे, और क्यों?" },
   { id:'q42', dim:'text', type:'text', en:"What is your biggest fear or concern regarding your future career?", hi:"अपने भविष्य के करियर को लेकर आपकी सबसे बड़ी चिंता क्या है?" },
 ];
+
+// ── MEDVERSE MEDICAL QUESTIONS (12 — science-backed) ──
+const _MEDICAL_KEYWORDS = [
+  'doctor','mbbs','neet','medical','bds','dentist','bams','bhms','bums',
+  'nursing','nurse','paramedical','pharmacy','pharmacist','surgeon',
+  'healthcare','health care','bpt','physiotherapy','gnm','anm'
+];
+
+const medicalQuestions = [
+  { id:'m1', dim:'investigative', hi:'Jab koi beemar hota hai, mujhe sirf ilaaj nahi balki bimari ki wajah jaanne ki curiosity hoti hai.', en:'When someone is ill, I want to know the root cause, not just the treatment.' },
+  { id:'m2', dim:'investigative', hi:'Biology, anatomy ya physiology ki complex cheezein samajhna mujhe genuinely interesting lagta hai.', en:'Understanding complex topics in biology or anatomy genuinely interests me.' },
+  { id:'m3', dim:'investigative', hi:'Main lab ya research mein utna hi comfortable hoon jitna logon se directly milne mein.', en:'I enjoy lab/research work as much as directly interacting with people.' },
+  { id:'m4', dim:'empathy', hi:'Doosron ka dard dekhkar mujhe andar se bura lagta hai — sirf intellectually nahi, feel bhi hota hai.', en:'Seeing others in pain affects me emotionally, not just intellectually.' },
+  { id:'m5', dim:'empathy', hi:'Main doosron ki baatein dhyan se sunne mein comfortable hoon chahe kuch bhi solution na ho.', en:'I am comfortable listening attentively even when I have no immediate solution.' },
+  { id:'m6', dim:'empathy', hi:'Mujhe lagta hai ki main logon ko tab bhi helpful feel kara sakta hoon jab unki problem solve nahi hoti.', en:'I can make people feel supported even when their problem cannot be solved.' },
+  { id:'m7', dim:'resilience', hi:'Mushkil haalat mein bhi main apna kaam focus ke saath kar sakta hoon.', en:'Even in difficult situations I can maintain focus and continue working.' },
+  { id:'m8', dim:'resilience', hi:'Koi bura ya dardnaak cheez dekhne ke baad main jaldi apne aap ko sambhal leta hoon.', en:'After witnessing something painful, I recover and recompose myself quickly.' },
+  { id:'m9', dim:'resilience', hi:'Lagaataar 8-10 ghante kaam karna zaroorat padne par mujhe mentally possible lagta hai.', en:'Working continuously for 8-10 hours when needed feels mentally possible.' },
+  { id:'m10', dim:'med_motivation', hi:'Main doctor banna chahta hoon kyunki genuinely logon ki help karna mujhe satisfy karta hai.', en:'I want to become a doctor because genuinely helping people gives me satisfaction.' },
+  { id:'m11', dim:'med_motivation', hi:'Agar doctor ki salary itni acchi na hoti to bhi main yahi field choose karta.', en:'Even if doctors were not well-compensated, I would still choose this field.' },
+  { id:'m12', dim:'med_motivation', hi:'8-10 saal ki lambi padhai ke baad bhi mujhe yakeen hai ki mera yahi raasta sahi hai.', en:'Even knowing MBBS+PG takes 8-10 years, I am confident this is the right path.' },
+];
+
+var isMedicalTrack = false;
+
+
 
 // ── LANG TEXTS ──
 const T = {
@@ -1689,7 +1722,7 @@ function saveTextAnswers(){
 function _old_renderQuestions_unused() {
   const c = document.getElementById('questionsContainer');
   c.innerHTML = '';
-  questions.forEach((q, i) => {
+  allQ.forEach((q, i) => {
     const txt = lang === 'hi' ? q.hi : q.en;
     const selected = assessmentAnswers[q.id] || 0;
     
@@ -1834,7 +1867,7 @@ function saveAssessmentToSheet(scores, results){
   
   // Method 1: no-cors POST (data saves, no response)
   var payload = {
-    action: 'save_assessment',
+    action: 'saveAssessment',
     id: id,
     name: name,
     scores: {
@@ -1865,12 +1898,18 @@ function saveAssessmentToSheet(scores, results){
     q40: assessmentAnswers['q40'] || '',
     q41: assessmentAnswers['q41'] || '',
     q42: assessmentAnswers['q42'] || '',
+    isMedicalTrack:         isMedicalTrack || false,
+    medverse_score:         isMedicalTrack ? (scores.medverse||0) : '',
+    medverse_level:         isMedicalTrack ? (scores.medverseLevel||'') : '',
+    medverse_investigative: isMedicalTrack ? (scores.investigative||0) : '',
+    medverse_empathy:       isMedicalTrack ? (scores.empathy||0) : '',
+    medverse_resilience:    isMedicalTrack ? (scores.resilience_med||0) : '',
+    medverse_motivation:    isMedicalTrack ? (scores.med_motivation||0) : '',
   };
   
   // POST no-cors - AppScript receives it!
   fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec', {
     method: 'POST',
-    mode: 'no-cors',
     headers: {'Content-Type': 'text/plain'},
     body: JSON.stringify(payload)
   }).then(function(){
@@ -1879,7 +1918,7 @@ function saveAssessmentToSheet(scores, results){
     console.warn('POST failed, trying GET...');
     // Method 2: GET fallback
     var params = new URLSearchParams({
-      action: 'save_assessment',
+      action: 'saveAssessment',
       id: id, name: name,
       a: payload.scores.analytical,
       c: payload.scores.communication,
@@ -1942,6 +1981,23 @@ function runScoringEngine() {
   scores.clarity       = avg('q37','q38','q39');
   scores.readiness     = scores.learning*0.30 + scores.motivation*0.30 + scores.decision*0.20 + scores.clarity*0.20;
   scores.foundation    = scores.learning*0.25 + scores.motivation*0.20 + scores.decision*0.20 + scores.clarity*0.20 + scores.analytical*0.15;
+
+  // MEDVERSE scoring (only if medical track)
+  if(isMedicalTrack){
+    scores.investigative  = avg('m1','m2','m3');
+    scores.empathy        = avg('m4','m5','m6');
+    scores.resilience_med = avg('m7','m8','m9');
+    scores.med_motivation = avg('m10','m11','m12');
+    scores.medverse = Math.round((
+      scores.investigative  * 0.25 +
+      scores.empathy        * 0.30 +
+      scores.resilience_med * 0.25 +
+      scores.med_motivation * 0.20
+    ) * 100) / 100;
+    scores.medverseLevel = scores.medverse >= 5.5 ? 'High Suitability'
+                         : scores.medverse >= 4.0 ? 'Moderate Suitability'
+                         : 'Needs Counselling';
+  }
 
   // Animate loading steps
   const steps = [2,3,4,5];
