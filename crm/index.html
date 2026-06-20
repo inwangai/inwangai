@@ -1774,12 +1774,15 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 
 // ══ SYNC ══
 function syncData(){
-  if(!CFG.webapp){notif('⚠️ Add Web App URL in Settings for live data.');return;}
-  notif('🔄 Syncing from Google Sheets…');
-  // Use ?action=all to get everything in one call
-  fetch(CFG.webapp+'?action=all')
-    .then(r=>r.json())
-    .then(d=>{
+  if(!CFG.webapp){notif('⚠️ Settings mein Web App URL add karo.');return;}
+  notif('🔄 Google Sheets se sync ho raha hai…');
+  fetch(CFG.webapp+'?action=all', {method:'GET'})
+    .then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    })
+    .then(function(d){
+      if(d.error) throw new Error(d.error);
       if(d.leads && d.leads.length){
         LEADS = d.leads;
         notif('✅ Synced: '+d.leads.length+' leads');
@@ -1821,14 +1824,12 @@ function pushToSheet(action, payload){
     else notif('⚠️ '+(d.error||'Sheet update failed'));
   })
   .catch(function(){
-    // Fallback no-cors POST
-    fetch(CFG.webapp, {
-      method:'POST',
-      mode:'no-cors',
-      headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify(Object.assign({action:action}, payload))
-    });
-    notif('✅ Update sent!');
+    // Fallback GET request
+    var fbParams = new URLSearchParams(Object.assign({action:action}, payload));
+    fetch(CFG.webapp+'?'+fbParams.toString())
+      .then(function(r){return r.json();})
+      .then(function(d){ notif(d.success?'✅ Updated!':'⚠️ '+(d.error||'Failed')); })
+      .catch(function(){ notif('⚠️ Update failed — internet check karo'); });
   });
 }
 
