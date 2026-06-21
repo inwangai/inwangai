@@ -3084,7 +3084,7 @@ window.onload = function(){
   document.getElementById('ltxt').textContent = 'Report load ho rahi hai...';
 
   // JSONP fetch
-  fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?action=report&id=' + encodeURIComponent(leadId))
+  fetch('https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec?action=report&id=' + encodeURIComponent(leadId))
   .then(function(r){ return r.json(); })
   .then(function(d){
     if(!d || d.error){
@@ -3108,7 +3108,7 @@ window.onload = function(){
       // ── LAYER 1: Report View Tracker ──
       // Ping AppScript when report is opened
       try{
-        fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?action=track_report_view&id='+encodeURIComponent(leadId)+'&paid='+encodeURIComponent(paid||''), {
+        fetch('https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec?action=track_report_view&id='+encodeURIComponent(leadId)+'&paid='+encodeURIComponent(paid||''), {
           method:'GET', mode:'no-cors'
         });
       } catch(e3){ /* silent */ }
