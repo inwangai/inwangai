@@ -2410,7 +2410,9 @@ function AL(){
   // CTA
   document.getElementById('ctaT').textContent=IP?(hi?'Counselling Session Book Karo':'Book a Counselling Session'):(hi?'Poori report unlock karo':'Unlock Your Full Report');
   document.getElementById('ctaS').textContent=IP?(hi?'Expert counsellor se personally baat karo. 30-min free session available.':'Speak with an expert counsellor. A free 30-min session is available.'):(hi?'₹149 mein full career report milegi.':'Get your complete career report for ₹149.');
-  document.getElementById('ctaB').innerHTML=IP?'<a href="https://wa.me/919470659224?text=Hi,+INWANG+ID:+'+d.id+'" target="_blank" class="bg">📞 Book on WhatsApp</a><button onclick="window.print()" class="bo">🖨 Save PDF</button>':'<a href="unlock.html?id='+d.id+'" class="bg">Unlock Full Report — ₹149</a><a href="index.html" class="bo">Back to Home</a>';
+  document.getElementById('ctaB').innerHTML=IP
+    ?'<a href="https://wa.me/919470659224?text=Hi,+INWANG+ID:+'+d.id+'" target="_blank" class="bg">📞 Book on WhatsApp</a><button onclick="window.print()" class="bo">🖨 Save PDF</button>'
+    :'<a href="https://inwangai.com/payment?id='+d.id+'" class="bg">🔓 Unlock Full Report</a><a href="https://inwangai.com" class="bo">← Home</a>';
 }
 function TL(){L=L==='hi'?'en':'hi';if(D){RND(D);}else{AL();}}
 
