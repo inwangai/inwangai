@@ -382,7 +382,7 @@ function verifyCoupon(){
     if(d.valid){
       ok.style.display = 'block';
       setTimeout(function(){
-        window.location.href = 'https://inwangai.com/report?id=' + encodeURIComponent(leadId) + '&code=' + encodeURIComponent(code);
+        window.location.href = 'https://inwangai.com/report?id=' + encodeURIComponent(leadId) + '&paid=true&code=' + encodeURIComponent(code);
       }, 1500);
     } else {
       err.textContent = '❌ ' + (d.message || 'Invalid coupon code.');
