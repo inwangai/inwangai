@@ -1778,73 +1778,45 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 // ══ SYNC ══
 function syncData(){
   if(!CFG.webapp){notif('⚠️ Settings mein Web App URL add karo.');return;}
-  notif('🔄 Google Sheets se sync ho raha hai…');
-  fetch(CFG.webapp+'?action=all', {
-    method:'GET',
-    redirect:'follow',
-    cache:'no-cache',
-    headers:{'Accept':'application/json'}
-  })
-  .then(function(r){ return r.text(); })
-  .then(function(txt){
-    try{ return JSON.parse(txt); }
-    catch(e){ throw new Error('Invalid JSON: '+txt.substring(0,100)); }
-  })
-    .then(function(d){
-      if(d.error) throw new Error(d.error);
-      if(d.leads && d.leads.length){
-        LEADS = d.leads;
-        notif('✅ Synced: '+d.leads.length+' leads');
-      }
-      if(d.assessments && d.assessments.length){
-        ASSESSMENTS = d.assessments;
-      }
-      if(d.duplicates && d.duplicates.length){
-        DUPS = d.duplicates;
-      }
-      // Re-render everything
-      renderDashboard();
-      renderLeads();
-      renderKanban();
-      renderAssessments();
-      renderReports();
-      renderDuplicates();
-      updateSideBadges();
-      populateFilters();
-    })
-    .catch(e=>{
-      notif('⚠️ Sync failed — Check Web App URL & deployment');
-      console.error(e);
-    });
+  notif('🔄 Syncing...');
+  var cbName='inwang_'+Date.now();
+  var script=document.createElement('script');
+  window[cbName]=function(d){
+    delete window[cbName];
+    if(script.parentNode) script.parentNode.removeChild(script);
+    if(d.error){notif('⚠️ '+d.error);return;}
+    if(d.leads&&d.leads.length){LEADS=d.leads;notif('✅ Synced: '+d.leads.length+' leads');}
+    if(d.assessments){ASSESSMENTS=d.assessments;}
+    renderDashboard();renderLeads();renderKanban();
+    renderAssessments();renderReports();
+    updateSideBadges();populateFilters();
+  };
+  script.onerror=function(){
+    delete window[cbName];
+    if(script.parentNode) script.parentNode.removeChild(script);
+    notif('⚠️ Sync failed — Check deployment settings');
+  };
+  script.src=CFG.webapp+'?action=all&callback='+cbName+'&t='+Date.now();
+  document.body.appendChild(script);
 }
 
 // Write back to Sheet (POST)
 function pushToSheet(action, payload){
   if(!CFG.webapp) return;
-  
-  // Build GET params
-  var params = new URLSearchParams({action: action});
-  Object.keys(payload).forEach(function(k){ params.set(k, payload[k]); });
-  
-  fetch(CFG.webapp + '?' + params.toString(), {
-    method:'GET',
-    redirect:'follow',
-    cache:'no-cache'
-  })
-  .then(function(r){ return r.text(); })
-  .then(function(txt){ try{ return JSON.parse(txt); }catch(e){ return {success:true}; } })
-  .then(function(d){
-    if(d.success) notif('✅ Saved!');
-    else notif('⚠️ '+(d.error||'Sheet update failed'));
-  })
-  .catch(function(){
-    // Fallback GET request
-    var fbParams = new URLSearchParams(Object.assign({action:action}, payload));
-    fetch(CFG.webapp+'?'+fbParams.toString())
-      .then(function(r){return r.json();})
-      .then(function(d){ notif(d.success?'✅ Updated!':'⚠️ '+(d.error||'Failed')); })
-      .catch(function(){ notif('⚠️ Update failed — internet check karo'); });
-  });
+  var cbName='inwang_push_'+Date.now();
+  var params=new URLSearchParams(Object.assign({action:action,callback:cbName},payload));
+  var script=document.createElement('script');
+  window[cbName]=function(d){
+    delete window[cbName];
+    if(script.parentNode) script.parentNode.removeChild(script);
+    notif(d&&d.success?'✅ Saved!':'⚠️ '+(d&&d.error||'Failed'));
+  };
+  script.onerror=function(){
+    delete window[cbName];
+    if(script.parentNode) script.parentNode.removeChild(script);
+  };
+  script.src=CFG.webapp+'?'+params.toString();
+  document.body.appendChild(script);
 }
 
 // ══ SETTINGS ══
