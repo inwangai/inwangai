@@ -797,7 +797,7 @@ tr:hover td{background:rgba(200,168,75,.025)}
 <script>
 // ══ CONFIG ══
 var CFG = {
-  webapp: localStorage.getItem('crm_webapp')||'https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec',
+  webapp: localStorage.getItem('crm_webapp')||'https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec',
   counsellor: localStorage.getItem('crm_counsellor')||''
 };
 
@@ -1696,7 +1696,7 @@ function generateAndSendCoupon(id){
   if(!l){notif('Lead not found');return;}
   notif('Generating coupon for '+l.name+'...');
   
-  fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?action=generate_coupon&id='+encodeURIComponent(id))
+  fetch('https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec?action=generate_coupon&id='+encodeURIComponent(id))
   .then(function(r){return r.json();})
   .then(function(d){
     if(d && d.success && d.coupon){
@@ -1779,11 +1779,17 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 function syncData(){
   if(!CFG.webapp){notif('⚠️ Settings mein Web App URL add karo.');return;}
   notif('🔄 Google Sheets se sync ho raha hai…');
-  fetch(CFG.webapp+'?action=all', {method:'GET'})
-    .then(function(r){
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      return r.json();
-    })
+  fetch(CFG.webapp+'?action=all', {
+    method:'GET',
+    redirect:'follow',
+    cache:'no-cache',
+    headers:{'Accept':'application/json'}
+  })
+  .then(function(r){ return r.text(); })
+  .then(function(txt){
+    try{ return JSON.parse(txt); }
+    catch(e){ throw new Error('Invalid JSON: '+txt.substring(0,100)); }
+  })
     .then(function(d){
       if(d.error) throw new Error(d.error);
       if(d.leads && d.leads.length){
@@ -1820,8 +1826,13 @@ function pushToSheet(action, payload){
   var params = new URLSearchParams({action: action});
   Object.keys(payload).forEach(function(k){ params.set(k, payload[k]); });
   
-  fetch(CFG.webapp + '?' + params.toString())
-  .then(function(r){ return r.json(); })
+  fetch(CFG.webapp + '?' + params.toString(), {
+    method:'GET',
+    redirect:'follow',
+    cache:'no-cache'
+  })
+  .then(function(r){ return r.text(); })
+  .then(function(txt){ try{ return JSON.parse(txt); }catch(e){ return {success:true}; } })
   .then(function(d){
     if(d.success) notif('✅ Saved!');
     else notif('⚠️ '+(d.error||'Sheet update failed'));
@@ -2085,7 +2096,7 @@ function submitNewLead(){
   if(!mobRe.test(mob)){if(err){err.textContent='Mobile 10 digits!';err.style.display='block';}return;}
   if(err)err.style.display='none';
   var params=new URLSearchParams({action:'register',name:name,mobile:mob,email:email,city:city,state:'',qual:qual,source:'CRM Manual',whatsapp:mob});
-  fetch('https://script.google.com/macros/s/AKfycbwU-FHQij4bNhWGyol0jRZz6x2Mkc3h5g8LDM2APdlZFm5TLyDxOo6flpPrCFxs3eh1/exec?'+params.toString())
+  fetch('https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec?'+params.toString())
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.success){notif('Lead added: '+(d.id||''));closeNewLeadModal();setTimeout(syncData,1000);}
