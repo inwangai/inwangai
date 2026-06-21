@@ -1512,6 +1512,9 @@ function buildInfoTab(l){
     <div class="ds"><div class="dst">Career Goals</div>
       <div class="field-row full"><div><div class="fl">Goal</div><div class="fv">${l.goal||'—'}</div></div></div>
       <div class="field-row full"><div><div class="fl">Confusion</div><div class="fv">${l.confusion||'—'}</div></div></div>
+      ${l.neet_status||l.neet_score?`<div class="field-row"><div><div class="fl" style="color:#00d464">NEET Status</div><div class="fv">${l.neet_status||'—'}</div></div><div><div class="fl" style="color:#00d464">NEET Score</div><div class="fv">${l.neet_score||'—'}</div></div></div>
+      <div class="field-row"><div><div class="fl" style="color:#00d464">Category</div><div class="fv">${l.neet_status||'—'}</div></div><div><div class="fl" style="color:#00d464">India/Abroad</div><div class="fv">${l.india_abroad||'—'}</div></div></div>`:''}
+      ${l.viewCount>0?`<div class="field-row"><div><div class="fl" style="color:#c8a84b">Report Views</div><div class="fv">${l.viewCount}x</div></div><div><div class="fl" style="color:#c8a84b">MEDVERSE Score</div><div class="fv">${l.medverseScore>0?l.medverseScore+'/7':'—'}</div></div></div>`:''}
     </div>
     <div class="ds"><div class="dst">CRM</div>
       <div class="field-row"><div><div class="fl">Source</div><div class="fv">${l.source||'—'} · ${l.sdet||''}</div></div><div><div class="fl">Counsellor</div><div class="fv">${l.counsellor||'UNASSIGNED'}</div></div></div>
@@ -1641,12 +1644,12 @@ function updateStatus(id,val){
   l.status=val;
   renderLeads();renderKanban();renderDashboard();
   notif('✅ '+id+' → '+val);
-  pushToSheet('update_status',{id,status:val});
+  pushToSheet('updateLead',{id,status:val});
 }
 function updateCounsellor(id,val){
   var l=LEADS.find(x=>x.id===id);if(!l)return;
   l.counsellor=val;notif('👤 Counsellor updated: '+val);
-  pushToSheet('update_counsellor',{id,counsellor:val});
+  pushToSheet('updateLead',{id,counsellor:val});
 }
 function updatePkg(id,val){
   var l=LEADS.find(x=>x.id===id);if(!l)return;
@@ -1654,7 +1657,7 @@ function updatePkg(id,val){
   if(val) l.status='PAID';
   renderRevenue();renderReports();
   notif('💰 Package: ₹'+val);
-  if(val) pushToSheet('update_package',{id,amount:val});
+  if(val) pushToSheet('updateLead',{id,amount:val});
 }
 function markPaid(id){
   var l=LEADS.find(x=>x.id===id);if(!l)return;
@@ -1668,7 +1671,7 @@ function setFollowUp(id){
   l.next_fu=d.value;l.status='FOLLOW-UP';
   renderFollowUps();renderDashboard();updateSideBadges();
   notif('📅 Follow-up set: '+d.value);
-  pushToSheet('set_followup',{id,date:d.value});
+  pushToSheet('updateLead',{id,date:d.value});
 }
 function addNote(id,type){
   var inp=document.getElementById('note-input-'+id);
@@ -1681,7 +1684,7 @@ function addNote(id,type){
   var l=LEADS.find(x=>x.id===id);
   document.getElementById('mtab-notes').innerHTML=buildNotesTab(l);
   notif('📝 Note added!');
-  pushToSheet('add_note',{id,note:noteText,by});
+  pushToSheet('updateLead',{id,note:noteText,by});
 }
 function openWA(mob,name){
   if(!mob||mob==='—'){notif('⚠️ No mobile');return;}
@@ -2150,7 +2153,7 @@ function saveEditLead(id){
   if(m)m.remove();
   renderLeads();renderKanban();renderDashboard();
   notif('Lead updated: '+id);
-  pushToSheet('update_lead',{id:id,name:l.name,father:l.father,mobile:l.smob,pmobile:l.pmob,email:l.email,city:l.city,state:l.state,qual:l.qual,stream:l.stream,marks:l.marks,goal:l.goal,confusion:l.confusion,concern:l.concern,priority:l.priority,source:l.source});
+  pushToSheet('updateLead',{id:id,name:l.name,father:l.father,mobile:l.smob,pmobile:l.pmob,email:l.email,city:l.city,state:l.state,qual:l.qual,stream:l.stream,marks:l.marks,goal:l.goal,confusion:l.confusion,concern:l.concern,priority:l.priority,source:l.source});
 }
 
 function deleteLead(id){
@@ -2160,7 +2163,7 @@ function deleteLead(id){
   var m2=document.getElementById('lead-modal');if(m2)m2.style.display='none';
   renderLeads();renderKanban();renderDashboard();
   notif('Deleted: '+id);
-  pushToSheet('delete_lead',{id:id});
+  pushToSheet('updateLead',{id:id});
 }
 </script>
 
