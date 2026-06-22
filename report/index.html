@@ -3093,41 +3093,29 @@ window.onload = function(){
     delete window[cbName];
     if(script.parentNode) script.parentNode.removeChild(script);
     if(data.error){ showError(data.error); return; }
-    // Flatten lead + score into one object
+
+    // Flatten lead + score
     var d = {};
     if(data.lead) Object.assign(d, data.lead);
-    else Object.assign(d, data);
-    if(data.score && typeof data.score === 'object'){
-      Object.assign(d, data.score);
-    }
-    // Build d.scores with BOTH short (a,c,l) AND long field names
-    var _a = parseFloat(d.analytical||d.a||d.scores&&d.scores.analytical||0);
-    var _c = parseFloat(d.communication||d.c||d.scores&&d.scores.communication||0);
-    var _l = parseFloat(d.learning||d.l||d.scores&&d.scores.learning||0);
-    var _de= parseFloat(d.decision||d.d||d.scores&&d.scores.decision||0);
-    var _m = parseFloat(d.motivation||d.m||d.scores&&d.scores.motivation||0);
-    var _cl= parseFloat(d.clarity||d.cl||d.scores&&d.scores.clarity||0);
-    var _r = parseFloat(d.readiness||d.r||d.scores&&d.scores.readiness||0);
-    var _f = parseFloat(d.foundation||d.f||d.scores&&d.scores.foundation||0);
-    d.scores = {
-      // Short keys (used by mergeWithDefaults)
-      a:_a, c:_c, l:_l, d:_de, m:_m, cl:_cl, r:_r, f:_f,
-      // Long keys (used by GLS, GP etc)
-      analytical:_a, communication:_c, learning:_l, decision:_de,
-      motivation:_m, clarity:_cl, readiness:_r, foundation:_f,
-    };
-    // Cluster fields
-    d.c1 = d.c1 || '';
-    d.c2 = d.c2 || '';
-    d.c3 = d.c3 || '';
-    d.rl = d.rl || '';
-    d.str = d.str || '';
-    d.gaps = d.gaps || '';
-    d.beh = d.beh || '';
-    d.streamPrimary = d.streamPrimary || d.sp || '';
-    d.pathway = d.pathway || d.path || '';
-    d.courses = d.courses || '';
-    d.roles = d.roles || '';
+    if(data.score) Object.assign(d, data.score);
+
+    // d.scores with short+long keys
+    var sc = data.score || {};
+    d.scores = sc;
+
+    // Calculate readPct, pri, found etc that RND() needs on d directly
+    var a  = sc.a  || sc.analytical    || 0;
+    var c  = sc.c  || sc.communication || 0;
+    var l  = sc.l  || sc.learning      || 0;
+    var de = sc.d  || sc.decision      || 0;
+    var m  = sc.m  || sc.motivation    || 0;
+    var cl = sc.cl || sc.clarity       || 0;
+
+    d.readPct  = Math.round((a+c+l+de+m+cl)/42*100);
+    d.found    = Math.round((a+l+de)/21*100) + '%';
+    d.pri      = sc.c1 || sc.streamPrimary || '';
+    d.qualStatus = d.qual || '';
+
     D = d;
     try{ RND(D); AL(); }
     catch(e){ showError(e.message||String(e)); }
@@ -3137,7 +3125,7 @@ window.onload = function(){
     if(script.parentNode) script.parentNode.removeChild(script);
     showError('Report load nahi hui. Internet check karo ya page refresh karo.');
   };
-  script.src = 'https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec?action=getReport&id=' + encodeURIComponent(leadId) + '&callback=' + cbName;
+  script.src = 'https://script.google.com/macros/s/AKfycbyHYvQmDKXdWOj8ouJYrglaIxDwWyp4nzkWM-JaePn-9M95qN3Wgs5EZJnfwIFrcUJz/exec?action=getReport&id=' + encodeURIComponent(leadId) + '&callback=' + cbName;
   document.body.appendChild(script);
 
   // Track view (fire and forget)
@@ -3145,7 +3133,7 @@ window.onload = function(){
     var t = document.createElement('script');
     var tn = 'noop_' + Date.now();
     window[tn] = function(){};
-    t.src = 'https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec?action=track_report_view&id=' + encodeURIComponent(leadId) + '&callback=' + tn;
+    t.src = 'https://script.google.com/macros/s/AKfycbyHYvQmDKXdWOj8ouJYrglaIxDwWyp4nzkWM-JaePn-9M95qN3Wgs5EZJnfwIFrcUJz/exec?action=track_report_view&id=' + encodeURIComponent(leadId) + '&callback=' + tn;
     document.body.appendChild(t);
   }, 2000);
 };
