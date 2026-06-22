@@ -502,7 +502,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:58px;display:flex;ali
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <nav class="no-print">
@@ -3075,9 +3074,11 @@ function extractField(text, label){
 window.onload = function(){
   var params = new URLSearchParams(location.search);
   var leadId = params.get('id');
+  var paid   = params.get('paid') === 'true';
+  var code   = params.get('code') || '';
+  IP = paid || (code.length > 0);
 
   if(!leadId){
-    // No ID — show demo
     document.getElementById('ltxt').textContent = 'Demo report load ho rahi hai...';
     try{ RND(demo); } catch(e){ showError(e); }
     return;
@@ -3085,41 +3086,35 @@ window.onload = function(){
 
   document.getElementById('ltxt').textContent = 'Report load ho rahi hai...';
 
-  // JSONP fetch
-  fetch('https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec?action=report&id=' + encodeURIComponent(leadId))
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    if(!d || d.error){
-      try{ RND(demo); } catch(e2){ showError(e2); }
-      return;
-    }
-    try{
-      // Check if assessment done
-      if(!d.c1 || !d.scores || Object.keys(d.scores).length === 0){
-        document.getElementById('ltxt').innerHTML = 
-          '<div style="text-align:center;padding:60px 20px">' +
-          '<div style="font-size:40px;margin-bottom:16px">📋</div>' +
-          '<div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px">Assessment Abhi Baki Hai</div>' +
-          '<div style="font-size:13px;color:#6b7a99;margin-bottom:24px;max-width:400px;margin-left:auto;margin-right:auto;line-height:1.7">Report generate karne ke liye pehle 40-question career assessment complete karo. Sirf 15-20 minutes lagte hain!</div>' +
-          '<a href="https://inwangai.com/assess?id=' + leadId + '" style="display:inline-block;background:linear-gradient(135deg,#c8a84b,#e8c96d);color:#020408;padding:14px 28px;border-radius:10px;font-size:14px;font-weight:800;text-decoration:none">Assessment Shuru Karo →</a>' +
-          '</div>';
-        return;
-      }
-      RND(mergeWithDefaults(d));
-      
-      // ── LAYER 1: Report View Tracker ──
-      // Ping AppScript when report is opened
-      try{
-        fetch('https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec?action=track_report_view&id='+encodeURIComponent(leadId)+'&paid='+encodeURIComponent(paid||''), {
-          method:'GET', mode:'no-cors'
-        });
-      } catch(e3){ /* silent */ }
-      
-    } catch(e2){ showError(e2); }
-  })
-  .catch(function(){
-    try{ RND(demo); } catch(e2){ showError(e2); }
-  });
+  // JSONP — CORS bypass
+  var cbName = 'rpt_cb_' + Date.now();
+  var script = document.createElement('script');
+  window[cbName] = function(data){
+    delete window[cbName];
+    if(script.parentNode) script.parentNode.removeChild(script);
+    if(data.error){ showError(data.error); return; }
+    var d = data.lead || data;
+    if(data.score) Object.assign(d, data.score);
+    D = d;
+    try{ RND(D); AL(); }
+    catch(e){ showError(e.message||String(e)); }
+  };
+  script.onerror = function(){
+    delete window[cbName];
+    if(script.parentNode) script.parentNode.removeChild(script);
+    showError('Report load nahi hui. Internet check karo ya page refresh karo.');
+  };
+  script.src = 'https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec?action=getReport&id=' + encodeURIComponent(leadId) + '&callback=' + cbName;
+  document.body.appendChild(script);
+
+  // Track view (fire and forget)
+  setTimeout(function(){
+    var t = document.createElement('script');
+    var tn = 'noop_' + Date.now();
+    window[tn] = function(){};
+    t.src = 'https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec?action=track_report_view&id=' + encodeURIComponent(leadId) + '&callback=' + tn;
+    document.body.appendChild(t);
+  }, 2000);
 };
 
 function showError(e){
