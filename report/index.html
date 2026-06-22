@@ -3084,6 +3084,22 @@ window.onload = function(){
     return;
   }
 
+  // Check sessionStorage cache first (instant load on refresh)
+  var cacheKey = 'inwang_report_' + leadId;
+  var cached = null;
+  try{ cached = sessionStorage.getItem(cacheKey); }catch(e){}
+  
+  if(cached){
+    try{
+      var d = JSON.parse(cached);
+      mergeWithDefaults(d);
+      D = d;
+      document.getElementById('ltxt').textContent = '';
+      try{ RND(D); AL(); }catch(e){ showError(e.message||String(e)); }
+      return;
+    }catch(e){ cached = null; }
+  }
+
   document.getElementById('ltxt').textContent = 'Report load ho rahi hai...';
 
   // JSONP — CORS bypass
@@ -3137,9 +3153,11 @@ window.onload = function(){
     d.pType = d.pType || (d.scores && d.scores.a >= 5 ? 'Strategic Thinker' : 'Creative Explorer');
     d.pTag  = d.pTag  || (d.c1 || 'Career Oriented');
 
-    // mergeWithDefaults fills ALL missing fields (intro, pType, readPct etc)
+    // mergeWithDefaults fills ALL missing fields
     mergeWithDefaults(d);
     D = d;
+    // Cache for instant reload
+    try{ sessionStorage.setItem('inwang_report_'+leadId, JSON.stringify(d)); }catch(e){}
     try{ RND(D); AL(); }
     catch(e){ showError(e.message||String(e)); }
   };
