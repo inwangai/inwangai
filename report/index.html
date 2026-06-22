@@ -2579,6 +2579,32 @@ function mergeWithDefaults(d){
   // ── ELIGIBILITY MATRIX 2026 + GOAL LOGIC ──
   var _stream = (d.stream||'').toLowerCase();
   var _goal   = (d.goal||'').toLowerCase();
+  // goalCluster — map goal to career cluster
+  var goalCluster = '';
+  var _gcMap = [
+    {kw:['doctor','mbbs','neet','surgeon','bds','medical'],cl:'Medical / Healthcare'},
+    {kw:['engineer','iit','jee','btech','b.tech'],cl:'Engineering / Technical'},
+    {kw:['software','coding','developer','bca','mca'],cl:'IT / Computer Applications'},
+    {kw:['ca','finance','banking','bcom','accountant'],cl:'Commerce / Finance'},
+    {kw:['ias','upsc','civil','bpsc','ssc','ibps'],cl:'Civil Services / Govt Jobs'},
+    {kw:['army','nda','defence','military','airforce'],cl:'Defence / Uniform Services'},
+    {kw:['mba','business','management','entrepreneur'],cl:'Management / Business'},
+    {kw:['lawyer','law','clat','llb'],cl:'Law / Legal Studies'},
+    {kw:['teacher','b.ed','ctet','lecturer'],cl:'Teaching / Education'},
+    {kw:['scientist','research','isro','drdo','phd'],cl:'Research / Science'},
+    {kw:['nurse','nursing','paramedical','bpt'],cl:'Paramedical / Allied Health'},
+    {kw:['pharmacy','pharmacist','b.pharm'],cl:'Pharmacy'},
+    {kw:['journalist','media','bjmc'],cl:'Media / Journalism / Communication'},
+    {kw:['architect','designer','nata','nift'],cl:'Design / Architecture / Fine Arts'},
+    {kw:['hotel','chef','hospitality'],cl:'Hotel Management / Hospitality'},
+    {kw:['sports','cricket','football','athlete'],cl:'Sports / Physical Education'},
+    {kw:['agri','farming','agriculture'],cl:'Agriculture / Environmental Sciences'},
+    {kw:['fashion','styling','retail'],cl:'Fashion / Retail / Lifestyle'},
+    {kw:['social work','ngo','welfare'],cl:'Social Work / NGO'},
+  ];
+  for(var _gi=0;_gi<_gcMap.length;_gi++)
+    for(var _gj=0;_gj<_gcMap[_gi].kw.length;_gj++)
+      if(_goal.indexOf(_gcMap[_gi].kw[_gj])>=0){ goalCluster=_gcMap[_gi].cl; break; }
   var _isGrad = ['ug','graduate','pg','mba','b.tech','bca','bsc','working','diploma completed','iti completed']
     .some(function(k){ return (d.qual||'').toLowerCase().includes(k); });
 
