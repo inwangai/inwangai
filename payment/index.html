@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="alternate icon" href="/favicon.ico">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>INWANG — Unlock Your Career Report</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -307,7 +309,7 @@ nav{position:relative;z-index:10;padding:16px 24px;display:flex;align-items:cent
 </div>
 
 <script>
-var WEBAPP = 'https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec';
+var WEBAPP = 'https://script.google.com/macros/s/AKfycbyEA5aKyF7nfzcG9IBkpjKbuxS2FZmn4bWqh812-MhuW-neR9u91xatt_Cp79H7TOzL/exec';
 var leadId = '';
 var selectedPkg = 'standard';
 var selectedPkgAmt = 349;
@@ -372,27 +374,33 @@ function verifyCoupon(){
   var ok = document.getElementById('couponOk');
   err.style.display = 'none';
   ok.style.display = 'none';
-  
+
   if(!code){ err.textContent = '❌ Coupon code enter karo.'; err.style.display='block'; return; }
   if(!leadId){ err.textContent = '❌ INWANG ID missing. Register page se try karo.'; err.style.display='block'; return; }
-  
-  fetch(WEBAPP + '?action=verify_coupon&id=' + encodeURIComponent(leadId) + '&code=' + encodeURIComponent(code))
-  .then(function(r){ return r.json(); })
-  .then(function(d){
+
+  // JSONP — CORS bypass
+  var cbName = 'coupon_cb_' + Date.now();
+  var script = document.createElement('script');
+  window[cbName] = function(d){
+    delete window[cbName];
+    if(script.parentNode) script.parentNode.removeChild(script);
     if(d.valid){
       ok.style.display = 'block';
       setTimeout(function(){
         window.location.href = 'https://inwangai.com/report?id=' + encodeURIComponent(leadId) + '&paid=true&code=' + encodeURIComponent(code);
       }, 1500);
     } else {
-      err.textContent = '❌ ' + (d.message || 'Invalid coupon code.');
+      err.textContent = '❌ ' + (d.message || d.error || 'Invalid coupon code.');
       err.style.display = 'block';
     }
-  })
-  .catch(function(){
+  };
+  script.onerror = function(){
+    delete window[cbName];
     err.textContent = '❌ Network error. Please try again.';
     err.style.display = 'block';
-  });
+  };
+  script.src = WEBAPP + '?action=validate_coupon&id=' + encodeURIComponent(leadId) + '&code=' + encodeURIComponent(code) + '&callback=' + cbName;
+  document.body.appendChild(script);
 }
 </script>
 
