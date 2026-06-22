@@ -2760,7 +2760,9 @@ function mergeWithDefaults(d){
   }
   
   // ── ALIGNMENT STATUS ──
-  var alignmentStatus = 'aligned'; // aligned / goal_mismatch / stream_mismatch / both_mismatch
+  var goalMatch    = !goalCluster || goalCluster === (d.c1||'');
+  var clusterValid = (d.streamAlign||'').toLowerCase().indexOf('re-evaluate') < 0;
+  var alignmentStatus = 'aligned';
   if(goalCluster && !goalMatch){
     if(!clusterValid) alignmentStatus = 'both_mismatch';
     else alignmentStatus = 'goal_mismatch';
@@ -3192,7 +3194,7 @@ window.onload = function(){
     if(script.parentNode) script.parentNode.removeChild(script);
     showError('Report load nahi hui. Internet check karo ya page refresh karo.');
   };
-  script.src = 'https://script.google.com/macros/s/AKfycbyT5uh8y4Db0duT2izlZCrhHFxJeTKdEa3OibxEYTAVjf0InAB-Wa9mUJ36yvS9LdEu/exec?action=getReport&id=' + encodeURIComponent(leadId) + '&callback=' + cbName;
+  script.src = 'https://script.google.com/macros/s/AKfycbyEA5aKyF7nfzcG9IBkpjKbuxS2FZmn4bWqh812-MhuW-neR9u91xatt_Cp79H7TOzL/exec?action=getReport&id=' + encodeURIComponent(leadId) + '&callback=' + cbName;
   document.body.appendChild(script);
 
   // Track view (fire and forget)
@@ -3200,7 +3202,7 @@ window.onload = function(){
     var t = document.createElement('script');
     var tn = 'noop_' + Date.now();
     window[tn] = function(){};
-    t.src = 'https://script.google.com/macros/s/AKfycbyT5uh8y4Db0duT2izlZCrhHFxJeTKdEa3OibxEYTAVjf0InAB-Wa9mUJ36yvS9LdEu/exec?action=track_report_view&id=' + encodeURIComponent(leadId) + '&callback=' + tn;
+    t.src = 'https://script.google.com/macros/s/AKfycbyEA5aKyF7nfzcG9IBkpjKbuxS2FZmn4bWqh812-MhuW-neR9u91xatt_Cp79H7TOzL/exec?action=track_report_view&id=' + encodeURIComponent(leadId) + '&callback=' + tn;
     document.body.appendChild(t);
   }, 2000);
 };
