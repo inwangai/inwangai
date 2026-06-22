@@ -1822,7 +1822,7 @@ function submitForm1() {
   studentName = name;
   inwangId = generateLocalId();
 
-  fetch('https://script.google.com/macros/s/AKfycbyT5uh8y4Db0duT2izlZCrhHFxJeTKdEa3OibxEYTAVjf0InAB-Wa9mUJ36yvS9LdEu/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbyEA5aKyF7nfzcG9IBkpjKbuxS2FZmn4bWqh812-MhuW-neR9u91xatt_Cp79H7TOzL/exec', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
@@ -1910,7 +1910,7 @@ function saveAssessmentToSheet(scores, results){
   };
   
   // POST no-cors - AppScript receives it!
-  fetch('https://script.google.com/macros/s/AKfycbyT5uh8y4Db0duT2izlZCrhHFxJeTKdEa3OibxEYTAVjf0InAB-Wa9mUJ36yvS9LdEu/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbyEA5aKyF7nfzcG9IBkpjKbuxS2FZmn4bWqh812-MhuW-neR9u91xatt_Cp79H7TOzL/exec', {
     method: 'POST',
     headers: {'Content-Type': 'text/plain'},
     body: JSON.stringify(payload)
@@ -1939,7 +1939,7 @@ function saveAssessmentToSheet(scores, results){
       q42: payload.q42,
     });
     var img = new Image();
-    img.src = 'https://script.google.com/macros/s/AKfycbyT5uh8y4Db0duT2izlZCrhHFxJeTKdEa3OibxEYTAVjf0InAB-Wa9mUJ36yvS9LdEu/exec?' + params.toString();
+    img.src = 'https://script.google.com/macros/s/AKfycbyEA5aKyF7nfzcG9IBkpjKbuxS2FZmn4bWqh812-MhuW-neR9u91xatt_Cp79H7TOzL/exec?' + params.toString();
   });
 }
 
