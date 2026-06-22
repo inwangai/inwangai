@@ -799,7 +799,7 @@ tr:hover td{background:rgba(200,168,75,.025)}
 <script>
 // ══ CONFIG ══
 var CFG = {
-  webapp: localStorage.getItem('crm_webapp')||'https://script.google.com/macros/s/AKfycbyT5uh8y4Db0duT2izlZCrhHFxJeTKdEa3OibxEYTAVjf0InAB-Wa9mUJ36yvS9LdEu/exec',
+  webapp: localStorage.getItem('crm_webapp')||'https://script.google.com/macros/s/AKfycbyEA5aKyF7nfzcG9IBkpjKbuxS2FZmn4bWqh812-MhuW-neR9u91xatt_Cp79H7TOzL/exec',
   counsellor: localStorage.getItem('crm_counsellor')||''
 };
 
@@ -1698,7 +1698,7 @@ function generateAndSendCoupon(id){
   if(!l){notif('Lead not found');return;}
   notif('Generating coupon for '+l.name+'...');
   
-  fetch('https://script.google.com/macros/s/AKfycbyT5uh8y4Db0duT2izlZCrhHFxJeTKdEa3OibxEYTAVjf0InAB-Wa9mUJ36yvS9LdEu/exec?action=generate_coupon&id='+encodeURIComponent(id))
+  fetch('https://script.google.com/macros/s/AKfycbyEA5aKyF7nfzcG9IBkpjKbuxS2FZmn4bWqh812-MhuW-neR9u91xatt_Cp79H7TOzL/exec?action=generate_coupon&id='+encodeURIComponent(id))
   .then(function(r){return r.json();})
   .then(function(d){
     if(d && d.success && d.coupon){
@@ -2070,7 +2070,7 @@ function submitNewLead(){
   if(!mobRe.test(mob)){if(err){err.textContent='Mobile 10 digits!';err.style.display='block';}return;}
   if(err)err.style.display='none';
   var params=new URLSearchParams({action:'register',name:name,mobile:mob,email:email,city:city,state:'',qual:qual,source:'CRM Manual',whatsapp:mob});
-  fetch('https://script.google.com/macros/s/AKfycbyT5uh8y4Db0duT2izlZCrhHFxJeTKdEa3OibxEYTAVjf0InAB-Wa9mUJ36yvS9LdEu/exec?'+params.toString())
+  fetch('https://script.google.com/macros/s/AKfycbyEA5aKyF7nfzcG9IBkpjKbuxS2FZmn4bWqh812-MhuW-neR9u91xatt_Cp79H7TOzL/exec?'+params.toString())
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.success){notif('Lead added: '+(d.id||''));closeNewLeadModal();setTimeout(syncData,1000);}
