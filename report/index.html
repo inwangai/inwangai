@@ -3116,6 +3116,29 @@ window.onload = function(){
     d.pri        = d.c1 || sc.streamPrimary || '';
     d.qualStatus = d.qual || '';
 
+    // Generate intro text dynamically
+    var _nm = d.name || 'Student';
+    var _c1 = d.c1 || 'your chosen field';
+    var _rl = d.rl || 'High Readiness';
+    var _goal = d.goal || '';
+    d.intro = {
+      body_hi: _nm + ' ki is AI-based career assessment report mein unki natural strengths, '
+        + 'learning pattern, motivation level aur ' + _c1 + ' career direction ko samjhaya gaya hai. '
+        + 'Assessment ke results ke anusaar ' + _nm + ' ka readiness level ' + _rl + ' hai. '
+        + (_goal ? 'Unka career goal "' + _goal + '" hai jo unke psychometric profile se align karta hai.' : ''),
+      body_en: _nm + "'s AI-based career assessment report analyses their natural strengths, "
+        + 'learning patterns, motivation levels and career direction in ' + _c1 + '. '
+        + 'Based on assessment results, ' + _nm + "'s readiness level is " + _rl + '. '
+        + (_goal ? 'Their career goal "' + _goal + '" aligns well with their psychometric profile.' : ''),
+      obj_hi: ['Psychometric strengths identify karna', 'Career cluster align karna', 'Skill gaps samajhna', 'Action plan banana'],
+      obj_en: ['Identify psychometric strengths', 'Align career cluster', 'Understand skill gaps', 'Build action plan'],
+    };
+    // Generate career personality
+    d.pType = d.pType || (d.scores && d.scores.a >= 5 ? 'Strategic Thinker' : 'Creative Explorer');
+    d.pTag  = d.pTag  || (d.c1 || 'Career Oriented');
+
+    // mergeWithDefaults fills ALL missing fields (intro, pType, readPct etc)
+    mergeWithDefaults(d);
     D = d;
     try{ RND(D); AL(); }
     catch(e){ showError(e.message||String(e)); }
