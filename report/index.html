@@ -3182,12 +3182,19 @@ window.onload = function(){
     d.pTag  = d.pTag  || (d.c1 || 'Career Oriented');
 
     // mergeWithDefaults fills ALL missing fields
-    mergeWithDefaults(d);
+    try{
+      mergeWithDefaults(d);
+    }catch(mergeErr){
+      console.error('mergeWithDefaults error:', mergeErr.message, mergeErr.stack);
+    }
     D = d;
     // Cache for instant reload
     try{ sessionStorage.setItem('inwang_report_'+leadId, JSON.stringify(d)); }catch(e){}
     try{ RND(D); AL(); }
-    catch(e){ showError(e.message||String(e)); }
+    catch(e){ 
+      console.error('RND/AL error:', e.message, e.stack);
+      showError(e.message||String(e)); 
+    }
   };
   script.onerror = function(){
     delete window[cbName];
