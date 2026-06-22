@@ -3100,16 +3100,21 @@ window.onload = function(){
     if(data.score && typeof data.score === 'object'){
       Object.assign(d, data.score);
     }
-    // Build d.scores object that AL() expects
+    // Build d.scores with BOTH short (a,c,l) AND long field names
+    var _a = parseFloat(d.analytical||d.a||d.scores&&d.scores.analytical||0);
+    var _c = parseFloat(d.communication||d.c||d.scores&&d.scores.communication||0);
+    var _l = parseFloat(d.learning||d.l||d.scores&&d.scores.learning||0);
+    var _de= parseFloat(d.decision||d.d||d.scores&&d.scores.decision||0);
+    var _m = parseFloat(d.motivation||d.m||d.scores&&d.scores.motivation||0);
+    var _cl= parseFloat(d.clarity||d.cl||d.scores&&d.scores.clarity||0);
+    var _r = parseFloat(d.readiness||d.r||d.scores&&d.scores.readiness||0);
+    var _f = parseFloat(d.foundation||d.f||d.scores&&d.scores.foundation||0);
     d.scores = {
-      analytical:    parseFloat(d.analytical||d.a||0),
-      communication: parseFloat(d.communication||d.c||0),
-      learning:      parseFloat(d.learning||d.l||0),
-      decision:      parseFloat(d.decision||d.d||0),
-      motivation:    parseFloat(d.motivation||d.m||0),
-      clarity:       parseFloat(d.clarity||d.cl||0),
-      readiness:     parseFloat(d.readiness||d.r||0),
-      foundation:    parseFloat(d.foundation||d.f||0),
+      // Short keys (used by mergeWithDefaults)
+      a:_a, c:_c, l:_l, d:_de, m:_m, cl:_cl, r:_r, f:_f,
+      // Long keys (used by GLS, GP etc)
+      analytical:_a, communication:_c, learning:_l, decision:_de,
+      motivation:_m, clarity:_cl, readiness:_r, foundation:_f,
     };
     // Cluster fields
     d.c1 = d.c1 || '';
