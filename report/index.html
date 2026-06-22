@@ -1627,9 +1627,9 @@ function RND(d){
       });
     }
     var ca=document.getElementById('crsArea');
-    (d.courses||[]).forEach(function(c){ca.innerHTML+='<span class="chip cg2">'+c+'</span>';});
+    (typeof d.courses==='string'?d.courses.split(','):d.courses||[]).forEach(function(c){ca.innerHTML+='<span class="chip cg2">'+c+'</span>';});
     var ra=document.getElementById('rolArea');
-    (d.roles||[]).forEach(function(r){ra.innerHTML+='<span class="chip cc">'+r+'</span>';});
+    (typeof d.roles==='string'?d.roles.split(','):d.roles||[]).forEach(function(r){ra.innerHTML+='<span class="chip cc">'+r+'</span>';});
   } else {
     document.getElementById('lockDiv').style.display='block';
     var ub=document.getElementById('uBtn');if(ub)ub.href='https://inwangai.com/payment?id='+d.id;
