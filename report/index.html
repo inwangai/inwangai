@@ -3093,8 +3093,36 @@ window.onload = function(){
     delete window[cbName];
     if(script.parentNode) script.parentNode.removeChild(script);
     if(data.error){ showError(data.error); return; }
-    var d = data.lead || data;
-    if(data.score) Object.assign(d, data.score);
+    // Flatten lead + score into one object
+    var d = {};
+    if(data.lead) Object.assign(d, data.lead);
+    else Object.assign(d, data);
+    if(data.score && typeof data.score === 'object'){
+      Object.assign(d, data.score);
+    }
+    // Build d.scores object that AL() expects
+    d.scores = {
+      analytical:    parseFloat(d.analytical||d.a||0),
+      communication: parseFloat(d.communication||d.c||0),
+      learning:      parseFloat(d.learning||d.l||0),
+      decision:      parseFloat(d.decision||d.d||0),
+      motivation:    parseFloat(d.motivation||d.m||0),
+      clarity:       parseFloat(d.clarity||d.cl||0),
+      readiness:     parseFloat(d.readiness||d.r||0),
+      foundation:    parseFloat(d.foundation||d.f||0),
+    };
+    // Cluster fields
+    d.c1 = d.c1 || '';
+    d.c2 = d.c2 || '';
+    d.c3 = d.c3 || '';
+    d.rl = d.rl || '';
+    d.str = d.str || '';
+    d.gaps = d.gaps || '';
+    d.beh = d.beh || '';
+    d.streamPrimary = d.streamPrimary || d.sp || '';
+    d.pathway = d.pathway || d.path || '';
+    d.courses = d.courses || '';
+    d.roles = d.roles || '';
     D = d;
     try{ RND(D); AL(); }
     catch(e){ showError(e.message||String(e)); }
