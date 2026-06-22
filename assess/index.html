@@ -2,6 +2,8 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="alternate icon" href="/favicon.ico">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>INWANG AI Career Coach</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1820,7 +1822,7 @@ function submitForm1() {
   studentName = name;
   inwangId = generateLocalId();
 
-  fetch('https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbyT5uh8y4Db0duT2izlZCrhHFxJeTKdEa3OibxEYTAVjf0InAB-Wa9mUJ36yvS9LdEu/exec', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
@@ -1908,7 +1910,7 @@ function saveAssessmentToSheet(scores, results){
   };
   
   // POST no-cors - AppScript receives it!
-  fetch('https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbyT5uh8y4Db0duT2izlZCrhHFxJeTKdEa3OibxEYTAVjf0InAB-Wa9mUJ36yvS9LdEu/exec', {
     method: 'POST',
     headers: {'Content-Type': 'text/plain'},
     body: JSON.stringify(payload)
@@ -1937,7 +1939,7 @@ function saveAssessmentToSheet(scores, results){
       q42: payload.q42,
     });
     var img = new Image();
-    img.src = 'https://script.google.com/macros/s/AKfycbyVWxFubvupKKPMxQnxmgzEJmPH7sJoy9x5xBlLTBYRX4nGQKg3bmtRBILMFK0oPzku/exec?' + params.toString();
+    img.src = 'https://script.google.com/macros/s/AKfycbyT5uh8y4Db0duT2izlZCrhHFxJeTKdEa3OibxEYTAVjf0InAB-Wa9mUJ36yvS9LdEu/exec?' + params.toString();
   });
 }
 
