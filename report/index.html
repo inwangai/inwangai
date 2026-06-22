@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="alternate icon" href="/favicon.ico">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>INWANG Career Report</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -1842,9 +1844,9 @@ function AL(){
   
   // Goal-based override note
   var goalNote = '';
+  var goalCluster = '';  // declared outside if block
   if(d.goal && d.goal.trim()){
     var g = d.goal.toLowerCase();
-    var goalCluster = '';
     if(g.includes('ca') || g.includes('chartered') || g.includes('accountant')) goalCluster = 'Commerce / Finance';
     else if(g.includes('doctor') || g.includes('mbbs') || g.includes('medical')) goalCluster = 'Medical / Healthcare';
     else if(g.includes('ias') || g.includes('upsc') || g.includes('civil')) goalCluster = 'Civil Services / Govt Jobs';
