@@ -1667,7 +1667,7 @@ function AL(){
   document.getElementById('pRea').textContent=hi?p.rhi:p.ren;
   document.getElementById('lAI').textContent=hi?'🤖 AI ne ye kyun suggest kiya':'🤖 Why AI suggested this';
   // Readiness
-  document.getElementById('rLvl').textContent=hi?(d.readLvl.hi||d.readLvl):(d.readLvl.en||d.readLvl);
+  document.getElementById('rLvl').textContent=typeof d.readLvl==='object'?(hi?d.readLvl.hi:d.readLvl.en):(d.readLvl||'');
   document.getElementById('fnNote').textContent=hi?'6 dimensions ka combined score (0-100). Strong=60+, Moderate=40-59.':'Combined score of 6 dimensions (0-100). Strong=60+, Moderate=40-59.';
   var vals=SK.map(function(k){return d.scores[k]||0;});
   var strong=[],weak=[];
@@ -3138,67 +3138,111 @@ window.onload = function(){
     if(script.parentNode) script.parentNode.removeChild(script);
     if(data.error){ showError(data.error); return; }
 
-    // API returns flat object — no lead/score wrapper
-    // data = {id, name, city, ..., scores:{a,c,l...}, c1, c2...}
+    // Flatten lead + score into one object
     var d = {};
-    Object.assign(d, data);  // copy everything
-
-    // scores object
-    var sc = data.scores || data.score || {};
+    if(data.lead) Object.assign(d, data.lead);
+    var sc = data.score || {};
+    Object.assign(d, sc);
     d.scores = sc;
 
-    // Calculate fields RND() needs
-    var a  = sc.a  || sc.analytical    || 0;
-    var c  = sc.c  || sc.communication || 0;
-    var l  = sc.l  || sc.learning      || 0;
-    var de = sc.d  || sc.decision      || 0;
-    var m  = sc.m  || sc.motivation    || 0;
-    var cl = sc.cl || sc.clarity       || 0;
+    // ── HELPER FUNCTIONS ──
+    function toObj(v, fallback){ return (v && typeof v==='object' && v.hi!==undefined) ? v : {hi:String(v||fallback||''), en:String(v||fallback||'')}; }
+    function toArr(v){ if(Array.isArray(v)) return v; if(typeof v==='string' && v) return v.split(',').map(function(x){return x.trim();}); return []; }
 
-    d.readPct    = Math.round((a+c+l+de+m+cl)/42*100);
-    d.found      = Math.round((a+l+de)/21*100) + '%';
-    d.pri        = d.c1 || sc.streamPrimary || '';
-    d.qualStatus = d.qual || '';
+    // ── SCORES ──
+    d.scores = {
+      a:sc.a||0, c:sc.c||0, l:sc.l||0, d:sc.d||0, m:sc.m||0, cl:sc.cl||0, r:sc.r||0, f:sc.f||0,
+      analytical:sc.a||0, communication:sc.c||0, learning:sc.l||0, decision:sc.d||0,
+      motivation:sc.m||0, clarity:sc.cl||0, readiness:sc.r||0, foundation:sc.f||0,
+    };
 
-    // Generate intro text dynamically
-    var _nm = d.name || 'Student';
-    var _c1 = d.c1 || 'your chosen field';
-    var _rl = d.rl || 'High Readiness';
-    var _goal = d.goal || '';
+    // ── READINESS ──
+    var _a=sc.a||0,_c=sc.c||0,_l=sc.l||0,_d=sc.d||0,_m=sc.m||0,_cl=sc.cl||0;
+    d.readPct   = Math.round((_a+_c+_l+_d+_m+_cl)/42*100);
+    d.found     = Math.round((_a+_l+_d)/21*100) + '%';
+    var _rlStr  = sc.rl || (d.readPct>=70?'High Readiness':d.readPct>=50?'Medium Readiness':'Low Readiness');
+    d.readLvl   = {hi: _rlStr, en: _rlStr};
+
+    // ── CLUSTERS ──
+    d.pri = sc.c1 || '';
+    d.sec = sc.c2 || '';
+    d.em  = sc.c3 || '';
+    d.c1  = sc.c1 || '';
+    d.c2  = sc.c2 || '';
+    d.c3  = sc.c3 || '';
+    d.streamAlign = sc.streamAlign || sc.align || 'Aligned';
+
+    // ── QUAL STATUS ──
+    var _q = (d.qual||'').toLowerCase();
+    d.qualStatus = _q.includes('12 pass')||_q.includes('12th pass') ? '12_pass' :
+                   _q.includes('appear')||_q.includes('class 12') ? '12_appearing' :
+                   _q.includes('graduate')||_q.includes('b.tech')||_q.includes('bca') ? 'ug_completed' :
+                   _q.includes('diploma')||_q.includes('iti') ? 'diploma' : '12_pass';
+
+    // ── STRENGTHS ──
+    var _strArr = toArr(sc.str);
+    d.str = {hi: _strArr.length ? _strArr : ['Analytical Thinking','Learning Agility','Motivation'], en: _strArr.length ? _strArr : ['Analytical Thinking','Learning Agility','Motivation']};
+
+    // ── BEHAVIOUR ──
+    var _beh = sc.beh || '';
+    var _thinking = _beh.indexOf('Thinking Style:')>=0 ? _beh.split('Thinking Style:')[1].split('\n')[0].trim() : 'Logical aur structured thinking.';
+    var _work = _beh.indexOf('Work Orientation:')>=0 ? _beh.split('Work Orientation:')[1].split('\n')[0].trim() : 'Goal-oriented kaam prefer karte hain.';
+    var _env = _beh.indexOf('Best Environment:')>=0 ? _beh.split('Best Environment:')[1].split('\n')[0].trim() : 'Supportive environment mein best perform.';
+    d.beh = {hi:{thinking:_thinking,work:_work,environment:_env}, en:{thinking:_thinking,work:_work,environment:_env}};
+
+    // ── MOTIVATION ──
+    d.mot = {hi:['Career stability aur success chahiye','Family expectations genuinely seriously lete hain','Long-term thinking — career stability priority'],en:['Wants career stability and success','Genuinely takes family expectations seriously','Long-term thinking — career stability is priority']};
+
+    // ── INTEREST ──
+    d.interest = {hi:{on:['Logical aur structured tasks mein interest','Clear goals hone par focused rehte hain','Naye concepts sikhna engaging lagta hai'],off:['Unstructured environments mein discomfort']},en:{on:['Interest in logical and structured tasks','Stays focused with clear goals','Finds learning new concepts engaging'],off:['Discomfort in unstructured environments']}};
+
+    // ── CONCERN ──
+    var _concern = d.confusion || d.pconcern || '';
+    d.concern = {q:{hi:'"'+(_concern||'Sahi career kaise choose karein?')+'"',en:'"'+(_concern||'How to choose the right career?')+'"'},r:{hi:'Yeh concern valid hai. INWANG assessment ne aapki strengths identify ki hain — counselling mein detail milegi.',en:'This concern is valid. INWANG assessment has identified your strengths — details in counselling session.'}};
+
+    // ── PARENT ──
+    d.parent = {ind:{hi:['Responsible mindset — family expectations seriously lete hain','Guidance lene ki willingness','Long-term thinking'],en:['Responsible mindset','Willingness to seek guidance','Long-term thinking']},note:{hi:'Technical skills college mein sikhte hain — attitude aur sincerity already present hain.',en:'Technical skills are learned in college — attitude and sincerity are already present.'}};
+
+    // ── INTRO ──
+    var _nm = d.name||'Student', _c1 = d.c1||'your field', _goal = d.goal||'';
     d.intro = {
-      body_hi: _nm + ' ki is AI-based career assessment report mein unki natural strengths, '
-        + 'learning pattern, motivation level aur ' + _c1 + ' career direction ko samjhaya gaya hai. '
-        + 'Assessment ke results ke anusaar ' + _nm + ' ka readiness level ' + _rl + ' hai. '
-        + (_goal ? 'Unka career goal "' + _goal + '" hai jo unke psychometric profile se align karta hai.' : ''),
-      body_en: _nm + "'s AI-based career assessment report analyses their natural strengths, "
-        + 'learning patterns, motivation levels and career direction in ' + _c1 + '. '
-        + 'Based on assessment results, ' + _nm + "'s readiness level is " + _rl + '. '
-        + (_goal ? 'Their career goal "' + _goal + '" aligns well with their psychometric profile.' : ''),
-      pts_hi: ['Student aur parents ko clear career direction dena', 'Course aur college selection ko informed banana', 'Personality ke according suitable fields identify karna', 'Skill gaps aur strengths clearly dikhana'],
-      pts_en: ['Give clear career direction to student and parents', 'Make course and college selection informed', 'Identify suitable fields per personality', 'Show skill gaps and strengths clearly'],
+      body_hi: _nm+' ki is AI-based career assessment report mein unki natural strengths, learning pattern aur '+_c1+' career direction ko samjhaya gaya hai. Readiness level: '+_rlStr+'.',
+      body_en: _nm+"'s AI-based career assessment analyses natural strengths, learning patterns and career direction in "+_c1+'. Readiness level: '+_rlStr+'.',
+      pts_hi:  ['Student aur parents ko clear career direction dena','Course aur college selection informed banana','Personality ke according suitable fields identify karna','Skill gaps aur strengths clearly dikhana'],
+      pts_en:  ['Give clear career direction','Make course selection informed','Identify suitable fields per personality','Show skill gaps and strengths'],
       note_hi: 'Har recommendation ke saath reason explain kiya gaya hai.',
       note_en: 'Every recommendation includes its reasoning.',
-      obj_hi: ['Psychometric strengths identify karna', 'Career cluster align karna', 'Skill gaps samajhna', 'Action plan banana'],
-      obj_en: ['Identify psychometric strengths', 'Align career cluster', 'Understand skill gaps', 'Build action plan'],
     };
-    // Generate career personality
-    d.pType = d.pType || (d.scores && d.scores.a >= 5 ? 'Strategic Thinker' : 'Creative Explorer');
-    d.pTag  = d.pTag  || (d.c1 || 'Career Oriented');
 
-    // mergeWithDefaults fills ALL missing fields
-    try{
-      mergeWithDefaults(d);
-    }catch(mergeErr){
-      console.error('mergeWithDefaults error:', mergeErr.message, mergeErr.stack);
-    }
+    // ── COURSES & ROLES ──
+    d.courses = toArr(sc.courses);
+    d.roles   = toArr(sc.roles);
+
+    // ── STREAM ──
+    d.stream = {
+      name: {hi: (sc.streamPrimary||d.stream||'Science')+ ' → Best Path', en: (sc.streamPrimary||d.stream||'Science')+' → Best Path'},
+      conf: sc.streamConf || 'Moderate Alignment',
+      alt:  {hi: sc.streamAlt||'Counsellor se discuss karo', en: sc.streamAlt||'Discuss with counsellor'},
+      pw:   {hi: sc.pathway||'INWANG counselling session mein pathway discuss karo.', en: sc.pathway||'Discuss your pathway in INWANG counselling session.'},
+    };
+
+    // ── GAPS ──
+    var _gapsText = sc.gaps || sc.skillGaps || '';
+    var _gapLines = _gapsText.split('\n').filter(function(g){return g.trim();});
+    d.gaps = _gapLines.length ? _gapLines.map(function(g){
+      var parts = g.split('→'); var dim = (parts[0]||g).trim(); var act = (parts[1]||'').trim();
+      return {a:{hi:dim,en:dim},c:{hi:'Developing',en:'Developing'},r:{hi:'Strong',en:'Strong'},ac:{hi:act||'Practice regularly',en:act||'Practice regularly'},l:'lm'};
+    }) : [{a:{hi:'Career Clarity',en:'Career Clarity'},c:{hi:'Developing',en:'Developing'},r:{hi:'Strong',en:'Strong'},ac:{hi:'Counselling session mein discuss karo',en:'Discuss in counselling'},l:'lm'}];
+
+    // ── GOAL CLUSTER ──
+    d.pType = d.pType || (_a>=5&&_l>=5?'Strategic Thinker':_m>=5?'Motivated Explorer':'Creative Thinker');
+    d.pTag  = d.pTag  || (d.c1||'Career Oriented');
+
     D = d;
-    // Cache for instant reload
+    // Cache
     try{ sessionStorage.setItem('inwang_report_'+leadId, JSON.stringify(d)); }catch(e){}
     try{ RND(D); AL(); }
-    catch(e){ 
-      console.error('RND/AL error:', e.message, e.stack);
-      showError(e.message||String(e)); 
-    }
+    catch(e){ console.error('RND/AL error:', e.message, e.stack); showError(e.message||String(e)); }
   };
   script.onerror = function(){
     delete window[cbName];
