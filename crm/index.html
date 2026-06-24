@@ -945,6 +945,19 @@ function checkSession(){
 }
 
 function initCRM(){
+  // Load cached data instantly from localStorage
+  try{
+    var cached = localStorage.getItem('inwang_leads');
+    var cachedAss = localStorage.getItem('inwang_assessments');
+    if(cached){
+      LEADS = JSON.parse(cached);
+      if(cachedAss) ASSESSMENTS = JSON.parse(cachedAss);
+      renderDashboard();renderLeads();renderKanban();
+      renderAssessments();renderReports();
+      updateSideBadges();populateFilters();
+      notif('📱 '+LEADS.length+' leads (cache) — Sync for latest data');
+    }
+  }catch(e){}
   // Role-based UI setup
   var isAdmin = !currentUser || currentUser.username==='admin' || currentUser.username==='meraj';
   if(!isAdmin){
@@ -1157,7 +1170,7 @@ function renderLeads(){
         <div class="actions">
           <button class="ab ab-view" onclick="openLead('${l.id}')">👁</button>
           <button class="ab ab-wa" onclick="openWA('${l.smob}','${l.name}')">💬</button>
-          ${ASSESSMENTS.find(a=>a.id===l.id)?`<button class="ab ab-report" onclick="generateRpt('${l.id}')">📄</button>`:''}
+          ${ASSESSMENTS.find(a=>a.id===l.id)?`<button class="ab ab-report" onclick="generateRpt('${l.id}')" title="View Report (Counsellor)">📄</button><button class="ab" style="background:#25D366" onclick="shareDownloadLink('${l.id}','${l.name}','${l.smob}')" title="Share Download Link on WhatsApp">📤</button>`:''}
           <button class="ab" onclick="openEditLead('${l.id}')" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:#60a5fa" title="Edit">✏️</button>
           <button class="ab" onclick="if(confirm('Delete ${l.name}?'))deleteLead('${l.id}')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444" title="Delete">🗑</button>
         </div>
@@ -1722,13 +1735,31 @@ function generateAndSendCoupon(id){
 }
 
 function generateRpt(id){
+  // Counsellor ke liye direct report link (paid=true)
   var url = 'https://inwangai.com/report?id='+encodeURIComponent(id)+'&paid=true';
   notif('📄 Opening report for '+id+'...');
   var win = window.open(url, '_blank');
-  if(!win || win.closed){
-    // Popup blocked - open in same tab
-    window.location.href = url;
-  }
+  if(!win || win.closed){ window.location.href = url; }
+}
+
+function shareDownloadLink(id, name, mob){
+  // Student ke liye download page link — coupon se unlock karna hoga
+  var downloadUrl = 'https://inwangai.com/#download-report';
+  var waMsg = 'Hi ' + name + '! 👋\n\n'
+    + 'Aapka INWANG AI Career Report ready hai!\n\n'
+    + '🆔 INWANG ID: *' + id + '*\n\n'
+    + '📊 Report download karne ke liye:\n' + downloadUrl + '\n\n'
+    + 'Steps:\n'
+    + '1️⃣ Link open karo\n'
+    + '2️⃣ INWANG ID enter karo\n'
+    + '3️⃣ Coupon code enter karo (email/WA pe bheja tha)\n'
+    + '4️⃣ Report unlock ho jaayega ✨\n\n'
+    + 'Koi sawaal? Reply karo!\n'
+    + '— INWANG AI Career Guidance';
+  var phone = String(mob||'').replace(/\D/g,'');
+  var waLink = 'https://wa.me/91'+phone+'?text='+encodeURIComponent(waMsg);
+  window.open(waLink, '_blank');
+  notif('📤 WhatsApp share link opened!');
 }
 function openAssDetail(id){
   openLead(id);
@@ -1780,26 +1811,47 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 // ══ SYNC ══
 function syncData(){
   if(!CFG.webapp){notif('⚠️ Settings mein Web App URL add karo.');return;}
-  notif('🔄 Syncing...');
-  var cbName='inwang_'+Date.now();
-  var script=document.createElement('script');
-  window[cbName]=function(d){
-    delete window[cbName];
-    if(script.parentNode) script.parentNode.removeChild(script);
+  notif('🔄 Leads load ho rahe hain...');
+  
+  // Step 1: Load leads separately (smaller payload)
+  var cb1='inwang_leads_'+Date.now();
+  var s1=document.createElement('script');
+  window[cb1]=function(d){
+    delete window[cb1];
+    if(s1.parentNode) s1.parentNode.removeChild(s1);
     if(d.error){notif('⚠️ '+d.error);return;}
-    if(d.leads&&d.leads.length){LEADS=d.leads;notif('✅ Synced: '+d.leads.length+' leads');}
-    if(d.assessments){ASSESSMENTS=d.assessments;}
-    renderDashboard();renderLeads();renderKanban();
-    renderAssessments();renderReports();
-    updateSideBadges();populateFilters();
+    if(d.leads&&d.leads.length){
+      LEADS=d.leads;
+      // Save to localStorage for offline/slow network
+      try{ localStorage.setItem('inwang_leads', JSON.stringify(d.leads)); }catch(e){}
+      notif('✅ '+d.leads.length+' leads loaded! Assessments load ho rahe hain...');
+      renderDashboard();renderLeads();renderKanban();
+      updateSideBadges();populateFilters();
+    }
+    // Step 2: Load assessments separately
+    var cb2='inwang_ass_'+Date.now();
+    var s2=document.createElement('script');
+    window[cb2]=function(d2){
+      delete window[cb2];
+      if(s2.parentNode) s2.parentNode.removeChild(s2);
+      if(d2.assessments){
+        ASSESSMENTS=d2.assessments;
+        try{ localStorage.setItem('inwang_assessments', JSON.stringify(d2.assessments)); }catch(e){}
+        notif('✅ Sync complete! '+LEADS.length+' leads, '+ASSESSMENTS.length+' assessments');
+        renderAssessments();renderReports();updateSideBadges();
+      }
+    };
+    s2.onerror=function(){delete window[cb2];notif('⚠️ Assessments load failed');};
+    s2.src=CFG.webapp+'?action=assessments&callback='+cb2+'&t='+Date.now();
+    document.body.appendChild(s2);
   };
-  script.onerror=function(){
-    delete window[cbName];
-    if(script.parentNode) script.parentNode.removeChild(script);
+  s1.onerror=function(){
+    delete window[cb1];
+    if(s1.parentNode) s1.parentNode.removeChild(s1);
     notif('⚠️ Sync failed — Check deployment settings');
   };
-  script.src=CFG.webapp+'?action=all&callback='+cbName+'&t='+Date.now();
-  document.body.appendChild(script);
+  s1.src=CFG.webapp+'?action=leads&callback='+cb1+'&t='+Date.now();
+  document.body.appendChild(s1);
 }
 
 // Write back to Sheet (POST)
