@@ -58,6 +58,9 @@ nav{
   flex-direction:column;gap:5px;padding:8px;z-index:200;
   position:relative;
 }
+@media(max-width:768px){
+  .hamburger{display:flex!important}
+}
 .hamburger span{
   display:block;width:22px;height:2px;
   background:#e8c96d;border-radius:2px;
@@ -1314,65 +1317,107 @@ document.addEventListener('keydown', function(e){
 
 
 <!-- ══ MOBILE BOTTOM TAB BAR ══ -->
-<nav id="mobileBottomBar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;background:#0a1220;border-top:1px solid rgba(200,168,75,0.2);padding:8px 0 env(safe-area-inset-bottom,8px)">
-  <div style="display:flex;justify-content:space-around;align-items:center">
-    <a href="#home" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:rgba(255,255,255,0.5);min-width:56px;padding:4px 0">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span style="font-size:9px;font-weight:600;letter-spacing:.3px">Home</span>
+<nav id="mobileBottomBar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;background:#0a1220;border-top:1px solid rgba(200,168,75,0.2);padding:6px 0 env(safe-area-inset-bottom,6px)">
+  <div style="display:flex;justify-content:space-around;align-items:center;max-width:500px;margin:0 auto">
+
+    <a href="#home" class="mob-tab">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
     </a>
-    <a href="#report" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:rgba(255,255,255,0.5);min-width:56px;padding:4px 0">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      <span style="font-size:9px;font-weight:600;letter-spacing:.3px">Report</span>
+
+    <a href="#report" class="mob-tab">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Report</span>
     </a>
-    <a href="https://inwangai.com/register" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;min-width:56px;padding:4px 0">
-      <div style="background:linear-gradient(135deg,#c8a84b,#e8c96d);border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;margin-top:-16px;box-shadow:0 4px 12px rgba(200,168,75,0.4)">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#020408" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+
+    <a href="https://inwangai.com/register" class="mob-tab mob-tab-cta">
+      <div style="background:linear-gradient(135deg,#c8a84b,#e8c96d);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin-top:-18px;box-shadow:0 4px 16px rgba(200,168,75,0.4)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#020408" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
-      <span style="font-size:9px;font-weight:700;color:#c8a84b;letter-spacing:.3px">Start</span>
+      <span style="color:#c8a84b;font-weight:800">Register</span>
     </a>
-    <a href="#download-report" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:rgba(255,255,255,0.5);min-width:56px;padding:4px 0">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      <span style="font-size:9px;font-weight:600;letter-spacing:.3px">Download</span>
+
+    <a href="#download-report" class="mob-tab">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Download</span>
     </a>
-    <a href="https://inwangai.com/medverse" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:rgba(255,255,255,0.5);min-width:56px;padding:4px 0">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-      <span style="font-size:9px;font-weight:600;letter-spacing:.3px">NEET</span>
+
+    <a href="https://inwangai.com/medverse" class="mob-tab" style="color:#00d464">
+      <svg width="22" height="14" viewBox="0 0 22 14" fill="none"><polyline points="0,7 3,7 5,1 7,13 9,7 11,7 12.5,4 14,10 15.5,7 22,7" stroke="#00d464" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span style="color:#00d464;font-weight:800;font-size:8px;letter-spacing:.5px">MEDVERSE</span>
     </a>
+
   </div>
 </nav>
 
 <style>
+.mob-tab{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:rgba(255,255,255,0.5);min-width:52px;padding:4px 0;font-size:9px;font-weight:600}
+.mob-tab span{font-size:9px;font-weight:600;letter-spacing:.3px}
+.mob-tab svg{flex-shrink:0}
 @media(max-width:768px){
   #mobileBottomBar{display:block!important}
-  body{padding-bottom:64px}
+  body{padding-bottom:68px}
+  .hamburger{display:flex!important}
 }
 </style>
 
 <script>
-// Highlight active tab on scroll
 (function(){
-  var tabs = document.querySelectorAll('#mobileBottomBar a');
+  var tabs = document.querySelectorAll('#mobileBottomBar .mob-tab');
   function setActive(href){
     tabs.forEach(function(t){
       var isActive = t.getAttribute('href')===href;
-      t.style.color = isActive ? '#c8a84b' : 'rgba(255,255,255,0.5)';
-      var spans = t.querySelectorAll('span');
-      spans.forEach(function(s){ s.style.color = isActive ? '#c8a84b' : ''; });
-      var svgs = t.querySelectorAll('svg');
-      svgs.forEach(function(sv){ sv.style.stroke = isActive ? '#c8a84b' : ''; });
+      if(!t.classList.contains('mob-tab-cta')){
+        t.style.color = isActive?'#c8a84b':'rgba(255,255,255,0.5)';
+      }
     });
   }
-  window.addEventListener('scroll', function(){
-    var sections = ['#home','#report','#download-report','#who'];
-    var active = '#home';
-    sections.forEach(function(id){
-      var el = document.querySelector(id);
-      if(el && window.scrollY >= el.offsetTop - 100) active = id;
+  window.addEventListener('scroll',function(){
+    var active='#home';
+    ['#home','#report','#download-report'].forEach(function(id){
+      var el=document.querySelector(id);
+      if(el&&window.scrollY>=el.offsetTop-100) active=id;
     });
     setActive(active);
   });
 })();
 </script>
 
+
+<style>
+/* ══ MOBILE RESPONSIVE FIXES ══ */
+@media(max-width:768px){
+  /* Pricing cards */
+  .pricing-grid,.price-grid{grid-template-columns:1fr!important;gap:16px!important}
+  .price-card{min-width:0!important;word-break:break-word!important}
+  
+  /* General overflow fix */
+  *{max-width:100%;box-sizing:border-box}
+  img{max-width:100%;height:auto}
+  
+  /* Hero */
+  .hero-inner{flex-direction:column!important;text-align:center!important;padding:20px!important}
+  .hero-left{max-width:100%!important}
+  .hero-right{display:none!important}
+  .hero h1{font-size:28px!important;line-height:1.2!important}
+  
+  /* Section padding */
+  section,.section{padding:40px 16px!important}
+  .container{padding:0 16px!important;max-width:100%!important}
+  
+  /* Cards overflow */
+  .card,.rc,.report-card{overflow:hidden!important;word-break:break-word!important}
+  
+  /* Grid fixes */
+  [style*="grid-template-columns:1fr 1fr 1fr"]{grid-template-columns:1fr!important}
+  [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}
+  
+  /* Text overflow */
+  p,div,span,h1,h2,h3,h4{max-width:100%!important;word-wrap:break-word!important;overflow-wrap:break-word!important}
+  
+  /* Nav padding */
+  nav{padding:0 16px!important}
+}
+</style>
 </body>
 </html>
