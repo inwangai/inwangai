@@ -7,7 +7,27 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ACURATE CRM — INWANG AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js">
+function resetCounsellorPass(idx){
+  var u = USERS[idx];
+  if(!u){return;}
+  var newPass = prompt('New password for '+u.name+':');
+  if(!newPass||newPass.length<4){notif('⚠️ Min 4 characters chahiye');return;}
+  USERS[idx].pass = newPass;
+  try{localStorage.setItem('crm_users', JSON.stringify(USERS));}catch(e){}
+  notif('✅ Password updated for '+u.name);
+  renderCounsellorList();
+}
+
+function toggleCounsellorStatus(idx){
+  var u = USERS[idx];
+  if(!u||u.name==='Admin'){return;}
+  USERS[idx].active = !(USERS[idx].active!==false);
+  try{localStorage.setItem('crm_users', JSON.stringify(USERS));}catch(e){}
+  notif((USERS[idx].active?'✅ Activated: ':'❌ Deactivated: ')+u.name);
+  renderCounsellorList();
+}
+</script>
 <style>
 :root{
   --void:#020408;--navy:#071428;--panel:#0a1929;--card:#0d2137;
@@ -1811,9 +1831,24 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 // ══ SYNC ══
 function syncData(){
   if(!CFG.webapp){notif('⚠️ Settings mein Web App URL add karo.');return;}
-  notif('🔄 Leads load ho rahe hain...');
   
-  // Step 1: Load leads separately (smaller payload)
+  // Try cache first for instant display
+  try{
+    var cached=localStorage.getItem('inwang_leads');
+    var cachedAss=localStorage.getItem('inwang_assessments');
+    if(cached){
+      var cl=JSON.parse(cached);
+      if(cl&&cl.length){
+        LEADS=cl;
+        if(cachedAss) ASSESSMENTS=JSON.parse(cachedAss);
+        renderDashboard();renderLeads();renderKanban();
+        renderAssessments();updateSideBadges();populateFilters();
+        notif('📱 Cache: '+LEADS.length+' leads — Refreshing...');
+      }
+    }
+  }catch(e){}
+
+  // Load leads
   var cb1='inwang_leads_'+Date.now();
   var s1=document.createElement('script');
   window[cb1]=function(d){
@@ -1822,13 +1857,12 @@ function syncData(){
     if(d.error){notif('⚠️ '+d.error);return;}
     if(d.leads&&d.leads.length){
       LEADS=d.leads;
-      // Save to localStorage for offline/slow network
-      try{ localStorage.setItem('inwang_leads', JSON.stringify(d.leads)); }catch(e){}
-      notif('✅ '+d.leads.length+' leads loaded! Assessments load ho rahe hain...');
+      try{localStorage.setItem('inwang_leads',JSON.stringify(d.leads));}catch(e){}
       renderDashboard();renderLeads();renderKanban();
       updateSideBadges();populateFilters();
+      notif('✅ '+d.leads.length+' leads loaded!');
     }
-    // Step 2: Load assessments separately
+    // Load assessments
     var cb2='inwang_ass_'+Date.now();
     var s2=document.createElement('script');
     window[cb2]=function(d2){
@@ -1836,19 +1870,18 @@ function syncData(){
       if(s2.parentNode) s2.parentNode.removeChild(s2);
       if(d2.assessments){
         ASSESSMENTS=d2.assessments;
-        try{ localStorage.setItem('inwang_assessments', JSON.stringify(d2.assessments)); }catch(e){}
-        notif('✅ Sync complete! '+LEADS.length+' leads, '+ASSESSMENTS.length+' assessments');
-        renderAssessments();renderReports();updateSideBadges();
+        try{localStorage.setItem('inwang_assessments',JSON.stringify(d2.assessments));}catch(e){}
+        renderAssessments();updateSideBadges();
+        notif('✅ Sync done! '+LEADS.length+' leads · '+ASSESSMENTS.length+' assessments');
       }
     };
-    s2.onerror=function(){delete window[cb2];notif('⚠️ Assessments load failed');};
+    s2.onerror=function(){delete window[cb2];};
     s2.src=CFG.webapp+'?action=assessments&callback='+cb2+'&t='+Date.now();
     document.body.appendChild(s2);
   };
   s1.onerror=function(){
     delete window[cb1];
-    if(s1.parentNode) s1.parentNode.removeChild(s1);
-    notif('⚠️ Sync failed — Check deployment settings');
+    notif('⚠️ Sync failed');
   };
   s1.src=CFG.webapp+'?action=leads&callback='+cb1+'&t='+Date.now();
   document.body.appendChild(s1);
@@ -1946,18 +1979,27 @@ function showAddCounsellor(){
 function renderCounsellorList(){
   var el = document.getElementById('counsellor-list');
   if(!el) return;
-  el.innerHTML = USERS.map(function(u){
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">'
+  el.innerHTML = USERS.map(function(u, idx){
+    var initials = u.name.split(' ').map(function(n){return n[0];}).join('').substring(0,2).toUpperCase();
+    return '<div style="padding:12px 0;border-bottom:1px solid var(--border)">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
       +'<div style="display:flex;align-items:center;gap:10px">'
-      +'<div style="width:32px;height:32px;border-radius:8px;background:var(--gd);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gold)">'+u.initials+'</div>'
-      +'<div><div style="font-size:12px;font-weight:700">'+u.name+'</div>'
-      +'<div style="font-size:10px;color:var(--muted)">@'+u.username+' · '+u.role+'</div></div></div>'
-      +'<div style="display:flex;gap:6px">'
-      +(u.username!=='admin'&&u.username!=='meraj'
-        ?'<button class="ab ab-note" onclick="removeCounsellor(\"'+u.username+'\")" style="font-size:9px">Remove</button>'
-        :'<span style="font-size:10px;color:var(--gold)">Admin</span>')
-      +'</div></div>';
+      +'<div style="width:32px;height:32px;border-radius:8px;background:var(--gd);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--gold)">'+initials+'</div>'
+      +'<div>'
+      +'<div style="font-size:13px;font-weight:700;color:var(--white)">'+u.name+'</div>'
+      +'<div style="font-size:10px;color:var(--muted)">@'+u.user+' · '+(u.role||'Counsellor')+(u.name==='Admin'?' · 👑 Admin':'')+'</div>'
+      +'</div></div>'
+      +'<div style="display:flex;gap:6px;align-items:center">'
+      +(u.name!=='Admin'?'<button onclick="toggleCounsellorStatus('+idx+')" style="font-size:10px;padding:4px 8px;border-radius:5px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer">'+(u.active!==false?'Active':'Inactive')+'</button>':'')
+      +'<button onclick="resetCounsellorPass('+idx+')" style="font-size:10px;padding:4px 8px;border-radius:5px;border:1px solid rgba(200,168,75,0.3);background:rgba(200,168,75,0.08);color:var(--gold);cursor:pointer">🔑 Reset</button>'
+      +'</div></div>'
+      +'<div style="display:flex;gap:16px;padding-left:42px">'
+      +(u.email?'<div style="font-size:11px;color:var(--muted)">✉️ '+u.email+'</div>':'<div style="font-size:11px;color:rgba(255,255,255,0.2)">✉️ No email</div>')
+      +(u.mobile?'<div style="font-size:11px;color:var(--muted)">📱 '+u.mobile+'</div>':'<div style="font-size:11px;color:rgba(255,255,255,0.2)">📱 No mobile</div>')
+      +'</div>'
+      +'</div>';
   }).join('');
+  if(!USERS.length) el.innerHTML='<div style="font-size:12px;color:var(--muted);padding:12px 0">No counsellors yet. + Add karo.</div>';
 }
 
 function addCounsellor(){
