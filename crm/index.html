@@ -46,55 +46,56 @@ function updateCounsellorContact(idx){
 }
 
 function saveMyProfile(){
-  var email = document.getElementById('my-email').value.trim();
-  var mobile = document.getElementById('my-mobile').value.trim();
+  var email = (document.getElementById('my-email')||{}).value||'';
+  var mobile = (document.getElementById('my-mobile')||{}).value||'';
+  email = email.trim(); mobile = mobile.trim();
+  
   var cu = getCurrentUser();
-  if(!cu){ notif('⚠️ Login required'); return; }
+  if(!cu){ notif('⚠️ Pehle login karo'); return; }
   if(!email && !mobile){ notif('⚠️ Email ya Mobile enter karo'); return; }
-
+  
   var msg = document.getElementById('profile-msg');
-  msg.textContent = '⏳ Saving...';
-  msg.style.color = 'var(--muted)';
-
-  // Save to AppScript (Google Sheet)
-  var cbName = 'profile_cb_' + Date.now();
-  var script = document.createElement('script');
-  window[cbName] = function(d){
-    delete window[cbName];
-    if(script.parentNode) script.parentNode.removeChild(script);
-    if(d.success){
-      // Also update local USERS
-      for(var i=0;i<USERS.length;i++){
-        var uname = USERS[i].username||USERS[i].user||'';
-        var cuname = cu.username||cu.user||'';
-        if(uname===cuname){
-          if(email) USERS[i].email = email;
-          if(mobile) USERS[i].mobile = mobile;
-          break;
-        }
+  
+  // Update in USERS array
+  var cuname = cu.username||cu.user||'';
+  var found = false;
+  for(var i=0;i<USERS.length;i++){
+    var uname = USERS[i].username||USERS[i].user||'';
+    if(uname===cuname){
+      if(email) USERS[i].email = email;
+      if(mobile) USERS[i].mobile = mobile;
+      // Also update currentUser
+      if(currentUser){
+        if(email) currentUser.email = email;
+        if(mobile) currentUser.mobile = mobile;
+        try{ sessionStorage.setItem('crm_user', JSON.stringify(currentUser)); }catch(e){}
       }
-      try{localStorage.setItem('crm_users',JSON.stringify(USERS));}catch(e){}
-      msg.textContent = '✅ Profile saved! Notifications ab '+email+' pe aayenge.';
-      msg.style.color = 'var(--green)';
-      setTimeout(function(){msg.textContent='';},4000);
-      renderCounsellorList();
-    } else {
-      msg.textContent = '❌ Save failed. Try again.';
-      msg.style.color = '#ff6b6b';
+      found = true;
+      break;
     }
-  };
-  script.onerror = function(){
-    delete window[cbName];
-    msg.textContent = '❌ Network error';
-    msg.style.color = '#ff6b6b';
-  };
-  script.src = CFG.webapp
-    + '?action=update_counsellor_profile'
-    + '&name=' + encodeURIComponent(cu.name||cu.username||'')
-    + '&email=' + encodeURIComponent(email)
-    + '&mobile=' + encodeURIComponent(mobile)
-    + '&callback=' + cbName;
-  document.body.appendChild(script);
+  }
+  
+  // Save all users to localStorage
+  try{ localStorage.setItem('crm_users', JSON.stringify(USERS)); }catch(e){}
+  
+  if(msg){
+    msg.textContent = '✅ Saved! ' + (email?'Email: '+email:'') + (mobile?' | Mobile: '+mobile:'');
+    msg.style.color = 'var(--green)';
+    setTimeout(function(){ if(msg) msg.textContent=''; }, 4000);
+  }
+  
+  notif('✅ Profile updated!');
+  renderCounsellorList();
+  
+  // Also save to AppScript if connected
+  if(CFG.webapp && (email||mobile)){
+    var cbName = 'profile_cb_' + Date.now();
+    var script = document.createElement('script');
+    window[cbName] = function(d){ delete window[cbName]; if(script.parentNode) script.parentNode.removeChild(script); };
+    script.onerror = function(){ delete window[cbName]; };
+    script.src = CFG.webapp + '?action=update_counsellor_profile&name=' + encodeURIComponent(cu.name||cuname) + '&email=' + encodeURIComponent(email) + '&mobile=' + encodeURIComponent(mobile) + '&callback=' + cbName;
+    document.body.appendChild(script);
+  }
 }
 
 function loadMyProfile(){
@@ -1045,6 +1046,15 @@ var USERS = (function(){
 })();
 var currentUser = null;
 
+function getCurrentUser(){
+  if(currentUser) return currentUser;
+  try{
+    var saved = sessionStorage.getItem('crm_user');
+    if(saved) return JSON.parse(saved);
+  }catch(e){}
+  return null;
+}
+
 function checkBadge(){
   var u=document.getElementById('login-user').value.trim().toLowerCase();
   var b=document.getElementById('admin-badge');
@@ -1191,7 +1201,12 @@ function nav(p, el){
   document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('active'));
   if(el) el.classList.add('active');
   // Load profile data when settings opened
-  if(p==='settings') setTimeout(function(){ if(typeof loadMyProfile==='function') loadMyProfile(); }, 100);
+  if(p==='settings'){
+    setTimeout(function(){
+      if(typeof loadMyProfile==='function') loadMyProfile();
+      if(typeof renderCounsellorList==='function') renderCounsellorList();
+    }, 100);
+  }
   var titles = {dashboard:'Dashboard',leads:'All Leads',kanban:'Pipeline Kanban',followups:'Follow-ups',assessment:'Assessments',reports:'Career Reports',analytics:'Analytics',revenue:'Revenue',counsellors:'Counsellors',duplicates:'Duplicates',events:'Events',settings:'Settings'};
   document.getElementById('tb-title').textContent = titles[p]||p;
   // Render analytics charts on view
