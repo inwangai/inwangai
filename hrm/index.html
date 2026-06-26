@@ -232,7 +232,7 @@ html,body{height:100%;overflow:hidden;background:var(--s1);font-family:'Outfit',
 .modal-box::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
 
 /* MOBILE */
-.mob-ham{display:none;position:fixed;top:10px;left:10px;z-index:300;background:var(--s3);border:1px solid var(--b2);border-radius:10px;padding:10px;cursor:pointer;align-items:center;justify-content:center}
+.mob-ham{display:none;background:var(--s4);border:1px solid var(--b2);border-radius:8px;padding:8px 10px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0}
 .mob-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;backdrop-filter:blur(3px)}
 .mob-bottom{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--s2);border-top:1px solid var(--b2);z-index:150;padding:6px 0 env(safe-area-inset-bottom,6px)}
 .mob-bi{display:flex;justify-content:space-around;align-items:center;max-width:480px;margin:0 auto}
@@ -256,9 +256,10 @@ html,body{height:100%;overflow:hidden;background:var(--s1);font-family:'Outfit',
   .sb{position:fixed;left:0;top:0;bottom:0;z-index:250;transform:translateX(-100%);width:260px}
   .sb.open{transform:translateX(0)}
   .mob-ov.open{display:block}
-  .mob-ham{display:flex}
+  #mobHamBtn{display:flex!important}
   .mob-bottom{display:block}
-  .tb{padding-left:56px}
+  .tb{padding-left:0}
+  .mob-hide{display:none!important}
   .pages{padding:16px;padding-bottom:80px}
   .sg{grid-template-columns:1fr 1fr}
   .lb-grid{grid-template-columns:1fr 1fr}
@@ -273,9 +274,7 @@ html,body{height:100%;overflow:hidden;background:var(--s1);font-family:'Outfit',
 </head>
 <body>
 <div id="notifBar"></div>
-<button class="mob-ham" onclick="toggleSb()" aria-label="Menu">
-  <svg width="18" height="14" viewBox="0 0 18 14" fill="none"><line x1="0" y1="1" x2="18" y2="1" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/><line x1="0" y1="7" x2="18" y2="7" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/><line x1="0" y1="13" x2="18" y2="13" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/></svg>
-</button>
+<!-- hamburger moved to topbar -->
 <div class="mob-ov" id="mobOv" onclick="toggleSb()"></div>
 
 <!-- LOGIN -->
@@ -351,10 +350,13 @@ html,body{height:100%;overflow:hidden;background:var(--s1);font-family:'Outfit',
 <div class="mn">
   <div class="tb">
     <div style="display:flex;align-items:center;gap:10px">
+      <button class="mob-ham" id="mobHamBtn" onclick="toggleSb()" aria-label="Menu" style="display:none">
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="none"><line x1="0" y1="1" x2="18" y2="1" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/><line x1="0" y1="7" x2="18" y2="7" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/><line x1="0" y1="13" x2="18" y2="13" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
       <div class="tb-title" id="pageTitle">Dashboard</div>
     </div>
     <div class="tb-right">
-      <div class="chip"><div class="dot pulse" id="gpsDotTop" style="background:var(--amber)"></div><span id="gpsTopText">Checking...</span></div>
+      <div class="chip"><div class="dot pulse" id="gpsDotTop" style="background:var(--amber)"></div><span id="gpsTopText" style="display:none" class="mob-hide">Checking...</span></div>
       <div class="chip" id="timeChip">--:--</div>
     </div>
   </div>
@@ -833,6 +835,31 @@ html,body{height:100%;overflow:hidden;background:var(--s1);font-family:'Outfit',
     <button class="mm-btn admin-only" onclick="mobNav('reimb_mgmt');closeMore()" style="display:none"><span style="font-size:22px">✅</span>Claims</button>
   </div>
   <button onclick="doLogout()" style="width:100%;background:var(--red2);border:1px solid var(--redb);color:var(--red);border-radius:var(--r2);padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px">🚪 Logout</button>
+</div>
+
+<!-- EDIT EMPLOYEE MODAL -->
+<div class="modal" id="editEmpModal">
+  <div class="modal-box" style="max-width:460px">
+    <div style="font-size:16px;font-weight:800;margin-bottom:18px">✏️ Edit Employee</div>
+    <input type="hidden" id="editEmpIdx" value="">
+    <div class="fr">
+      <div class="fg"><label>Email</label><input id="editEmail" type="email" placeholder="emp@email.com"></div>
+      <div class="fg"><label>Mobile</label><input id="editMobile" placeholder="9876543210"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Salary (₹/month)</label><input id="editSalary" type="number" placeholder="15000" min="0"></div>
+      <div class="fg"><label>Department</label><select id="editDept"><option>INWANG AI</option><option>MEDVERSE</option><option>Management</option><option>Operations</option><option>Tech</option></select></div>
+    </div>
+    <div class="fg"><label>Role / Designation</label><input id="editRole" placeholder="Career Counsellor"></div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:12px;padding:8px;background:var(--s5);border-radius:var(--r1)">
+      🔑 Password change ke liye "Reset Password" button use karo
+    </div>
+    <div id="editEmpMsg" style="font-size:12px;margin-bottom:10px;display:none;padding:8px;border-radius:var(--r1)"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-gold" onclick="saveEmpEdit()" style="flex:1">💾 Save Changes</button>
+      <button class="btn btn-ghost" onclick="closeModal('editEmpModal')" style="flex:1">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <!-- CHANGE PASSWORD MODAL -->
@@ -1691,12 +1718,58 @@ function renderSettEmpList(){
 }
 
 function editContact(idx){
-  var e=EMPLOYEES[idx];if(!e)return;
-  var email=prompt('Email for '+e.name+':',e.email||'');if(email===null)return;
-  var mob=prompt('Mobile for '+e.name+':',e.mobile||'');if(mob===null)return;
-  var sal=prompt('Salary (₹/month) for '+e.name+':',e.salary||'');if(sal===null)return;
-  EMPLOYEES[idx].email=email; EMPLOYEES[idx].mobile=mob; EMPLOYEES[idx].salary=parseInt(sal)||e.salary;
-  saveData(); notif('✅ Updated: '+e.name,'✅'); renderSettEmpList(); renderEmpBody(); renderEmpDropdowns();
+  openEditEmp(idx);
+}
+
+function openEditEmp(idx){
+  var e = EMPLOYEES[idx];
+  if(!e){ notif('❌ Employee not found','❌'); return; }
+  document.getElementById('editEmpIdx').value = idx;
+  document.getElementById('editEmail').value = e.email || '';
+  document.getElementById('editMobile').value = e.mobile || '';
+  document.getElementById('editSalary').value = e.salary || '';
+  document.getElementById('editDept').value = e.dept || 'INWANG AI';
+  document.getElementById('editRole').value = e.role || '';
+  var msg = document.getElementById('editEmpMsg');
+  if(msg) msg.style.display = 'none';
+  showModal('editEmpModal');
+}
+
+function saveEmpEdit(){
+  var idx = parseInt(document.getElementById('editEmpIdx').value);
+  var e = EMPLOYEES[idx];
+  if(!e){ notif('❌ Employee not found','❌'); return; }
+  
+  var email = document.getElementById('editEmail').value.trim();
+  var mobile = document.getElementById('editMobile').value.trim();
+  var salStr = document.getElementById('editSalary').value.trim();
+  var dept = document.getElementById('editDept').value;
+  var role = document.getElementById('editRole').value.trim();
+  
+  var sal = parseInt(salStr) || 0;
+  
+  EMPLOYEES[idx].email = email;
+  EMPLOYEES[idx].mobile = mobile;
+  EMPLOYEES[idx].salary = sal;
+  EMPLOYEES[idx].dept = dept;
+  EMPLOYEES[idx].role = role;
+  
+  saveData();
+  
+  var msg = document.getElementById('editEmpMsg');
+  if(msg){
+    msg.textContent = '✅ ' + e.name + ' updated!';
+    msg.style.color = 'var(--green)';
+    msg.style.background = 'var(--green2)';
+    msg.style.display = 'block';
+  }
+  
+  notif('✅ Updated: ' + e.name,'✅');
+  renderSettEmpList();
+  renderEmpBody();
+  renderEmpDropdowns();
+  
+  setTimeout(function(){ closeModal('editEmpModal'); }, 1200);
 }
 
 // ── CHANGE PASSWORD ──
@@ -1982,6 +2055,114 @@ function actReim(id,status){
 // Logo + extra loads on showApp - called from main showApp
 
 
+
+
+// ═══ CLOUD SYNC ═══
+var HRM_WEBAPP = localStorage.getItem('hrm_webapp') || '';
+
+function saveWebappUrl(){
+  var url = (document.getElementById('hrmWebapp')||{value:''}).value.trim();
+  if(!url){ notif('⚠️ URL enter karo','⚠️'); return; }
+  HRM_WEBAPP = url;
+  localStorage.setItem('hrm_webapp', url);
+  notif('✅ URL saved!','✅');
+  updateSyncStatus();
+}
+
+function updateSyncStatus(){
+  var el = document.getElementById('syncStatus');
+  var inp = document.getElementById('hrmWebapp');
+  if(HRM_WEBAPP){
+    if(el){ el.textContent='Connected ✅'; el.style.background='var(--green2)'; el.style.color='var(--green)'; }
+    if(inp) inp.value = HRM_WEBAPP;
+  } else {
+    if(el){ el.textContent='Not Connected'; el.style.background='var(--amber2)'; el.style.color='var(--amber)'; }
+  }
+}
+
+function syncToSheets(){
+  if(!HRM_WEBAPP){ notif('⚠️ AppScript URL pehle save karo','⚠️'); return; }
+  var msg = document.getElementById('syncMsg');
+  if(msg) msg.textContent = '⏳ Pushing data to Google Sheets...';
+  
+  var data = {
+    employees: EMPLOYEES,
+    attendance: ATTENDANCE,
+    leaves: LEAVES,
+    payrolls: PAYROLLS,
+    company: COMPANY,
+    settings: SETTINGS,
+    holidays: typeof HOLIDAYS !== 'undefined' ? HOLIDAYS : [],
+    reimbursements: typeof REIMBURSEMENTS !== 'undefined' ? REIMBURSEMENTS : []
+  };
+  
+  var cbName = 'hrm_push_' + Date.now();
+  var script = document.createElement('script');
+  window[cbName] = function(d){
+    delete window[cbName];
+    if(script.parentNode) script.parentNode.removeChild(script);
+    if(d && d.success){
+      if(msg) msg.textContent = '✅ Data pushed! ' + new Date().toLocaleTimeString();
+      notif('✅ Data synced to Google Sheets!','✅');
+    } else {
+      if(msg) msg.textContent = '❌ Sync failed: ' + (d && d.error ? d.error : 'Unknown error');
+      notif('❌ Sync failed','❌');
+    }
+  };
+  script.onerror = function(){
+    delete window[cbName];
+    if(msg) msg.textContent = '❌ Network error — Check URL';
+    notif('❌ Network error','❌');
+  };
+  script.src = HRM_WEBAPP + '?action=hrm_push&data=' + encodeURIComponent(JSON.stringify(data)) + '&callback=' + cbName;
+  document.body.appendChild(script);
+}
+
+function syncFromSheets(){
+  if(!HRM_WEBAPP){ notif('⚠️ AppScript URL pehle save karo','⚠️'); return; }
+  var msg = document.getElementById('syncMsg');
+  if(msg) msg.textContent = '⏳ Pulling data from Google Sheets...';
+  
+  var cbName = 'hrm_pull_' + Date.now();
+  var script = document.createElement('script');
+  window[cbName] = function(d){
+    delete window[cbName];
+    if(script.parentNode) script.parentNode.removeChild(script);
+    if(d && d.success){
+      // Update local data
+      if(d.employees && d.employees.length){ EMPLOYEES = d.employees; }
+      if(d.attendance) ATTENDANCE = d.attendance;
+      if(d.leaves) LEAVES = d.leaves;
+      if(d.payrolls) PAYROLLS = d.payrolls;
+      if(d.company) Object.assign(COMPANY, d.company);
+      if(d.settings) Object.assign(SETTINGS, d.settings);
+      if(d.holidays && typeof HOLIDAYS !== 'undefined') HOLIDAYS = d.holidays;
+      if(d.reimbursements && typeof REIMBURSEMENTS !== 'undefined') REIMBURSEMENTS = d.reimbursements;
+      saveData();
+      localStorage.setItem('hrm_holidays', JSON.stringify(d.holidays || []));
+      localStorage.setItem('hrm_reimb', JSON.stringify(d.reimbursements || []));
+      if(msg) msg.textContent = '✅ Data pulled! ' + new Date().toLocaleTimeString();
+      notif('✅ Data synced from Sheets! Refreshing...','✅');
+      setTimeout(function(){ loadDashboard(); renderEmpBody(); renderEmpDropdowns(); }, 500);
+    } else {
+      if(msg) msg.textContent = '❌ Pull failed';
+      notif('❌ Pull failed','❌');
+    }
+  };
+  script.onerror = function(){
+    delete window[cbName];
+    if(msg) msg.textContent = '❌ Network error';
+  };
+  script.src = HRM_WEBAPP + '?action=hrm_pull&callback=' + cbName;
+  document.body.appendChild(script);
+}
+
+// Auto load webapp URL
+(function(){
+  var saved = localStorage.getItem('hrm_webapp');
+  if(saved) HRM_WEBAPP = saved;
+  setTimeout(updateSyncStatus, 500);
+})();
 
 </script>
 
