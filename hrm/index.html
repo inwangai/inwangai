@@ -327,6 +327,8 @@ html,body{height:100%;overflow:hidden;background:var(--s1);font-family:'Outfit',
     <button class="si" onclick="nav('myid',this)"><span class="ic">🪪</span>My ID Card</button>
     <button class="si" onclick="nav('mypay',this)"><span class="ic">💰</span>My Payslips</button>
     <button class="si" onclick="nav('performance',this)"><span class="ic">🎯</span>Performance</button>
+    <button class="si" onclick="nav('reimburse',this)"><span class="ic">💳</span>Reimbursement</button>
+    <button class="si" onclick="nav('holidays',this)"><span class="ic">🗓</span>Holidays</button>
 
     <div class="sb-sec admin-only" style="display:none">Admin</div>
     <button class="si admin-only" onclick="nav('live',this)" style="display:none"><span class="ic">🟢</span>Live Board</button>
@@ -337,6 +339,7 @@ html,body{height:100%;overflow:hidden;background:var(--s1);font-family:'Outfit',
     <button class="si admin-only" onclick="nav('employees',this)" style="display:none"><span class="ic">👥</span>Employees</button>
     <button class="si admin-only" onclick="nav('reports',this)" style="display:none"><span class="ic">📈</span>Reports</button>
     <button class="si admin-only" onclick="nav('settings',this)" style="display:none"><span class="ic">⚙</span>Settings</button>
+    <button class="si admin-only" onclick="nav('reimb_mgmt',this)" style="display:none"><span class="ic">💳</span>Reimb. Claims</button>
 
     <div class="sb-sec">Account</div>
     <button class="si" onclick="showModal('cpModal')"><span class="ic">🔑</span>Change Password</button>
@@ -685,6 +688,24 @@ html,body{height:100%;overflow:hidden;background:var(--s1);font-family:'Outfit',
     <div class="page" id="page-settings">
       <div class="card" style="margin-bottom:14px">
         <div class="ch"><div class="ct">🏢 Company Information</div></div>
+        <!-- Logo Upload -->
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:14px;background:var(--s5);border-radius:var(--r2);border:1px solid var(--b2)">
+          <div id="logoBox" style="width:68px;height:68px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden">
+            <img id="logoImg" style="display:none;width:100%;height:100%;object-fit:contain">
+            <span id="logoFallback">⚡</span>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:4px">Company Logo</div>
+            <div style="font-size:11px;color:var(--t3);margin-bottom:8px">Payslips aur HR documents mein show hoga</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <label style="cursor:pointer;padding:5px 12px;background:var(--s4);border:1px solid var(--b2);border-radius:var(--r1);font-size:11px;font-weight:700;color:var(--t2)">
+                📁 Upload
+                <input type="file" accept="image/*" style="display:none" onchange="uploadLogo(this)">
+              </label>
+              <button onclick="removeLogo()" style="padding:5px 12px;background:var(--red2);border:1px solid var(--redb);border-radius:var(--r1);font-size:11px;font-weight:700;color:var(--red);cursor:pointer;font-family:Outfit,sans-serif">Remove</button>
+            </div>
+          </div>
+        </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
           <div class="fg" style="margin:0"><label>Company Name</label><input id="cName" value="Acurate Multi Services Pvt. Ltd."></div>
           <div class="fg" style="margin:0"><label>CIN</label><input id="cCin" placeholder="U12345BR2024PTC000000"></div>
@@ -715,7 +736,56 @@ html,body{height:100%;overflow:hidden;background:var(--s1);font-family:'Outfit',
       </div>
     </div>
 
-  </div><!-- /pages -->
+  
+    <!-- HOLIDAYS -->
+    <div class="page" id="page-holidays">
+      <div class="card" style="margin-bottom:14px" id="holAddCard">
+        <div class="ch"><div class="ct">Add Holiday</div><span class="badge bm admin-only" style="display:none">Admin Only</span></div>
+        <div class="fr">
+          <div class="fg"><label>Holiday Name</label><input id="holName" placeholder="e.g. Diwali, Republic Day"></div>
+          <div class="fg"><label>Date</label><input type="date" id="holDate"></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label>Type</label><select id="holType"><option>National Holiday</option><option>Festival</option><option>Optional Holiday</option><option>Company Holiday</option></select></div>
+          <div class="fg"><label>For Dept</label><select id="holDept"><option value="">All Departments</option><option>INWANG AI</option><option>MEDVERSE</option><option>Management</option></select></div>
+        </div>
+        <button class="btn btn-gold admin-only" onclick="addHoliday()" style="display:none">+ Add Holiday</button>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">📅 Holiday Calendar 2026</div></div>
+        <div class="tw"><table class="tbl"><thead><tr><th>#</th><th>Holiday</th><th>Date</th><th>Day</th><th>Type</th><th>Dept</th><th class="admin-only" style="display:none">Del</th></tr></thead><tbody id="holBody"><tr><td colspan="7" style="text-align:center;color:var(--t4);padding:20px">No holidays added yet</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- REIMBURSEMENT -->
+    <div class="page" id="page-reimburse">
+      <div class="card" style="margin-bottom:14px">
+        <div class="ch"><div class="ct">Submit Expense Claim</div></div>
+        <div class="fr">
+          <div class="fg"><label>Category</label><select id="reimCat"><option>Travel</option><option>Food & Beverages</option><option>Internet / Phone</option><option>Office Supplies</option><option>Client Entertainment</option><option>Other</option></select></div>
+          <div class="fg"><label>Amount (₹)</label><input type="number" id="reimAmt" placeholder="0" min="0"></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label>Date of Expense</label><input type="date" id="reimDate"></div>
+          <div class="fg"><label>Bill / Receipt No.</label><input id="reimBill" placeholder="Bill number or description"></div>
+        </div>
+        <div class="fg"><label>Description</label><input id="reimDesc" placeholder="Expense ke baare mein details..."></div>
+        <button class="btn btn-gold" onclick="applyReim()">Submit Claim →</button>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ct">My Claims</div></div>
+        <div class="tw"><table class="tbl"><thead><tr><th>Category</th><th>Amount</th><th>Date</th><th>Bill</th><th>Description</th><th>Applied</th><th>Status</th></tr></thead><tbody id="reimBody"><tr><td colspan="7" style="text-align:center;color:var(--t4);padding:16px">Koi claim nahi</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- REIMBURSEMENT MGMT (Admin) -->
+    <div class="page" id="page-reimb_mgmt">
+      <div class="card">
+        <div class="ch"><div class="ct">All Reimbursement Claims</div><span class="badge ba" id="pendingReimCount">0 pending</span></div>
+        <div class="tw"><table class="tbl"><thead><tr><th>Employee</th><th>Category</th><th>Amount</th><th>Date</th><th>Description</th><th>Bill</th><th>Status</th><th>Action</th></tr></thead><tbody id="reimbMgmtBody"><tr><td colspan="8" style="text-align:center;color:var(--t4);padding:16px">No claims</td></tr></tbody></table></div>
+      </div>
+    </div>
+</div><!-- /pages -->
 </div><!-- /main -->
 </div><!-- /app-grid -->
 
@@ -758,6 +828,9 @@ html,body{height:100%;overflow:hidden;background:var(--s1);font-family:'Outfit',
     <button class="mm-btn admin-only" onclick="mobNav('employees');closeMore()" style="display:none"><span style="font-size:22px">👥</span>Staff</button>
     <button class="mm-btn gold admin-only" onclick="mobNav('settings');closeMore()" style="display:none"><span style="font-size:22px">⚙</span>Settings</button>
     <button class="mm-btn" onclick="showModal('cpModal');closeMore()"><span style="font-size:22px">🔑</span>Password</button>
+    <button class="mm-btn" onclick="mobNav('reimburse');closeMore()"><span style="font-size:22px">💳</span>Expense</button>
+    <button class="mm-btn" onclick="mobNav('holidays');closeMore()"><span style="font-size:22px">🗓</span>Holidays</button>
+    <button class="mm-btn admin-only" onclick="mobNav('reimb_mgmt');closeMore()" style="display:none"><span style="font-size:22px">✅</span>Claims</button>
   </div>
   <button onclick="doLogout()" style="width:100%;background:var(--red2);border:1px solid var(--redb);color:var(--red);border-radius:var(--r2);padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px">🚪 Logout</button>
 </div>
@@ -1724,6 +1797,196 @@ var isSafari=/^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 if(isIOS&&isSafari&&!window.navigator.standalone){
   setTimeout(function(){notif('📲 Install: Safari Share → Add to Home Screen','📲');},4000);
 }
+
+
+// ═══ LOGO ═══
+function uploadLogo(input){
+  if(!input.files||!input.files[0]) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=document.getElementById('logoImg');
+    var fb=document.getElementById('logoFallback');
+    if(img){img.src=e.target.result;img.style.display='block';}
+    if(fb) fb.style.display='none';
+    COMPANY.logo=e.target.result;
+    saveData(); notif('✅ Logo uploaded!','✅');
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function removeLogo(){
+  COMPANY.logo=''; saveData();
+  var img=document.getElementById('logoImg');
+  var fb=document.getElementById('logoFallback');
+  if(img){img.src='';img.style.display='none';}
+  if(fb) fb.style.display='block';
+  notif('Logo removed','ℹ️');
+}
+
+function loadLogo(){
+  if(!COMPANY.logo) return;
+  var img=document.getElementById('logoImg');
+  var fb=document.getElementById('logoFallback');
+  if(img&&COMPANY.logo){img.src=COMPANY.logo;img.style.display='block';}
+  if(fb&&COMPANY.logo) fb.style.display='none';
+}
+
+// ═══ HOLIDAYS ═══
+var HOLIDAYS=JSON.parse(localStorage.getItem('hrm_holidays')||'[]');
+
+// Pre-load 2026 Indian holidays
+if(!HOLIDAYS.length){
+  var defaultHols=[
+    {id:1,name:'Republic Day',date:'2026-01-26',type:'National Holiday',dept:'All'},
+    {id:2,name:'Holi',date:'2026-03-17',type:'Festival',dept:'All'},
+    {id:3,name:'Ram Navami',date:'2026-03-27',type:'Festival',dept:'All'},
+    {id:4,name:'Good Friday',date:'2026-04-03',type:'National Holiday',dept:'All'},
+    {id:5,name:'Eid ul-Fitr',date:'2026-03-31',type:'Festival',dept:'All'},
+    {id:6,name:'Independence Day',date:'2026-08-15',type:'National Holiday',dept:'All'},
+    {id:7,name:'Gandhi Jayanti',date:'2026-10-02',type:'National Holiday',dept:'All'},
+    {id:8,name:'Dussehra',date:'2026-10-14',type:'Festival',dept:'All'},
+    {id:9,name:'Diwali',date:'2026-11-01',type:'Festival',dept:'All'},
+    {id:10,name:'Christmas',date:'2026-12-25',type:'National Holiday',dept:'All'},
+  ];
+  var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  defaultHols.forEach(function(h){h.day=days[new Date(h.date).getDay()];});
+  HOLIDAYS=defaultHols;
+  localStorage.setItem('hrm_holidays',JSON.stringify(HOLIDAYS));
+}
+
+function addHoliday(){
+  var name=(document.getElementById('holName')||{value:''}).value.trim();
+  var date=(document.getElementById('holDate')||{value:''}).value;
+  var type=(document.getElementById('holType')||{value:''}).value;
+  var dept=(document.getElementById('holDept')||{value:''}).value;
+  if(!name||!date){notif('⚠️ Name aur date zaroori hai','⚠️');return;}
+  var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  HOLIDAYS.push({id:Date.now(),name:name,date:date,day:days[new Date(date).getDay()],type:type,dept:dept||'All'});
+  HOLIDAYS.sort(function(a,b){return a.date.localeCompare(b.date);});
+  localStorage.setItem('hrm_holidays',JSON.stringify(HOLIDAYS));
+  notif('✅ Holiday added: '+name,'✅');
+  var n=document.getElementById('holName');if(n)n.value='';
+  renderHolidays();
+}
+
+function renderHolidays(){
+  var body=document.getElementById('holBody');if(!body)return;
+  if(!HOLIDAYS.length){body.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--t4);padding:20px">No holidays</td></tr>';return;}
+  var today=new Date().toISOString().split('T')[0];
+  body.innerHTML=HOLIDAYS.map(function(h,i){
+    var isPast=h.date<today;
+    var isToday=h.date===today;
+    var typeColors={'National Holiday':'bg','Festival':'bgd','Optional Holiday':'bb','Company Holiday':'bp'};
+    return '<tr style="opacity:'+(isPast?'0.45':'1')+(isToday?';background:rgba(200,168,75,0.08)':'')+'">'
+      +'<td style="color:var(--t4)">'+(i+1)+'</td>'
+      +'<td style="font-weight:700'+(isToday?';color:var(--gold)':'')+'">'+h.name+(isToday?' 🎉':'')+'</td>'
+      +'<td>'+h.date+'</td>'
+      +'<td>'+h.day+'</td>'
+      +'<td><span class="badge '+(typeColors[h.type]||'bm')+'">'+h.type+'</span></td>'
+      +'<td>'+h.dept+'</td>'
+      +'<td>'+(CU&&CU.isAdmin?'<button class="btn btn-red btn-sm" onclick="delHoliday('+i+')">🗑</button>':'')+'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+function delHoliday(i){
+  if(!confirm('Delete this holiday?')) return;
+  HOLIDAYS.splice(i,1);
+  localStorage.setItem('hrm_holidays',JSON.stringify(HOLIDAYS));
+  renderHolidays();
+  notif('Holiday deleted','ℹ️');
+}
+
+// ═══ REIMBURSEMENT ═══
+var REIMBURSEMENTS=JSON.parse(localStorage.getItem('hrm_reimb')||'[]');
+
+function applyReim(){
+  var cat=(document.getElementById('reimCat')||{value:''}).value;
+  var amt=parseFloat((document.getElementById('reimAmt')||{value:0}).value)||0;
+  var date=(document.getElementById('reimDate')||{value:''}).value;
+  var bill=(document.getElementById('reimBill')||{value:''}).value.trim();
+  var desc=(document.getElementById('reimDesc')||{value:''}).value.trim();
+  if(!amt||amt<=0){notif('⚠️ Valid amount enter karo','⚠️');return;}
+  if(!date){notif('⚠️ Date select karo','⚠️');return;}
+  if(!desc){notif('⚠️ Description required','⚠️');return;}
+  REIMBURSEMENTS.push({id:Date.now(),empId:CU.id,empName:CU.name,dept:CU.dept||'',cat:cat,amt:amt,date:date,bill:bill||'-',desc:desc,applied:new Date().toISOString().split('T')[0],status:'Pending'});
+  localStorage.setItem('hrm_reimb',JSON.stringify(REIMBURSEMENTS));
+  notif('✅ Claim submitted! Admin approval pending.','✅');
+  ['reimAmt','reimBill','reimDesc'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  loadMyReimb();
+  loadReimbMgmt();
+}
+
+function loadMyReimb(){
+  var my=REIMBURSEMENTS.filter(function(r){return r.empId===CU.id;}).sort(function(a,b){return b.id-a.id;});
+  var body=document.getElementById('reimBody');if(!body)return;
+  if(!my.length){body.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--t4);padding:16px">Koi claim nahi</td></tr>';return;}
+  body.innerHTML=my.map(function(r){
+    return '<tr>'
+      +'<td><span class="badge bgd">'+r.cat+'</span></td>'
+      +'<td style="color:var(--green);font-weight:700">₹'+r.amt+'</td>'
+      +'<td>'+r.date+'</td>'
+      +'<td>'+r.bill+'</td>'
+      +'<td>'+r.desc+'</td>'
+      +'<td>'+r.applied+'</td>'
+      +'<td><span class="badge '+(r.status==='Approved'?'bg':r.status==='Rejected'?'br':'ba')+'">'+r.status+'</span></td>'
+      +'</tr>';
+  }).join('');
+}
+
+function loadReimbMgmt(){
+  var all=REIMBURSEMENTS.sort(function(a,b){return b.id-a.id;});
+  var pending=all.filter(function(r){return r.status==='Pending';});
+  var pc=document.getElementById('pendingReimCount');if(pc)pc.textContent=pending.length+' pending';
+  var body=document.getElementById('reimbMgmtBody');if(!body)return;
+  if(!all.length){body.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--t4);padding:16px">No claims</td></tr>';return;}
+  body.innerHTML=all.map(function(r){
+    return '<tr>'
+      +'<td style="font-weight:700">'+r.empName+'</td>'
+      +'<td><span class="badge bgd">'+r.cat+'</span></td>'
+      +'<td style="color:var(--green);font-weight:700">₹'+r.amt+'</td>'
+      +'<td>'+r.date+'</td>'
+      +'<td>'+r.desc+'</td>'
+      +'<td>'+r.bill+'</td>'
+      +'<td><span class="badge '+(r.status==='Approved'?'bg':r.status==='Rejected'?'br':'ba')+'">'+r.status+'</span></td>'
+      +'<td style="display:flex;gap:4px">'
+        +(r.status==='Pending'
+          ?'<button class="btn btn-green btn-sm" onclick="actReim('+r.id+',`Approved`)">✅</button>'
+           +'<button class="btn btn-red btn-sm" onclick="actReim('+r.id+',`Rejected`)">❌</button>'
+          :'<span style="color:var(--t4);font-size:11px">Done</span>')
+      +'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+function actReim(id,status){
+  var r=REIMBURSEMENTS.find(function(x){return x.id===id;});
+  if(!r) return;
+  r.status=status;
+  localStorage.setItem('hrm_reimb',JSON.stringify(REIMBURSEMENTS));
+  notif((status==='Approved'?'✅ Approved ':'❌ Rejected ')+r.empName+' — ₹'+r.amt,'ℹ️');
+  loadReimbMgmt();
+}
+
+// ═══ LOAD LOGO ON START ═══
+var _origShowApp3=showApp;
+function showApp(){
+  _origShowApp3();
+  loadLogo();
+  renderHolidays();
+  loadMyReimb();
+  if(CU&&CU.isAdmin) loadReimbMgmt();
+}
+
+// ═══ OVERRIDE NAV for new pages ═══
+var _origNav3=nav;
+function nav(p,el){
+  _origNav3(p,el);
+  if(p==='holidays'){ renderHolidays(); if(CU&&CU.isAdmin){var ab=document.querySelector('#holAddCard .admin-only');if(ab)ab.style.display='flex';} }
+  if(p==='reimburse') loadMyReimb();
+  if(p==='reimb_mgmt') loadReimbMgmt();
+}
+
 </script>
 
 </body>
