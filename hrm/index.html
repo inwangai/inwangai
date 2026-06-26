@@ -481,33 +481,148 @@ html,body{height:100%;overflow:hidden;background:var(--s1);font-family:'Outfit',
 
     <!-- MY ID CARD -->
     <div class="page" id="page-myid">
-      <div style="display:flex;justify-content:center;margin-bottom:16px">
-        <div class="id-card" id="myIdCard">
-          <div class="id-card-top">
-            <div class="id-card-av" id="idCardAv">MM</div>
-            <div class="id-card-company">
-              <div class="id-card-cname">Acurate Multi Services Pvt. Ltd.</div>
-              <div class="id-card-platform" id="idCardPlatform">INWANG AI · Career Platform</div>
-            </div>
+      
+      <!-- Photo Upload -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="ch"><div class="ct">📸 Employee Photo</div></div>
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <div id="empPhotoWrap" style="width:80px;height:80px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#020408;overflow:hidden;flex-shrink:0" id="empPhotoBox">
+            <img id="empPhotoImg" style="display:none;width:100%;height:100%;object-fit:cover">
+            <span id="empPhotoInit">MM</span>
           </div>
-          <div class="id-card-body">
-            <div class="id-card-name" id="idCardName">-</div>
-            <div class="id-card-role" id="idCardRole">-</div>
-            <div class="id-card-info">
-              <div class="id-info-item"><label>Employee ID</label><span id="idCardId">-</span></div>
-              <div class="id-info-item"><label>Department</label><span id="idCardDept">-</span></div>
-              <div class="id-info-item"><label>Mobile</label><span id="idCardMob">-</span></div>
-              <div class="id-info-item"><label>Email</label><span id="idCardEmail">-</span></div>
-            </div>
-          </div>
-          <div class="id-card-footer">
-            <div class="id-card-id" id="idCardEmpId">-</div>
-            <div class="id-card-valid">Valid: 2026-2027</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:4px">Apni Photo Upload Karo</div>
+            <div style="font-size:11px;color:var(--t3);margin-bottom:8px">ID Card pe dikhegi — Passport size best rahegi</div>
+            <label style="cursor:pointer;padding:8px 16px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#020408;border-radius:var(--r1);font-size:12px;font-weight:700">
+              📁 Upload Photo
+              <input type="file" accept="image/*" style="display:none" onchange="uploadEmpPhoto(this)">
+            </label>
           </div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;justify-content:center">
-        <button class="btn btn-gold" onclick="downloadIdCard()">📥 Download ID Card</button>
+
+      <!-- ID Card Toggle -->
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px">
+        <button class="btn btn-gold" onclick="showIdSide('front')" id="idFrontBtn">Front Side</button>
+        <button class="btn btn-ghost" onclick="showIdSide('back')" id="idBackBtn">Back Side</button>
+      </div>
+
+      <!-- FRONT SIDE -->
+      <div id="idCardFront" style="display:flex;justify-content:center;margin-bottom:16px">
+        <div style="width:340px;max-width:100%;border-radius:18px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.6);position:relative">
+          <!-- Card background -->
+          <div style="background:linear-gradient(135deg,#04060c 0%,#0c1220 60%,#162030 100%);padding:0;position:relative;overflow:hidden">
+            
+            <!-- Top decorative bar -->
+            <div style="background:linear-gradient(135deg,#c8a84b,#e8c96d,#c8a84b);height:6px;width:100%"></div>
+            
+            <!-- Decorative circles -->
+            <div style="position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(200,168,75,0.05);top:-60px;right:-60px"></div>
+            <div style="position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(200,168,75,0.04);bottom:-30px;left:-30px"></div>
+            
+            <!-- Header -->
+            <div style="padding:16px 20px 12px;display:flex;align-items:center;gap:12px;position:relative;z-index:1">
+              <div style="flex:1">
+                <div style="font-size:9px;font-weight:700;color:rgba(200,168,75,0.7);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px">Acurate Multi Services Pvt. Ltd.</div>
+                <div style="font-size:16px;font-weight:900;color:#c8a84b;letter-spacing:1px">INWANG AI</div>
+                <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:1px">Career Intelligence Platform</div>
+              </div>
+              <div style="width:36px;height:36px;background:linear-gradient(135deg,#c8a84b,#e8c96d);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚡</div>
+            </div>
+            
+            <!-- Divider -->
+            <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(200,168,75,0.3),transparent);margin:0 20px"></div>
+            
+            <!-- Body -->
+            <div style="padding:16px 20px;display:flex;gap:14px;align-items:flex-start;position:relative;z-index:1">
+              <!-- Photo -->
+              <div style="width:76px;height:92px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#c8a84b,#e8c96d);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid rgba(200,168,75,0.4)" id="idFrontPhoto">
+                <img id="idFrontPhotoImg" style="display:none;width:100%;height:100%;object-fit:cover">
+                <span id="idFrontInitials" style="font-size:22px;font-weight:900;color:#020408">MM</span>
+              </div>
+              <!-- Info -->
+              <div style="flex:1;min-width:0">
+                <div style="font-size:16px;font-weight:900;color:#f1f5f9;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="idFrontName">-</div>
+                <div style="font-size:11px;color:#c8a84b;font-weight:600;margin-bottom:10px" id="idFrontRole">-</div>
+                <div style="display:grid;grid-template-columns:1fr;gap:5px">
+                  <div><div style="font-size:8px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px">Employee ID</div><div style="font-size:11px;color:#e0e6f0;font-weight:700" id="idFrontEmpId">-</div></div>
+                  <div><div style="font-size:8px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px">Department</div><div style="font-size:11px;color:#e0e6f0;font-weight:600" id="idFrontDept">-</div></div>
+                  <div><div style="font-size:8px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.5px">Valid Until</div><div style="font-size:11px;color:#e0e6f0;font-weight:600">December 2027</div></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Footer bar -->
+            <div style="background:rgba(200,168,75,0.08);border-top:1px solid rgba(200,168,75,0.15);padding:8px 20px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1">
+              <div style="font-size:9px;color:rgba(255,255,255,0.3)">If found, please return to:</div>
+              <div style="font-size:9px;color:rgba(200,168,75,0.7);font-weight:600">hr@acuratemulti.com</div>
+            </div>
+            
+            <!-- Bottom gold bar -->
+            <div style="background:linear-gradient(135deg,#c8a84b,#e8c96d,#c8a84b);height:4px;width:100%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BACK SIDE -->
+      <div id="idCardBack" style="display:none;justify-content:center;margin-bottom:16px">
+        <div style="width:340px;max-width:100%;border-radius:18px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.6)">
+          <div style="background:linear-gradient(135deg,#162030 0%,#0c1220 60%,#04060c 100%);padding:0;position:relative;overflow:hidden">
+            
+            <div style="background:linear-gradient(135deg,#c8a84b,#e8c96d,#c8a84b);height:6px;width:100%"></div>
+            
+            <!-- Decorative -->
+            <div style="position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(200,168,75,0.04);top:-50px;left:-50px"></div>
+            
+            <!-- Acurate branding -->
+            <div style="padding:18px 20px 14px;position:relative;z-index:1">
+              <div style="font-size:14px;font-weight:900;color:#c8a84b;letter-spacing:1px;margin-bottom:1px">ACURATE</div>
+              <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase">Multi Services Pvt. Ltd.</div>
+            </div>
+            
+            <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(200,168,75,0.25),transparent);margin:0 20px"></div>
+            
+            <!-- Contact info -->
+            <div style="padding:14px 20px;position:relative;z-index:1">
+              <div style="font-size:9px;font-weight:700;color:rgba(200,168,75,0.6);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Contact Information</div>
+              <div style="display:grid;gap:8px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:24px;height:24px;background:rgba(200,168,75,0.1);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">📱</div>
+                  <div id="idBackMob" style="font-size:12px;color:#e0e6f0;font-weight:600">-</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:24px;height:24px;background:rgba(200,168,75,0.1);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✉️</div>
+                  <div id="idBackEmail" style="font-size:12px;color:#e0e6f0;font-weight:600">-</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:24px;height:24px;background:rgba(200,168,75,0.1);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">🌐</div>
+                  <div style="font-size:12px;color:#c8a84b;font-weight:600">inwangai.com</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:24px;height:24px;background:rgba(200,168,75,0.1);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">📍</div>
+                  <div style="font-size:11px;color:rgba(255,255,255,0.5)">Muzaffarpur, Bihar - 842001</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Terms -->
+            <div style="padding:10px 20px;background:rgba(0,0,0,0.2);position:relative;z-index:1">
+              <div style="font-size:9px;color:rgba(255,255,255,0.2);line-height:1.6">This card is the property of Acurate Multi Services Pvt. Ltd. If found, please contact HR at hr@acuratemulti.com or call 9470659224.</div>
+            </div>
+            
+            <!-- Platforms -->
+            <div style="padding:10px 20px 14px;display:flex;gap:8px;position:relative;z-index:1">
+              <div style="background:rgba(200,168,75,0.1);border:1px solid rgba(200,168,75,0.2);border-radius:6px;padding:4px 10px;font-size:9px;font-weight:700;color:#c8a84b">⚡ INWANG AI</div>
+              <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:6px;padding:4px 10px;font-size:9px;font-weight:700;color:#22c55e">🫀 MEDVERSE</div>
+            </div>
+            
+            <div style="background:linear-gradient(135deg,#c8a84b,#e8c96d,#c8a84b);height:4px;width:100%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-gold" onclick="downloadIdCard()">📥 Download / Print</button>
         <button class="btn btn-ghost" onclick="shareIdCard()">📤 Share</button>
       </div>
     </div>
@@ -718,7 +833,26 @@ html,body{height:100%;overflow:hidden;background:var(--s1);font-family:'Outfit',
         </div>
         <button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="saveCompanyInfo()">💾 Save</button>
       </div>
-      <div class="card" style="margin-bottom:14px">
+              <!-- CLOUD SYNC -->
+        <div class="card" style="margin-bottom:14px;border:1px solid var(--goldb)">
+          <div class="ch">
+            <div class="ct">☁️ Cloud Sync</div>
+            <span class="badge" id="syncStatus" style="background:var(--amber2);color:var(--amber)">Not Connected</span>
+          </div>
+          <div style="font-size:12px;color:var(--t3);margin-bottom:12px">Desktop + Mobile — sab devices pe same data dikhega</div>
+          <div class="fg" style="margin-bottom:10px">
+            <label>AppScript URL (apna existing CRM wala use karo)</label>
+            <input id="hrmWebappInp" placeholder="https://script.google.com/macros/s/..." style="width:100%;background:var(--s5);border:1.5px solid var(--b2);border-radius:var(--r1);padding:10px 12px;font-family:Outfit,sans-serif;font-size:12px;color:var(--t1);outline:none;transition:.2s">
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-gold btn-sm" onclick="saveWebappUrl()">💾 Save URL</button>
+            <button class="btn btn-ghost btn-sm" onclick="syncToSheets()">☁️ Push Data</button>
+            <button class="btn btn-ghost btn-sm" onclick="syncFromSheets()">⬇️ Pull Data</button>
+          </div>
+          <div id="syncMsg" style="font-size:11px;color:var(--t3);margin-top:8px"></div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
         <div class="ch"><div class="ct">📍 Office Location</div></div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:10px">
           <div class="fg" style="margin:0"><label>Office Name</label><input id="offName" value="INWANG AI HQ"></div>
@@ -1300,26 +1434,105 @@ function actLeave(id,status){
 }
 
 // ── ID CARD ──
+var _empPhotoData = localStorage.getItem('hrm_emp_photo_'+(CU?CU.id:'')) || '';
+
 function loadIdCard(){
   if(!CU) return;
-  var fields={idCardAv:CU.name.split(' ').map(function(n){return n[0];}).join('').substring(0,2).toUpperCase(),idCardName:CU.name,idCardRole:CU.role+' · '+CU.dept,idCardId:CU.id||'EMP001',idCardDept:CU.dept,idCardMob:CU.mobile||'—',idCardEmail:CU.email||'—',idCardEmpId:CU.id||'EMP001',idCardPlatform:CU.dept==='MEDVERSE'?'MEDVERSE · NEET Platform':'INWANG AI · Career Platform'};
-  Object.keys(fields).forEach(function(k){var el=document.getElementById(k);if(el)el.textContent=fields[k];});
+  var initials = CU.name.split(' ').map(function(n){return n[0];}).join('').substring(0,2).toUpperCase();
+  
+  // Update front side
+  var fn=document.getElementById('idFrontName'); if(fn) fn.textContent=CU.name;
+  var fr=document.getElementById('idFrontRole'); if(fr) fr.textContent=CU.role+(CU.dept?' · '+CU.dept:'');
+  var fi=document.getElementById('idFrontEmpId'); if(fi) fi.textContent=CU.id||'EMP001';
+  var fd=document.getElementById('idFrontDept'); if(fd) fd.textContent=CU.dept||'INWANG AI';
+  var finit=document.getElementById('idFrontInitials'); if(finit) finit.textContent=initials;
+  
+  // Update back side
+  var bm=document.getElementById('idBackMob'); if(bm) bm.textContent=CU.mobile||'Not set';
+  var be=document.getElementById('idBackEmail'); if(be) be.textContent=CU.email||'Not set';
+  
+  // Photo init
+  var pi=document.getElementById('empPhotoInit'); if(pi) pi.textContent=initials;
+  
+  // Load saved photo
+  var savedPhoto = localStorage.getItem('hrm_emp_photo_'+CU.id);
+  if(savedPhoto) applyEmpPhoto(savedPhoto);
+}
+
+function uploadEmpPhoto(input){
+  if(!input.files||!input.files[0]) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    localStorage.setItem('hrm_emp_photo_'+CU.id, e.target.result);
+    applyEmpPhoto(e.target.result);
+    notif('✅ Photo uploaded!','✅');
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function applyEmpPhoto(src){
+  // Preview box
+  var img=document.getElementById('empPhotoImg');
+  var init=document.getElementById('empPhotoInit');
+  if(img){img.src=src;img.style.display='block';}
+  if(init)init.style.display='none';
+  
+  // ID Card front photo
+  var cimg=document.getElementById('idFrontPhotoImg');
+  var cinit=document.getElementById('idFrontInitials');
+  if(cimg){cimg.src=src;cimg.style.display='block';}
+  if(cinit)cinit.style.display='none';
+}
+
+function showIdSide(side){
+  var front=document.getElementById('idCardFront');
+  var back=document.getElementById('idCardBack');
+  var fb=document.getElementById('idFrontBtn');
+  var bb=document.getElementById('idBackBtn');
+  if(side==='front'){
+    if(front)front.style.display='flex';
+    if(back)back.style.display='none';
+    if(fb){fb.className='btn btn-gold';}
+    if(bb){bb.className='btn btn-ghost';}
+  } else {
+    if(front)front.style.display='none';
+    if(back)back.style.display='flex';
+    if(fb){fb.className='btn btn-ghost';}
+    if(bb){bb.className='btn btn-gold';}
+  }
 }
 
 function downloadIdCard(){
-  var card=document.getElementById('myIdCard');
-  if(!card){notif('ID card not found','❌');return;}
-  notif('📥 ID Card download ho raha hai...','📥');
-  // Open print dialog for ID card
-  var content=card.outerHTML;
+  notif('📥 Printing ID Card...','📥');
+  var front = document.getElementById('idCardFront');
+  var back = document.getElementById('idCardBack');
+  if(!front){notif('ID Card not found','❌');return;}
+  
+  var fHtml = front.innerHTML;
+  var bHtml = back ? back.innerHTML : '';
+  
   var win=window.open('','_blank');
-  win.document.write('<html><head><title>INWANG HRM — ID Card</title><style>body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#1a1a1a;font-family:Outfit,sans-serif}</style><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet"></head><body>'+content+'</body></html>');
+  win.document.write(`<!DOCTYPE html><html><head><title>ID Card — ${CU.name}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body{margin:0;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:20px;font-family:Outfit,sans-serif;padding:20px}
+    h3{color:#c8a84b;font-size:12px;letter-spacing:2px;text-transform:uppercase;margin:0}
+    @media print{body{background:#fff}h3{color:#c8a84b}}
+  </style></head><body>
+  <h3>FRONT SIDE</h3>${fHtml}
+  <h3>BACK SIDE</h3>${bHtml}
+  </body></html>`);
   win.document.close();
-  setTimeout(function(){win.print();},500);
+  setTimeout(function(){win.print();},800);
 }
 
 function shareIdCard(){
-  notif('📤 Share feature: Screenshot lo aur share karo!','ℹ️');
+  if(navigator.share){
+    navigator.share({title:'My ID Card — '+CU.name,text:'INWANG AI Employee ID Card',url:window.location.href})
+    .catch(function(){notif('Share cancelled','ℹ️');});
+  } else {
+    notif('📤 Screenshot lo aur share karo!','ℹ️');
+  }
 }
 
 // ── MY PAYSLIPS ──
@@ -1520,60 +1733,148 @@ function previewDoc(){
 }
 
 function buildDoc(type,emp,date,extra){
-  var header='<div style="background:#fff;color:#000;padding:32px;font-family:Arial,sans-serif;max-width:600px;margin:0 auto">'
-    +'<div style="text-align:center;border-bottom:3px solid #c8a84b;padding-bottom:16px;margin-bottom:20px">'
-    +'<div style="font-size:20px;font-weight:900;color:#020408;letter-spacing:1px">ACURATE MULTI SERVICES PVT. LTD.</div>'
-    +'<div style="font-size:12px;color:#666;margin-top:3px">'+COMPANY.address+'</div>'
-    +'<div style="font-size:11px;color:#999">'+COMPANY.email+' · '+COMPANY.phone+'</div>'
+  var logo = COMPANY.logo ? '<img src="'+COMPANY.logo+'" style="height:50px;object-fit:contain">' : '<div style="width:50px;height:50px;background:linear-gradient(135deg,#c8a84b,#e8c96d);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px">⚡</div>';
+  
+  var header = '<div style="background:#fff;color:#000;padding:40px 48px;font-family:Arial,sans-serif;max-width:680px;margin:0 auto;position:relative">'
+    // Letterhead
+    +'<div style="display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:20px;border-bottom:3px solid #c8a84b;margin-bottom:24px">'
+      +'<div style="display:flex;align-items:center;gap:14px">'
+        +logo
+        +'<div>'
+          +'<div style="font-size:20px;font-weight:900;color:#020408;letter-spacing:.5px">ACURATE MULTI SERVICES PVT. LTD.</div>'
+          +'<div style="font-size:11px;color:#888;margin-top:2px;letter-spacing:.3px">Powered by INWANG AI · Career Intelligence Platform</div>'
+          +'<div style="font-size:11px;color:#888">'+COMPANY.address+'</div>'
+        +'</div>'
+      +'</div>'
+      +'<div style="text-align:right;font-size:11px;color:#888;line-height:1.7">'
+        +(COMPANY.cin?'CIN: '+COMPANY.cin+'<br>':'')
+        +(COMPANY.pan?'PAN: '+COMPANY.pan+'<br>':'')
+        +'📧 '+COMPANY.email+'<br>'
+        +'📞 '+COMPANY.phone
+      +'</div>'
     +'</div>';
-  var footer='<div style="margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:12px">'
-    +'<div>Employee Signature: _________________<br><br>Date: _________________</div>'
-    +'<div style="text-align:right">For Acurate Multi Services Pvt. Ltd.<br><br>Authorised Signatory</div>'
-    +'</div></div>';
-  var body='';
+
+  var footer = '<div style="margin-top:48px;padding-top:20px;border-top:1px solid #e0e0e0">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:40px">'
+      +'<div>'
+        +'<div style="margin-bottom:40px;border-bottom:1px solid #ccc;padding-bottom:2px"></div>'
+        +'<div style="font-size:11px;color:#666">Employee Signature</div>'
+        +'<div style="font-size:11px;color:#999;margin-top:2px">'+emp.name+'</div>'
+        +'<div style="font-size:11px;color:#999">Date: '+date+'</div>'
+      +'</div>'
+      +'<div style="text-align:right">'
+        +'<div style="margin-bottom:40px;border-bottom:1px solid #ccc;padding-bottom:2px"></div>'
+        +'<div style="font-size:11px;color:#666">Authorised Signatory</div>'
+        +'<div style="font-size:11px;color:#999;margin-top:2px">For Acurate Multi Services Pvt. Ltd.</div>'
+        +'<div style="font-size:11px;color:#999">HR Department</div>'
+      +'</div>'
+    +'</div>'
+    +'<div style="text-align:center;margin-top:20px;padding-top:12px;border-top:1px solid #eee;font-size:10px;color:#bbb">'
+      +'This is a computer generated document · Acurate Multi Services Pvt. Ltd. · inwangai.com'
+    +'</div>'
+  +'</div></div>';
+
+  var titles = {offer:'OFFER LETTER',appointment:'APPOINTMENT LETTER',increment:'SALARY INCREMENT LETTER',experience:'EXPERIENCE CERTIFICATE',warning:'WARNING LETTER',relieving:'RELIEVING LETTER'};
+  var titleColors = {warning:'#ef4444'};
+  var titleColor = titleColors[type]||'#c8a84b';
+  
+  var docTitle = '<div style="text-align:center;margin-bottom:28px">'
+    +'<div style="display:inline-block;background:linear-gradient(135deg,#c8a84b,#e8c96d);padding:2px;border-radius:4px">'
+      +'<div style="background:#fff;padding:6px 24px;border-radius:3px">'
+        +'<div style="font-size:16px;font-weight:900;color:'+titleColor+';letter-spacing:2px;text-transform:uppercase">'+(titles[type]||type.toUpperCase())+'</div>'
+      +'</div>'
+    +'</div>'
+    +'<div style="font-size:12px;color:#999;margin-top:8px">Ref No: AMS/'+type.toUpperCase().substring(0,3)+'/'+new Date().getFullYear()+'/'+Math.floor(Math.random()*9000+1000)+'</div>'
+  +'</div>';
+
+  var body = '';
+  var dateStr = '<p style="font-size:12px;color:#666;margin-bottom:20px">Date: '+date+'</p>';
+  var salutation = '<p style="font-size:14px;font-weight:700;margin-bottom:16px">Dear <span style="color:#020408">'+emp.name+'</span>,</p>';
+  
   if(type==='offer'){
-    body='<div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:20px;color:#c8a84b">OFFER LETTER</div>'
-      +'<p style="font-size:12px;color:#666;margin-bottom:12px">Date: '+date+'</p>'
-      +'<p style="font-size:13px;margin-bottom:16px">Dear <b>'+emp.name+'</b>,</p>'
-      +'<p style="font-size:13px;line-height:1.8;margin-bottom:14px">We are pleased to offer you the position of <b>'+emp.role+'</b> in our '+emp.dept+' team at Acurate Multi Services Pvt. Ltd. (INWANG AI Platform).</p>'
-      +'<p style="font-size:13px;line-height:1.8;margin-bottom:14px"><b>CTC:</b> ₹'+( extra||emp.salary||'As discussed')+'/month<br><b>Department:</b> '+emp.dept+'<br><b>Reporting To:</b> Management<br><b>Location:</b> '+COMPANY.address+'</p>'
-      +'<p style="font-size:13px;line-height:1.8;margin-bottom:14px">Please confirm your acceptance by signing and returning a copy of this letter.</p>'
-      +'<p style="font-size:13px">We look forward to welcoming you to our team.</p>';
+    body = dateStr+salutation
+      +'<p style="font-size:13px;line-height:1.9;margin-bottom:16px">We are pleased to offer you the position of <strong>'+emp.role+'</strong> at Acurate Multi Services Pvt. Ltd. in our <strong>'+emp.dept+'</strong> division. This offer is subject to the terms and conditions mentioned herein.</p>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:13px;margin:20px 0;border:1px solid #e0d0a0">'
+        +'<thead><tr style="background:#fdf8ed"><th style="padding:10px 14px;text-align:left;border:1px solid #e0d0a0;color:#c8a84b;font-weight:700">Terms of Employment</th><th style="padding:10px 14px;text-align:left;border:1px solid #e0d0a0;color:#c8a84b;font-weight:700">Details</th></tr></thead>'
+        +'<tbody>'
+          +'<tr><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Designation</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">'+emp.role+'</td></tr>'
+          +'<tr style="background:#fafafa"><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Department</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">'+emp.dept+'</td></tr>'
+          +'<tr><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">CTC (Per Month)</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700;color:#c8a84b">₹'+(extra||emp.salary||'As Discussed')+'</td></tr>'
+          +'<tr style="background:#fafafa"><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Location</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">'+COMPANY.address+'</td></tr>'
+          +'<tr><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Probation Period</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">3 Months</td></tr>'
+          +'<tr style="background:#fafafa"><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Working Hours</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">9:00 AM – 6:00 PM (Mon–Sat)</td></tr>'
+        +'</tbody>'
+      +'</table>'
+      +'<p style="font-size:13px;line-height:1.9;margin-bottom:14px">Please confirm your acceptance by signing and returning a copy of this letter within 3 working days. We look forward to welcoming you to our growing team.</p>';
   } else if(type==='appointment'){
-    body='<div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:20px;color:#c8a84b">APPOINTMENT LETTER</div>'
-      +'<p style="font-size:12px;color:#666;margin-bottom:12px">Date: '+date+'</p>'
-      +'<p style="font-size:13px;margin-bottom:16px">Dear <b>'+emp.name+'</b>,</p>'
-      +'<p style="font-size:13px;line-height:1.8;margin-bottom:14px">This is to formally confirm your appointment as <b>'+emp.role+'</b> with Acurate Multi Services Pvt. Ltd. effective from <b>'+(extra||date)+'</b>.</p>'
-      +'<p style="font-size:13px;line-height:1.8;margin-bottom:14px"><b>Employee ID:</b> '+emp.id+'<br><b>Department:</b> '+emp.dept+'<br><b>Monthly CTC:</b> ₹'+emp.salary+'<br><b>Probation Period:</b> 3 months</p>'
-      +'<p style="font-size:13px">Please report to HR on your first day with original documents.</p>';
+    body = dateStr+salutation
+      +'<p style="font-size:13px;line-height:1.9;margin-bottom:14px">This is to formally confirm your appointment with Acurate Multi Services Pvt. Ltd. on the following terms and conditions:</p>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:13px;margin:20px 0;border:1px solid #e0d0a0">'
+        +'<tbody>'
+          +'<tr><td style="padding:9px 14px;border:1px solid #eee;width:40%;color:#555;font-weight:600">Employee Name</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">'+emp.name+'</td></tr>'
+          +'<tr style="background:#fafafa"><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Employee ID</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">'+emp.id+'</td></tr>'
+          +'<tr><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Designation</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">'+emp.role+'</td></tr>'
+          +'<tr style="background:#fafafa"><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Department</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">'+emp.dept+'</td></tr>'
+          +'<tr><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Date of Joining</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">'+(extra||emp.joining||date)+'</td></tr>'
+          +'<tr style="background:#fafafa"><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Monthly CTC</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700;color:#c8a84b">₹'+emp.salary+'</td></tr>'
+          +'<tr><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Probation Period</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">3 Months (Extendable)</td></tr>'
+        +'</tbody>'
+      +'</table>'
+      +'<p style="font-size:13px;line-height:1.9">During your probation period, either party may terminate employment with 15 days notice. Post confirmation, 30 days notice is required.</p>';
   } else if(type==='increment'){
-    body='<div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:20px;color:#c8a84b">SALARY INCREMENT LETTER</div>'
-      +'<p style="font-size:12px;color:#666;margin-bottom:12px">Date: '+date+'</p>'
-      +'<p style="font-size:13px;margin-bottom:16px">Dear <b>'+emp.name+'</b>,</p>'
-      +'<p style="font-size:13px;line-height:1.8;margin-bottom:14px">We are pleased to inform you that based on your performance review, your salary has been revised with effect from <b>'+date+'</b>.</p>'
-      +'<p style="font-size:13px;line-height:1.8;margin-bottom:14px"><b>Previous Salary:</b> ₹'+emp.salary+'/month<br><b>Revised Salary:</b> ₹'+(extra||emp.salary)+'/month</p>'
-      +'<p style="font-size:13px">We appreciate your contribution and look forward to your continued growth.</p>';
+    var newSal = extra || emp.salary;
+    body = dateStr+salutation
+      +'<p style="font-size:13px;line-height:1.9;margin-bottom:16px">We are pleased to inform you that after due consideration of your performance and contribution to Acurate Multi Services Pvt. Ltd., the management has decided to revise your compensation package with effect from <strong>'+date+'</strong>.</p>'
+      +'<div style="background:#fdf8ed;border:2px solid #c8a84b;border-radius:8px;padding:20px;margin:20px 0">'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:center">'
+          +'<div style="border-right:1px solid #e0d0a0">'
+            +'<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Previous Salary</div>'
+            +'<div style="font-size:22px;font-weight:900;color:#888;text-decoration:line-through">₹'+emp.salary+'</div>'
+            +'<div style="font-size:10px;color:#bbb">Per Month</div>'
+          +'</div>'
+          +'<div>'
+            +'<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Revised Salary</div>'
+            +'<div style="font-size:22px;font-weight:900;color:#c8a84b">₹'+newSal+'</div>'
+            +'<div style="font-size:10px;color:#888">Per Month (Effective '+date+')</div>'
+          +'</div>'
+        +'</div>'
+      +'</div>'
+      +'<p style="font-size:13px;line-height:1.9">We appreciate your continued dedication and look forward to your sustained contribution to our growth. This increment is a recognition of your excellent performance.</p>';
   } else if(type==='experience'){
-    body='<div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:20px;color:#c8a84b">EXPERIENCE CERTIFICATE</div>'
-      +'<p style="font-size:12px;color:#666;margin-bottom:12px">Date: '+date+'</p>'
-      +'<p style="font-size:13px;line-height:1.8;margin-bottom:14px">This is to certify that <b>'+emp.name+'</b> (Employee ID: '+emp.id+') was employed with Acurate Multi Services Pvt. Ltd. as <b>'+emp.role+'</b> in the '+emp.dept+' department.</p>'
-      +'<p style="font-size:13px;line-height:1.8;margin-bottom:14px"><b>Joining Date:</b> '+( emp.joining||'2024'  )+'<br><b>Last Working Day:</b> '+(extra||date)+'</p>'
-      +'<p style="font-size:13px;line-height:1.8">During their tenure, '+emp.name+' demonstrated professionalism and dedication. We wish them success in future endeavours.</p>';
+    body = dateStr
+      +'<div style="font-size:13px;font-weight:700;color:#555;margin-bottom:16px">TO WHOMSOEVER IT MAY CONCERN</div>'
+      +'<p style="font-size:13px;line-height:1.9;margin-bottom:14px">This is to certify that <strong>'+emp.name+'</strong> (Employee ID: <strong>'+emp.id+'</strong>) was employed with Acurate Multi Services Pvt. Ltd. in the capacity of <strong>'+emp.role+'</strong> in the <strong>'+emp.dept+'</strong> department.</p>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:13px;margin:20px 0;border:1px solid #e0d0a0">'
+        +'<tbody>'
+          +'<tr><td style="padding:9px 14px;border:1px solid #eee;width:40%;color:#555;font-weight:600">Date of Joining</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">'+(emp.joining||'2024')+'</td></tr>'
+          +'<tr style="background:#fafafa"><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Last Working Day</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">'+(extra||date)+'</td></tr>'
+          +'<tr><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Designation</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">'+emp.role+'</td></tr>'
+          +'<tr style="background:#fafafa"><td style="padding:9px 14px;border:1px solid #eee;color:#555;font-weight:600">Department</td><td style="padding:9px 14px;border:1px solid #eee;font-weight:700">'+emp.dept+'</td></tr>'
+        +'</tbody>'
+      +'</table>'
+      +'<p style="font-size:13px;line-height:1.9;margin-bottom:14px">During their tenure, <strong>'+emp.name+'</strong> demonstrated professional excellence and was found to be sincere, dedicated, and hardworking. Their conduct and behaviour were satisfactory throughout.</p>'
+      +'<p style="font-size:13px;line-height:1.9">We wish them all the best in their future endeavours.</p>';
   } else if(type==='warning'){
-    body='<div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:20px;color:#ef4444">WARNING LETTER</div>'
-      +'<p style="font-size:12px;color:#666;margin-bottom:12px">Date: '+date+'</p>'
-      +'<p style="font-size:13px;margin-bottom:16px">Dear <b>'+emp.name+'</b>,</p>'
-      +'<p style="font-size:13px;line-height:1.8;margin-bottom:14px">This letter serves as an official warning regarding: <b>'+(extra||'Conduct/Performance issue')+'</b></p>'
-      +'<p style="font-size:13px;line-height:1.8;margin-bottom:14px">We expect immediate improvement. Any recurrence may lead to serious disciplinary action including termination.</p>'
-      +'<p style="font-size:13px">Please acknowledge receipt of this letter.</p>';
+    body = dateStr+salutation
+      +'<div style="background:#fff5f5;border-left:4px solid #ef4444;padding:12px 16px;margin-bottom:20px;border-radius:0 6px 6px 0">'
+        +'<div style="font-size:12px;font-weight:700;color:#ef4444;margin-bottom:4px">⚠️ OFFICIAL WARNING NOTICE</div>'
+        +'<div style="font-size:12px;color:#666">Subject: '+( extra||'Misconduct / Performance Issue')+'</div>'
+      +'</div>'
+      +'<p style="font-size:13px;line-height:1.9;margin-bottom:14px">This letter serves as an official written warning regarding the above mentioned issue. The management has taken note of the situation and expects immediate corrective action.</p>'
+      +'<p style="font-size:13px;line-height:1.9;margin-bottom:14px">Please be informed that any recurrence of such behavior/performance issues may lead to serious disciplinary action, up to and including termination of employment.</p>'
+      +'<p style="font-size:13px;line-height:1.9;margin-bottom:14px">You are advised to acknowledge receipt of this warning letter and take immediate steps to improve.</p>'
+      +'<div style="background:#fafafa;border:1px solid #eee;border-radius:6px;padding:14px;margin-top:16px;font-size:12px;color:#666">'
+        +'<strong>Acknowledgement:</strong><br>I, '+emp.name+', hereby acknowledge receipt of this warning letter and understand its implications.<br><br>'
+        +'Signature: ___________________ &nbsp;&nbsp; Date: ___________________'
+      +'</div>';
   } else if(type==='relieving'){
-    body='<div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:20px;color:#c8a84b">RELIEVING LETTER</div>'
-      +'<p style="font-size:12px;color:#666;margin-bottom:12px">Date: '+date+'</p>'
-      +'<p style="font-size:13px;margin-bottom:16px">Dear <b>'+emp.name+'</b>,</p>'
-      +'<p style="font-size:13px;line-height:1.8;margin-bottom:14px">This is to confirm that <b>'+emp.name+'</b> ('+emp.role+') has been relieved from services of Acurate Multi Services Pvt. Ltd. effective <b>'+(extra||date)+'</b>.</p>'
-      +'<p style="font-size:13px;line-height:1.8;margin-bottom:14px">All company assets have been returned and dues have been settled. We wish them the very best for their future.</p>';
+    body = dateStr+salutation
+      +'<p style="font-size:13px;line-height:1.9;margin-bottom:14px">This is to confirm that <strong>'+emp.name+'</strong> (Employee ID: <strong>'+emp.id+'</strong>), working as <strong>'+emp.role+'</strong> in the <strong>'+emp.dept+'</strong> department, has been officially relieved from the services of Acurate Multi Services Pvt. Ltd. effective <strong>'+(extra||date)+'</strong>.</p>'
+      +'<p style="font-size:13px;line-height:1.9;margin-bottom:14px">All company assets, credentials, and access have been returned/revoked. Full and final settlement has been processed as per company policy.</p>'
+      +'<p style="font-size:13px;line-height:1.9;margin-bottom:14px">We thank <strong>'+emp.name+'</strong> for their service and contribution to Acurate Multi Services Pvt. Ltd. and wish them great success in all future endeavours.</p>';
   }
-  return header+body+footer;
+  
+  return header + docTitle + body + footer;
 }
 
 function printDoc(){
@@ -2061,7 +2362,7 @@ function actReim(id,status){
 var HRM_WEBAPP = localStorage.getItem('hrm_webapp') || '';
 
 function saveWebappUrl(){
-  var url = (document.getElementById('hrmWebapp')||{value:''}).value.trim();
+  var url = (document.getElementById('hrmWebappInp')||document.getElementById('hrmWebapp')||{value:''}).value.trim();
   if(!url){ notif('⚠️ URL enter karo','⚠️'); return; }
   HRM_WEBAPP = url;
   localStorage.setItem('hrm_webapp', url);
@@ -2071,7 +2372,7 @@ function saveWebappUrl(){
 
 function updateSyncStatus(){
   var el = document.getElementById('syncStatus');
-  var inp = document.getElementById('hrmWebapp');
+  var inp = document.getElementById('hrmWebappInp') || document.getElementById('hrmWebapp');
   if(HRM_WEBAPP){
     if(el){ el.textContent='Connected ✅'; el.style.background='var(--green2)'; el.style.color='var(--green)'; }
     if(inp) inp.value = HRM_WEBAPP;
