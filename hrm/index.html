@@ -205,7 +205,13 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 
 /* NOTIF PANEL */
-.notif-toast{position:fixed;top:16px;left:16px;right:16px;background:var(--card);border:1px solid var(--bg2);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow2);z-index:600;display:flex;align-items:center;gap:10px;animation:slideDown .3s ease;font-size:13px;font-weight:500}
+.notif-toast{position:fixed;top:12px;left:12px;right:12px;background:#1a1a2e;color:#fff;border:none;border-radius:14px;padding:16px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.25);z-index:9999;display:flex;align-items:center;gap:12px;animation:slideDown .35s cubic-bezier(.22,1,.36,1);font-size:14px;font-weight:600;letter-spacing:.2px}
+.notif-toast.success{background:linear-gradient(135deg,#059669,#10B981)}
+.notif-toast.error{background:linear-gradient(135deg,#DC2626,#EF4444)}
+.notif-toast.info{background:linear-gradient(135deg,#4F46E5,#7C3AED)}
+.notif-toast .nt-icon{font-size:22px;flex-shrink:0}
+.notif-toast .nt-text{flex:1;line-height:1.3}
+.notif-toast .nt-close{opacity:.6;cursor:pointer;font-size:18px}
 @keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
 
 /* TEAM */
@@ -233,6 +239,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .doc-preview{background:#fff;color:#000;padding:32px;font-family:Arial,sans-serif;max-width:680px;margin:0 auto;border:1px solid #e0e0e0;border-radius:8px}
 
 /* PRINT */
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @media print{.bottomnav,.topbar,.modal{display:none!important}.main-content{overflow:visible!important}}
 
 </style>
@@ -273,6 +280,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     </div>
   </div>
   <div class="topbar-right">
+    <button class="topbar-btn" onclick="manualRefresh()" id="refreshBtn"><span class="mi">sync</span></button>
     <button class="topbar-btn" onclick="showModal('searchModal')"><span class="mi">search</span></button>
     <button class="topbar-btn" onclick="showModal('notifModal')"><span class="mi">notifications</span><span class="notif-dot" id="notifDot" style="display:none"></span></button>
     <button class="topbar-btn" onclick="showModal('profileModal')" id="topAvatar" style="font-size:13px;font-weight:700;background:var(--goldBg);color:var(--gold);border-radius:50%">ME</button>
@@ -830,7 +838,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 </div></div>
 
 <!-- Notification Toast -->
-<div id="notifToast" style="display:none"></div>
+<div id="notifToast" class="notif-toast" style="display:none"></div>
 
 <script>
 // ══════════════════════════════════════
@@ -870,6 +878,7 @@ var HRM_WEBAPP=localStorage.getItem('hrm_webapp')||'';
 var calYear,calMonth;
 
 // ── SAVE ──
+var _syncTimer=null;
 function saveData(){
   localStorage.setItem('hrm_employees',JSON.stringify(EMPLOYEES));
   localStorage.setItem('hrm_attendance',JSON.stringify(ATTENDANCE));
@@ -883,6 +892,30 @@ function saveData(){
   localStorage.setItem('hrm_notifs',JSON.stringify(NOTIFICATIONS));
   localStorage.setItem('hrm_company',JSON.stringify(COMPANY));
   localStorage.setItem('hrm_settings',JSON.stringify(SETTINGS));
+  // AUTO-SYNC: debounce push to sheets (2 sec delay)
+  if(_syncTimer)clearTimeout(_syncTimer);
+  _syncTimer=setTimeout(function(){autoSync();},2000);
+}
+function autoSync(){
+  if(!HRM_WEBAPP)return;
+  var payload={action:'hrm_push',data:{
+    employees:EMPLOYEES,attendance:ATTENDANCE,leaves:LEAVES,
+    payrolls:PAYROLLS,company:COMPANY,settings:SETTINGS,
+    holidays:HOLIDAYS,reimbursements:REIMBURSEMENTS,
+    posts:POSTS,requests:REQUESTS,notifications:NOTIFICATIONS,goals:GOALS
+  }};
+  fetch(HRM_WEBAPP,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(payload),redirect:'follow'
+  }).then(function(r){return r.text();}).then(function(t){
+    try{var d=JSON.parse(t);}catch(e){var d={success:true};}
+    if(d.success)console.log('Auto-sync OK');else console.log('Auto-sync FAIL');
+  }).catch(function(err){
+    // JSONP fallback
+    var cbName='as_'+Date.now();var s=document.createElement('script');
+    window[cbName]=function(d){delete window[cbName];if(s.parentNode)s.parentNode.removeChild(s);};
+    s.src=HRM_WEBAPP+'?action=hrm_push&data='+encodeURIComponent(JSON.stringify(payload.data))+'&callback='+cbName;
+    document.body.appendChild(s);
+  });
 }
 
 // ── LOGIN ──
@@ -890,8 +923,12 @@ function doLogin(){
   var u=(document.getElementById('loginUser').value||'').trim().toLowerCase();
   var p=(document.getElementById('loginPass').value||'').trim();
   if(!u||!p){document.getElementById('loginErr').style.display='block';document.getElementById('loginErr').textContent='Username aur password dono daalo';return;}
+  // Check stored employees first, then defaults
   var emp=EMPLOYEES.find(function(e){return(e.username||e.user||'').toLowerCase()===u;});
+  if(!emp)emp=EMPLOYEES_DEFAULT.find(function(e){return(e.username||e.user||'').toLowerCase()===u;});
   if(!emp||emp.password!==p||emp.active===false){document.getElementById('loginErr').style.display='block';document.getElementById('loginErr').textContent='Invalid credentials';return;}
+  // Ensure employee exists in EMPLOYEES array
+  if(!EMPLOYEES.find(function(e){return e.id===emp.id;})){EMPLOYEES.push(emp);}
   CU=emp;
   localStorage.setItem('hrm_current',JSON.stringify(CU));
   showApp();
@@ -923,8 +960,51 @@ function showApp(){
   // Init
   startClock();startGPS();
   var now=new Date();calYear=now.getFullYear();calMonth=now.getMonth();
-  loadHome();renderEmpDropdowns();
   loadLogo();settingsLoad();updateSyncStatus();
+  // AUTO-PULL from sheets on login
+  autoPull(function(){
+    loadHome();renderEmpDropdowns();
+  });
+}
+function autoPull(callback){
+  if(!HRM_WEBAPP){if(callback)callback();return;}
+  var cbName='ap_'+Date.now();var s=document.createElement('script');
+  var timeout=setTimeout(function(){delete window[cbName];if(callback)callback();},5000);
+  window[cbName]=function(d){
+    clearTimeout(timeout);delete window[cbName];if(s.parentNode)s.parentNode.removeChild(s);
+    if(d&&d.success!==false){
+      if(d.employees&&d.employees.length){EMPLOYEES=d.employees;
+        // Re-find current user
+        var me=EMPLOYEES.find(function(e){return e.id===CU.id;});
+        if(me)CU=me;
+      }
+      if(d.attendance&&d.attendance.length)ATTENDANCE=d.attendance;
+      if(d.leaves)LEAVES=d.leaves;
+      if(d.payrolls)PAYROLLS=d.payrolls;
+      if(d.holidays)HOLIDAYS=d.holidays;
+      if(d.reimbursements)REIMBURSEMENTS=d.reimbursements;
+      if(d.posts)POSTS=d.posts;
+      if(d.requests)REQUESTS=d.requests;
+      if(d.notifications)NOTIFICATIONS=d.notifications;
+      if(d.goals)GOALS=d.goals;
+      // Save locally
+      localStorage.setItem('hrm_employees',JSON.stringify(EMPLOYEES));
+      localStorage.setItem('hrm_attendance',JSON.stringify(ATTENDANCE));
+      localStorage.setItem('hrm_leaves',JSON.stringify(LEAVES));
+      localStorage.setItem('hrm_payrolls',JSON.stringify(PAYROLLS));
+      localStorage.setItem('hrm_holidays',JSON.stringify(HOLIDAYS));
+      localStorage.setItem('hrm_reimb',JSON.stringify(REIMBURSEMENTS));
+      localStorage.setItem('hrm_posts',JSON.stringify(POSTS));
+      localStorage.setItem('hrm_requests',JSON.stringify(REQUESTS));
+      localStorage.setItem('hrm_notifs',JSON.stringify(NOTIFICATIONS));
+      localStorage.setItem('hrm_goals',JSON.stringify(GOALS));
+      console.log('Auto-pull: synced from sheets');
+    }
+    if(callback)callback();
+  };
+  s.onerror=function(){clearTimeout(timeout);delete window[cbName];if(callback)callback();};
+  s.src=HRM_WEBAPP+'?action=hrm_pull&callback='+cbName;
+  document.body.appendChild(s);
 }
 
 // ── CLOCK ──
@@ -954,7 +1034,7 @@ function startGPS(){
 }
 function updateGpsUI(ok,txt){
   var el=document.getElementById('gpsStatus');
-  if(el)el.innerHTML=(ok?'🟢':'🔴')+' '+txt;
+  if(el)el.innerHTML='<span class="mi" style="font-size:16px;vertical-align:-3px;color:'+(ok?'var(--green)':'var(--amber)')+'">'+( ok?'location_on':'location_off')+'</span> '+txt+(ok?'':' <span style="font-size:10px;color:var(--t3)">(punch allowed)</span>');
 }
 function getDistance(lat1,lng1,lat2,lng2){
   var R=6371e3;var dLat=(lat2-lat1)*Math.PI/180;var dLng=(lng2-lng1)*Math.PI/180;
@@ -1407,6 +1487,18 @@ function showIdSide(side){
   if(tabs[1])tabs[1].className='tab'+(side==='back'?' active':'');
 }
 function uploadEmpPhoto(input){if(input.files&&input.files[0]){var r=new FileReader();r.onload=function(e){CU.photo=e.target.result;var emp=EMPLOYEES.find(function(x){return x.id===CU.id;});if(emp)emp.photo=CU.photo;saveData();loadIdCard();};r.readAsDataURL(input.files[0]);}}
+function manualRefresh(){
+  var btn=document.getElementById('refreshBtn');
+  if(btn)btn.style.animation='spin .5s linear';
+  autoPull(function(){
+    loadHome();loadInbox();loadTeam();
+    if(CU&&CU.isAdmin)loadAdminDashboard();
+    updateNotifDot();
+    notif('Data refreshed from server!');
+    if(btn)setTimeout(function(){btn.style.animation='';},600);
+  });
+}
+
 function loadH2C(cb){if(window.html2canvas)return cb();var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';s.onload=cb;document.body.appendChild(s);}
 function downloadIdCard(){
   var frontEl=document.getElementById('idCardFront');
@@ -1420,13 +1512,13 @@ function downloadIdCard(){
     link.download='ACURATE_ID_'+CU.name.replace(/\s/g,'_')+'_'+(target.id==='idCardFront'?'Front':'Back')+'.png';
     link.href=canvas.toDataURL('image/png',1.0);
     link.click();
-    notif('Downloaded!');
+    notif('ID Card downloaded!');
   }).catch(function(err){notif('Download error: '+err.message);});
   });
 }
 function shareIdCard(){
   var frontEl=document.getElementById('idCardFront');
-  if(!frontEl){notif('Card load karo');return;}
+  if(!frontEl){notif('Card load karo pehle');return;}
   loadH2C(function(){
   html2canvas(frontEl,{scale:3,useCORS:true,backgroundColor:'#ffffff'}).then(function(canvas){
     canvas.toBlob(function(blob){
@@ -1860,11 +1952,25 @@ function syncFromSheets(){
 // ── INIT ──
 (function(){
   var saved=localStorage.getItem('hrm_current');
-  if(saved){CU=JSON.parse(saved);var emp=EMPLOYEES.find(function(e){return e.id===CU.id;});
+  if(saved){CU=JSON.parse(saved);
+    var emp=EMPLOYEES.find(function(e){return e.id===CU.id;});
+    if(!emp)emp=EMPLOYEES_DEFAULT.find(function(e){return e.id===CU.id;});
     if(emp&&emp.active!==false){CU=emp;showApp();}
     else{CU=null;localStorage.removeItem('hrm_current');}
   }
   setTimeout(updateSyncStatus,500);
+  // Auto-refresh from sheets every 30 sec
+  setInterval(function(){
+    if(!CU||!HRM_WEBAPP)return;
+    autoPull(function(){
+      var pg=document.querySelector('.page.active');
+      if(pg&&pg.id==='page-home')loadHome();
+      else if(pg&&pg.id==='page-inbox')loadInbox();
+      else if(pg&&pg.id==='page-team')loadTeam();
+      else if(pg&&pg.id==='page-dashboard')loadAdminDashboard();
+      updateNotifDot();
+    });
+  },30000);
 })();
 
 // ── POST IMAGE ──
@@ -1895,16 +2001,16 @@ function loadFeedV2(){
   var el=document.getElementById('feedPosts');if(el)el.innerHTML=html;
   var el2=document.getElementById('feedPage');if(el2)el2.innerHTML=html;
 }
-function deletePost(idx){if(confirm('Delete this post?')){POSTS.splice(idx,1);saveData();loadFeedV2();notif('Deleted!');}}
+function deletePost(idx){if(confirm('Delete this post?')){POSTS.splice(idx,1);saveData();loadFeedV2();notif('Post deleted!');}}
 function submitPostV2(){
   var title=document.getElementById('postTitle').value.trim();
   var content=document.getElementById('postContent').value.trim();
-  if(!title||!content){notif('Title and content required');return;}
+  if(!title||!content){notif('Title and content both required');return;}
   var featured=document.getElementById('postFeatured').checked;
   var img=document.getElementById('postImgPreview');
   var image=(img&&img.style.display!=='none')?img.src:'';
   POSTS.push({id:Date.now(),title:title,content:content,by:CU.name,date:new Date().toLocaleDateString('en-IN'),featured:featured,image:image});
-  saveData();loadFeedV2();closeModal('postModal');notif('Posted!');
+  saveData();loadFeedV2();closeModal('postModal');notif('Announcement posted successfully!');
   document.getElementById('postTitle').value='';document.getElementById('postContent').value='';
   if(img){img.style.display='none';img.src='';}
   addNotification('New announcement: '+title);
@@ -1940,7 +2046,7 @@ function saveEmpEdit(){
   e.dob=document.getElementById('editDob').value||e.dob;
   e.joining=document.getElementById('editJoining').value||e.joining;
   if(CU.id===e.id)CU=e;
-  saveData();closeModal('editEmpModal');renderEmpList();notif('Employee updated!');
+  saveData();closeModal('editEmpModal');renderEmpList();notif('Employee details updated!');
 }
 
 </script>
