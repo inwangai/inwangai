@@ -445,6 +445,8 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 
 <div class="page" id="page-team">
   <div class="sec-header"><span class="sec-title">Team</span></div>
+  <!-- Debug Panel -->
+  <div id="teamDebug" style="background:#f0f4ff;border:1px solid #c7d2fe;border-radius:8px;padding:10px;margin-bottom:10px;font-size:11px;color:#4338CA;display:none"></div>
   <!-- Today's Attendance -->
   <div class="card" style="margin-bottom:14px">
     <div class="card-header"><span class="card-title">Today's Status</span></div>
@@ -1609,6 +1611,20 @@ function inboxTab(t){
 function loadTeam(){
   var today=new Date().toISOString().split('T')[0];
   var active=EMPLOYEES.filter(function(e){return e.active!==false;});
+  
+  // DEBUG: Log attendance data
+  console.log('TEAM DEBUG — Today:', today, 'Total attendance:', ATTENDANCE.length);
+  var todayRecs=ATTENDANCE.filter(function(a){return isToday(a.date);});
+  console.log('Today records:', todayRecs.length, todayRecs.map(function(a){return a.empName+':'+a.type+':'+a.date;}));
+  var dbg=document.getElementById('teamDebug');
+  if(dbg){
+    dbg.style.display='block';
+    var allDates=ATTENDANCE.map(function(a){return a.date;}).filter(function(v,i,s){return s.indexOf(v)===i;});
+    dbg.innerHTML='<b>Debug:</b> Today='+today+' | Total attendance='+ATTENDANCE.length+' | Today matches='+todayRecs.length
+      +'<br>Dates in data: '+allDates.join(', ')
+      +'<br>Records: '+todayRecs.map(function(a){return a.empName+'('+a.type+')';}).join(', ');
+  }
+  
   var todayIn=new Set(ATTENDANCE.filter(function(a){return isToday(a.date)&&a.type==='in';}).map(function(a){return a.empId;}));
   var onLeave=LEAVES.filter(function(l){return l.status==='Approved'&&l.from<=today&&l.to>=today;});
   var lateC=ATTENDANCE.filter(function(a){return isToday(a.date)&&a.type==='in'&&a.isLate;}).length;
