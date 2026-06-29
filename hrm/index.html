@@ -929,7 +929,6 @@ var HRM_WEBAPP=localStorage.getItem('hrm_webapp')||'https://script.google.com/ma
 var calYear,calMonth;
 
 // ── SAVE ──
-var _syncTimer=null;
 function saveData(){
   localStorage.setItem('hrm_employees',JSON.stringify(EMPLOYEES));
   localStorage.setItem('hrm_attendance',JSON.stringify(ATTENDANCE));
@@ -943,30 +942,9 @@ function saveData(){
   localStorage.setItem('hrm_notifs',JSON.stringify(NOTIFICATIONS));
   localStorage.setItem('hrm_company',JSON.stringify(COMPANY));
   localStorage.setItem('hrm_settings',JSON.stringify(SETTINGS));
-  // AUTO-SYNC: debounce push to sheets (2 sec delay)
-  if(_syncTimer)clearTimeout(_syncTimer);
-  _syncTimer=setTimeout(function(){autoSync();},2000);
-}
-function autoSync(){
-  if(!HRM_WEBAPP)return;
-  var payload={action:'hrm_push',data:{
-    employees:EMPLOYEES,attendance:ATTENDANCE,leaves:LEAVES,
-    payrolls:PAYROLLS,company:COMPANY,settings:SETTINGS,
-    holidays:HOLIDAYS,reimbursements:REIMBURSEMENTS,
-    posts:POSTS,requests:REQUESTS,notifications:NOTIFICATIONS,goals:GOALS
-  }};
-  fetch(HRM_WEBAPP,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body:JSON.stringify(payload),redirect:'follow'
-  }).then(function(r){return r.text();}).then(function(t){
-    try{var d=JSON.parse(t);}catch(e){var d={success:true};}
-    if(d.success)console.log('Auto-sync OK');else console.log('Auto-sync FAIL');
-  }).catch(function(err){
-    // JSONP fallback
-    var cbName='as_'+Date.now();var s=document.createElement('script');
-    window[cbName]=function(d){delete window[cbName];if(s.parentNode)s.parentNode.removeChild(s);};
-    s.src=HRM_WEBAPP+'?action=hrm_push&data='+encodeURIComponent(JSON.stringify(payload.data))+'&callback='+cbName;
-    document.body.appendChild(s);
-  });
+  // Flag that data changed
+  _dataDirty=true;
+  _lastChangeTime=Date.now();
 }
 
 // ── LOGIN ──
@@ -1055,83 +1033,247 @@ function showApp(){
   startClock();startGPS();
   var now=new Date();calYear=now.getFullYear();calMonth=now.getMonth();
   loadLogo();settingsLoad();updateSyncStatus();
-  // AUTO-PULL from sheets on login
-  autoPull(function(){
-    loadHome();renderEmpDropdowns();
-  });
+  // Load immediately, then auto-sync in background
+  loadHome();renderEmpDropdowns();
+  // Push first (send local data), then pull (get server data)
+  setTimeout(function(){
+    pushToSheet(function(pushOk){
+      setTimeout(function(){
+        pullFromSheet(function(pullOk){
+          if(pullOk){loadHome();renderEmpDropdowns();updateNotifDot();}
+        });
+      },3000);
+    });
+  },2000);
 }
-function autoPull(callback){
-  if(!HRM_WEBAPP){if(callback)callback();return;}
-  // Try fetch GET first (more reliable than JSONP)
-  fetch(HRM_WEBAPP+'?action=hrm_pull',{redirect:'follow'})
+
+
+// ═══════════════════════════════════════
+// CLEAN SYNC SYSTEM v3
+// Push = send local data to Google Sheet  
+// Pull = get data from Google Sheet
+// ═══════════════════════════════════════
+var _dataDirty=false;
+var _syncInProgress=false;
+
+// Smart date check — works with any date format
+function isToday(dateStr){
+  if(!dateStr)return false;
+  var now=new Date();
+  try{
+    var d=new Date(dateStr);
+    if(!isNaN(d.getTime()))return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()&&d.getDate()===now.getDate();
+  }catch(e){}
+  var ts=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  return String(dateStr).indexOf(ts)>=0;
+}
+
+// ── PUSH: Local → Google Sheet ──
+function pushToSheet(callback){
+  if(!HRM_WEBAPP||_syncInProgress){if(callback)callback(false);return;}
+  _syncInProgress=true;
+  var payload={action:'hrm_push',data:{
+    employees:EMPLOYEES,attendance:ATTENDANCE,leaves:LEAVES,
+    payrolls:PAYROLLS,company:COMPANY,settings:SETTINGS,
+    holidays:HOLIDAYS,reimbursements:REIMBURSEMENTS,
+    posts:POSTS,requests:REQUESTS,notifications:NOTIFICATIONS,goals:GOALS
+  }};
+  fetch(HRM_WEBAPP,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(payload),redirect:'follow'})
   .then(function(r){return r.text();})
   .then(function(text){
-    try{var d=JSON.parse(text);}catch(e){if(callback)callback();return;}
-    applyPulledData(d);
-    if(callback)callback();
+    _syncInProgress=false;_dataDirty=false;
+    try{var d=JSON.parse(text);}catch(e){if(callback)callback(false);return;}
+    console.log('PUSH:',d.success?'OK':'FAIL');
+    if(callback)callback(d.success!==false);
   })
-  .catch(function(){
-    // Fallback to JSONP
-    var cbName='ap_'+Date.now();var s=document.createElement('script');
-    var timeout=setTimeout(function(){delete window[cbName];if(callback)callback();},15000);
-    window[cbName]=function(d){
-      clearTimeout(timeout);delete window[cbName];if(s.parentNode)s.parentNode.removeChild(s);
-      applyPulledData(d);
-      if(callback)callback();
-    };
-    s.onerror=function(){clearTimeout(timeout);delete window[cbName];if(callback)callback();};
-    s.src=HRM_WEBAPP+'?action=hrm_pull&callback='+cbName;
-    document.body.appendChild(s);
+  .catch(function(err){
+    _syncInProgress=false;
+    console.log('PUSH error:',err.message);
+    if(callback)callback(false);
   });
 }
-function applyPulledData(d){
-  if(!d||d.success===false)return;
-  if(d.employees&&d.employees.length>0){
-        var pulled=d.employees;
-        // Ensure all defaults are preserved
-        EMPLOYEES_DEFAULT.forEach(function(def){
-          if(!pulled.find(function(p){return p.id===def.id;})){
-            pulled.push(Object.assign({},def));
-          }
-        });
-        // Ensure passwords are preserved (sheet doesn't store photos/passwords well)
-        pulled.forEach(function(p){
-          var def=EMPLOYEES_DEFAULT.find(function(d){return d.id===p.id;});
-          if(def&&(!p.password||p.password==='')){p.password=def.password;}
-          if(def&&def.isAdmin){p.isAdmin=true;}
-        });
-        EMPLOYEES=pulled;
-        var me=EMPLOYEES.find(function(e){return e.id===CU.id;});
-        if(me)CU=me;
-      }
-      if(d.attendance){
-        normDates(d.attendance,['date']);
-        ATTENDANCE=mergeById(ATTENDANCE,d.attendance);
-      }
-      if(d.leaves){
-        normDates(d.leaves,['from','to','applied']);
-        LEAVES=mergeById(LEAVES,d.leaves);
-      }
-      if(d.payrolls)PAYROLLS=d.payrolls;
-      if(d.holidays)HOLIDAYS=d.holidays;
-      if(d.reimbursements)REIMBURSEMENTS=d.reimbursements;
-      if(d.posts)POSTS=d.posts;
-      if(d.requests)REQUESTS=d.requests;
-      if(d.notifications)NOTIFICATIONS=d.notifications;
-      if(d.goals)GOALS=d.goals;
-      // Save locally
-      localStorage.setItem('hrm_employees',JSON.stringify(EMPLOYEES));
-      localStorage.setItem('hrm_attendance',JSON.stringify(ATTENDANCE));
-      localStorage.setItem('hrm_leaves',JSON.stringify(LEAVES));
-      localStorage.setItem('hrm_payrolls',JSON.stringify(PAYROLLS));
-      localStorage.setItem('hrm_holidays',JSON.stringify(HOLIDAYS));
-      localStorage.setItem('hrm_reimb',JSON.stringify(REIMBURSEMENTS));
-      localStorage.setItem('hrm_posts',JSON.stringify(POSTS));
-      localStorage.setItem('hrm_requests',JSON.stringify(REQUESTS));
-      localStorage.setItem('hrm_notifs',JSON.stringify(NOTIFICATIONS));
-      localStorage.setItem('hrm_goals',JSON.stringify(GOALS));
-      console.log('Auto-pull: synced from sheets');
+
+// ── PULL: Google Sheet → Local ──
+function pullFromSheet(callback){
+  if(!HRM_WEBAPP||_syncInProgress){if(callback)callback(false);return;}
+  _syncInProgress=true;
+  // Use JSONP (most reliable for Google Apps Script GET)
+  var cbName='pull_'+Date.now();
+  var s=document.createElement('script');
+  var done=false;
+  var timeout=setTimeout(function(){
+    if(done)return;done=true;_syncInProgress=false;
+    delete window[cbName];
+    console.log('PULL: timeout');
+    if(callback)callback(false);
+  },30000); // 30 second timeout
+  
+  window[cbName]=function(d){
+    if(done)return;done=true;_syncInProgress=false;
+    clearTimeout(timeout);
+    delete window[cbName];
+    if(s.parentNode)s.parentNode.removeChild(s);
+    
+    if(!d||d.success===false){
+      console.log('PULL: failed',d?d.error:'no data');
+      if(callback)callback(false);
+      return;
+    }
+    
+    console.log('PULL: got data, applying...');
+    
+    // Apply employees (merge with defaults)
+    if(d.employees&&d.employees.length>0){
+      var pulled=d.employees;
+      // Always keep default employees
+      EMPLOYEES_DEFAULT.forEach(function(def){
+        if(!pulled.find(function(p){return p.id===def.id;})){
+          pulled.push(Object.assign({},def));
+        }
+      });
+      // Restore passwords and admin flags
+      pulled.forEach(function(p){
+        var def=EMPLOYEES_DEFAULT.find(function(dd){return dd.id===p.id;});
+        if(def){
+          if(!p.password||p.password==='')p.password=def.password;
+          if(def.isAdmin)p.isAdmin=true;
+          if(!p.username)p.username=def.username;
+        }
+      });
+      EMPLOYEES=pulled;
+      if(CU){var me=EMPLOYEES.find(function(e){return e.id===CU.id;});if(me)CU=me;}
+    }
+    
+    // Apply other data (merge attendance by id to prevent loss)
+    if(d.attendance&&d.attendance.length){
+      var localMap={};
+      ATTENDANCE.forEach(function(a){localMap[a.id]=a;});
+      d.attendance.forEach(function(a){if(!localMap[a.id])ATTENDANCE.push(a);});
+    }
+    if(d.leaves&&d.leaves.length){
+      var leaveMap={};LEAVES.forEach(function(l){leaveMap[l.id]=true;});
+      d.leaves.forEach(function(l){if(!leaveMap[l.id])LEAVES.push(l);});
+    }
+    if(d.posts&&d.posts.length){
+      var postMap={};POSTS.forEach(function(p){postMap[p.id]=true;});
+      d.posts.forEach(function(p){if(!postMap[p.id])POSTS.push(p);});
+    }
+    if(d.requests&&d.requests.length){
+      var reqMap={};REQUESTS.forEach(function(r){reqMap[r.id]=true;});
+      d.requests.forEach(function(r){if(!reqMap[r.id])REQUESTS.push(r);});
+    }
+    if(d.payrolls)PAYROLLS=d.payrolls;
+    if(d.holidays)HOLIDAYS=d.holidays;
+    if(d.reimbursements)REIMBURSEMENTS=d.reimbursements;
+    
+    // Save to localStorage
+    localStorage.setItem('hrm_employees',JSON.stringify(EMPLOYEES));
+    localStorage.setItem('hrm_attendance',JSON.stringify(ATTENDANCE));
+    localStorage.setItem('hrm_leaves',JSON.stringify(LEAVES));
+    localStorage.setItem('hrm_payrolls',JSON.stringify(PAYROLLS));
+    localStorage.setItem('hrm_holidays',JSON.stringify(HOLIDAYS));
+    localStorage.setItem('hrm_reimb',JSON.stringify(REIMBURSEMENTS));
+    localStorage.setItem('hrm_posts',JSON.stringify(POSTS));
+    localStorage.setItem('hrm_requests',JSON.stringify(REQUESTS));
+    console.log('PULL: applied successfully');
+    if(callback)callback(true);
+  };
+  
+  s.onerror=function(){
+    if(done)return;done=true;_syncInProgress=false;
+    clearTimeout(timeout);delete window[cbName];
+    console.log('PULL: network error');
+    if(callback)callback(false);
+  };
+  s.src=HRM_WEBAPP+'?action=hrm_pull&callback='+cbName;
+  document.body.appendChild(s);
 }
+
+// ── FULL SYNC: Push then Pull ──
+function fullSync(){
+  var bar=document.getElementById('syncBar');
+  var txt=document.getElementById('syncBarText');
+  var sub=document.getElementById('syncBarSub');
+  if(!bar)return;
+  
+  txt.textContent='Pushing data...';
+  sub.textContent='';
+  bar.style.borderLeftColor='var(--amber)';
+  
+  pushToSheet(function(pushOk){
+    if(!pushOk){
+      txt.textContent='Push failed! Check internet.';
+      bar.style.borderLeftColor='var(--red)';
+      return;
+    }
+    txt.textContent='Push OK! Pulling server data...';
+    
+    // Wait 2 sec for sheet to save, then pull
+    setTimeout(function(){
+      pullFromSheet(function(pullOk){
+        if(pullOk){
+          txt.textContent='Sync Complete!';
+          sub.textContent='Employees: '+EMPLOYEES.length+' | Attendance: '+ATTENDANCE.length+' | Posts: '+POSTS.length;
+          bar.style.borderLeftColor='var(--green)';
+          notif('Sync successful!');
+          loadHome();
+        } else {
+          txt.textContent='Push OK, Pull slow — try again in 30 sec';
+          sub.textContent='Employees: '+EMPLOYEES.length+' (local data safe)';
+          bar.style.borderLeftColor='var(--amber)';
+        }
+      });
+    },2000);
+  });
+}
+
+// ── SYNC BAR UPDATE ──
+function updateSyncBar(){
+  var txt=document.getElementById('syncBarText');
+  var sub=document.getElementById('syncBarSub');
+  var bar=document.getElementById('syncBar');
+  if(!txt)return;
+  if(!HRM_WEBAPP){
+    txt.textContent='Server not connected';
+    sub.textContent='Settings mein URL set karo';
+    if(bar)bar.style.borderLeftColor='var(--red)';
+  } else {
+    txt.textContent='Auto-sync active';
+    sub.textContent='Employees: '+EMPLOYEES.length+' | Attendance: '+ATTENDANCE.length+' | Auto-refresh: 60s';
+    if(bar)bar.style.borderLeftColor='var(--green)';
+  }
+}
+
+// ── MANUAL REFRESH ──
+function manualRefresh(){
+  fullSync();
+}
+
+// ── AUTO PUSH every 30 sec (only if data changed) ──
+var _lastChangeTime=0;
+setInterval(function(){
+  if(!CU||!HRM_WEBAPP||!_dataDirty)return;
+  pushToSheet(function(ok){if(ok){console.log('Auto-push: done');_lastChangeTime=Date.now();}});
+},30000);
+
+// ── AUTO PULL every 60 sec (merge-safe, won't overwrite) ──
+setInterval(function(){
+  if(!CU||!HRM_WEBAPP||_syncInProgress)return;
+  // Skip pull for 15 sec after local change (let push complete first)
+  if(Date.now()-_lastChangeTime<15000)return;
+  pullFromSheet(function(ok){
+    if(ok){
+      var pg=document.querySelector('.page.active');
+      if(pg&&pg.id==='page-home')loadHome();
+      else if(pg&&pg.id==='page-team')loadTeam();
+      else if(pg&&pg.id==='page-inbox')loadInbox();
+      else if(pg&&pg.id==='page-dashboard')loadAdminDashboard();
+      updateNotifDot();
+    }
+  });
+},60000);
+
 
 // ── CLOCK ──
 function startClock(){
@@ -1198,13 +1340,16 @@ function loadTodayStatus(){
 }
 
 function startPunch(type){
-  // STRICT MODE: Block punch if out of office radius
-  if(!currentLat&&!currentLng){notif('GPS location not available. Enable location permission.');return;}
-  var dist=getDistance(currentLat,currentLng,SETTINGS.officeLat,SETTINGS.officeLng);
-  var allowed=dist<=(SETTINGS.radius||200);
-  if(!allowed){
-    notif('You are '+Math.round(dist)+'m away from office. Punch only allowed within '+( SETTINGS.radius||200)+'m radius.');
-    return;
+  // GPS check — Admin can punch from anywhere, Employee needs to be in range
+  var isAdmin=CU&&CU.isAdmin;
+  if(!isAdmin){
+    if(!currentLat&&!currentLng){notif('GPS loading... Location permission allow karo, phir retry karo.');return;}
+    var dist=getDistance(currentLat,currentLng,SETTINGS.officeLat,SETTINGS.officeLng);
+    var allowed=dist<=(SETTINGS.radius||200);
+    if(!allowed){
+      notif('Office se '+Math.round(dist)+'m door ho. Punch sirf '+(SETTINGS.radius||200)+'m radius mein allowed hai.');
+      return;
+    }
   }
   if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
     document.getElementById('selfieWrap').style.display='block';
@@ -1227,7 +1372,6 @@ function cancelSelfie(){
   if(v.srcObject)v.srcObject.getTracks().forEach(function(t){t.stop();});
   document.getElementById('selfieWrap').style.display='none';
 }
-var _lastPunchTime=0;
 function completePunch(type,photo){_lastPunchTime=Date.now();
   var now=new Date();var date=now.toISOString().split('T')[0];
   var time=now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
@@ -1739,192 +1883,6 @@ if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(function(e){console.log('SW:',e);});
 }
 
-// ── VISIBLE SYNC TEST ──
-function testSync(){
-  var bar=document.getElementById('syncBar');
-  var txt=document.getElementById('syncBarText');
-  var sub=document.getElementById('syncBarSub');
-  if(!HRM_WEBAPP){
-    txt.textContent='No AppScript URL set!';
-    bar.style.borderLeftColor='var(--red)';
-    return;
-  }
-  txt.textContent='Pushing data to server...';
-  sub.textContent='';
-  bar.style.borderLeftColor='var(--amber)';
-  
-  // Step 1: PUSH
-  var payload={action:'hrm_push',data:{
-    employees:EMPLOYEES,attendance:ATTENDANCE,leaves:LEAVES,
-    payrolls:PAYROLLS,company:COMPANY,settings:SETTINGS,
-    holidays:HOLIDAYS,reimbursements:REIMBURSEMENTS,
-    posts:POSTS,requests:REQUESTS,notifications:NOTIFICATIONS,goals:GOALS
-  }};
-  
-  fetch(HRM_WEBAPP,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body:JSON.stringify(payload),redirect:'follow'})
-  .then(function(r){return r.text();})
-  .then(function(text){
-    try{var d=JSON.parse(text);}catch(e){var d={success:false,error:'Bad response'};}
-    if(d&&d.success!==false){
-      txt.textContent='Push OK! Now pulling...';
-      bar.style.borderLeftColor='var(--green)';
-      sub.textContent='Employees: '+EMPLOYEES.length+' | Attendance: '+ATTENDANCE.length+' | Leaves: '+LEAVES.length;
-      // Step 2: PULL
-      setTimeout(function(){
-        var cbName='ts_'+Date.now();var s=document.createElement('script');
-        var to=setTimeout(function(){
-          delete window[cbName];
-          txt.textContent='Push OK but Pull timeout (AppScript slow)';
-          sub.textContent='Try again in 10 seconds';
-          bar.style.borderLeftColor='var(--amber)';
-        },15000);
-        window[cbName]=function(pd){
-          clearTimeout(to);delete window[cbName];if(s.parentNode)s.parentNode.removeChild(s);
-          if(pd&&pd.success!==false){
-            var pullCount=(pd.employees?pd.employees.length:0);
-            var attCount=(pd.attendance?pd.attendance.length:0);
-            txt.textContent='Sync Complete! Connected.';
-            sub.textContent='Pulled: '+pullCount+' employees, '+attCount+' attendance records';
-            bar.style.borderLeftColor='var(--green)';
-            notif('Sync successful! '+pullCount+' employees, '+attCount+' attendance records');
-            // Apply pulled data
-            if(pd.employees&&pd.employees.length>0){
-              var pulled=pd.employees;
-              EMPLOYEES_DEFAULT.forEach(function(def){
-                if(!pulled.find(function(p){return p.id===def.id;}))pulled.push(Object.assign({},def));
-              });
-              pulled.forEach(function(p){
-                var def=EMPLOYEES_DEFAULT.find(function(d){return d.id===p.id;});
-                if(def&&(!p.password||p.password===''))p.password=def.password;
-                if(def&&def.isAdmin)p.isAdmin=true;
-              });
-              EMPLOYEES=pulled;
-            }
-            if(pd.attendance){
-              normDates(pd.attendance,['date']);
-              ATTENDANCE=mergeById(ATTENDANCE,pd.attendance);
-            }
-            if(pd.leaves){normDates(pd.leaves,['from','to','applied']);LEAVES=mergeById(LEAVES,pd.leaves);}
-            if(pd.payrolls)PAYROLLS=pd.payrolls;
-            if(pd.holidays)HOLIDAYS=pd.holidays;
-            if(pd.reimbursements)REIMBURSEMENTS=pd.reimbursements;
-            if(pd.posts)POSTS=mergeById(POSTS,pd.posts);
-            if(pd.requests)REQUESTS=mergeById(REQUESTS,pd.requests);
-            localStorage.setItem('hrm_employees',JSON.stringify(EMPLOYEES));
-            localStorage.setItem('hrm_attendance',JSON.stringify(ATTENDANCE));
-            localStorage.setItem('hrm_leaves',JSON.stringify(LEAVES));
-            localStorage.setItem('hrm_payrolls',JSON.stringify(PAYROLLS));
-            localStorage.setItem('hrm_holidays',JSON.stringify(HOLIDAYS));
-            localStorage.setItem('hrm_reimb',JSON.stringify(REIMBURSEMENTS));
-            localStorage.setItem('hrm_posts',JSON.stringify(POSTS));
-            localStorage.setItem('hrm_requests',JSON.stringify(REQUESTS));
-            loadHome();
-          } else {
-            txt.textContent='Push OK but Pull failed';
-            sub.textContent=pd?pd.error:'No response';
-            bar.style.borderLeftColor='var(--amber)';
-          }
-        };
-        s.onerror=function(){clearTimeout(to);delete window[cbName];
-          txt.textContent='Push OK but Pull network error';
-          bar.style.borderLeftColor='var(--red)';
-        };
-        s.src=HRM_WEBAPP+'?action=hrm_pull&callback='+cbName;
-        document.body.appendChild(s);
-      },2000);
-    } else {
-      txt.textContent='Push FAILED!';
-      sub.textContent=d?d.error:'Server error — check AppScript deploy';
-      bar.style.borderLeftColor='var(--red)';
-    }
-  })
-  .catch(function(err){
-    txt.textContent='Network error!';
-    sub.textContent=err.message+' — Check internet connection';
-    bar.style.borderLeftColor='var(--red)';
-  });
-}
-
-// Auto-check sync status on home load
-function updateSyncBar(){
-  var bar=document.getElementById('syncBar');
-  var txt=document.getElementById('syncBarText');
-  var sub=document.getElementById('syncBarSub');
-  if(!bar)return;
-  if(!HRM_WEBAPP){
-    txt.textContent='Not connected to server';
-    sub.textContent='Settings mein AppScript URL set karo';
-    bar.style.borderLeftColor='var(--red)';
-  } else {
-    txt.textContent='Connected to server';
-    sub.textContent='Employees: '+EMPLOYEES.length+' | Attendance: '+ATTENDANCE.length+' | Press Sync to refresh';
-    bar.style.borderLeftColor='var(--green)';
-  }
-}
-
-// ── SMART MERGE: Keep local + add remote missing records ──
-function mergeById(local,remote){
-  if(!remote||!remote.length)return local;
-  if(!local||!local.length)return remote;
-  var map={};
-  // Local records take priority (most recent)
-  local.forEach(function(item){map[item.id||item.date+item.empId+item.type]=item;});
-  // Add remote records that don't exist locally
-  remote.forEach(function(item){
-    var key=item.id||item.date+item.empId+item.type;
-    if(!map[key])map[key]=item;
-  });
-  return Object.values(map);
-}
-function normDate(d){
-  if(!d)return '';
-  if(typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d))return d;
-  try{var dd=new Date(d);if(!isNaN(dd.getTime()))return dd.toISOString().split('T')[0];}catch(e){}
-  return String(d);
-}
-function normDates(arr,fields){
-  if(!arr)return arr;
-  arr.forEach(function(item){
-    (fields||['date']).forEach(function(f){if(item[f])item[f]=normDate(item[f]);});
-  });
-  return arr;
-}
-
-// ── SMART DATE CHECK ──
-function isToday(dateStr){
-  if(!dateStr)return false;
-  var today=new Date();
-  var ty=today.getFullYear(),tm=today.getMonth(),td=today.getDate();
-  try{
-    var d=new Date(dateStr);
-    if(!isNaN(d.getTime()))return d.getFullYear()===ty&&d.getMonth()===tm&&d.getDate()===td;
-  }catch(e){}
-  // Try YYYY-MM-DD format
-  var todayStr=ty+'-'+String(tm+1).padStart(2,'0')+'-'+String(td).padStart(2,'0');
-  return String(dateStr).indexOf(todayStr)>=0;
-}
-function isSameDate(d1,d2){
-  if(!d1||!d2)return false;
-  if(d1===d2)return true;
-  try{
-    var a=new Date(d1),b=new Date(d2);
-    return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
-  }catch(e){return false;}
-}
-
-function manualRefresh(){
-  var btn=document.getElementById('refreshBtn');
-  if(btn)btn.style.animation='spin .5s linear';
-  autoPull(function(){
-    loadHome();loadInbox();loadTeam();
-    if(CU&&CU.isAdmin)loadAdminDashboard();
-    updateNotifDot();
-    notif('Data refreshed from server!');
-    if(btn)setTimeout(function(){btn.style.animation='';},600);
-  });
-}
-
 function loadH2C(cb){if(window.html2canvas)return cb();var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';s.onload=cb;document.body.appendChild(s);}
 function downloadIdCard(){
   var frontEl=document.getElementById('idCardFront');
@@ -2400,19 +2358,7 @@ function syncFromSheets(){
     }
   }
   setTimeout(updateSyncStatus,500);
-  // Auto-refresh every 60 sec (only when logged in)
-  setInterval(function(){
-    if(!CU||!HRM_WEBAPP)return;
-    if(Date.now()-_lastPunchTime<30000)return; // Skip pull 30s after punch
-    autoPull(function(){
-      var pg=document.querySelector('.page.active');
-      if(pg&&pg.id==='page-home')loadHome();
-      else if(pg&&pg.id==='page-inbox')loadInbox();
-      else if(pg&&pg.id==='page-team')loadTeam();
-      else if(pg&&pg.id==='page-dashboard')loadAdminDashboard();
-      updateNotifDot();
-    });
-  },60000);
+  // Auto-push handles sync (manual pull via Sync button)
 })();
 
 // ── POST IMAGE ──
