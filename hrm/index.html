@@ -287,6 +287,18 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     </div>
   </div>
   <div class="lc-ft">Powered by INWANG AI · inwangai.com</div>
+    <div style="margin-top:16px;text-align:center">
+      <button onclick="resetApp()" style="background:none;border:none;color:var(--t3);font-size:11px;cursor:pointer;text-decoration:underline">🔄 Reset App (Login problem fix)</button>
+    </div>
+    <script>
+    function resetApp(){
+      if(confirm('Poora app data reset hoga. Continue?')){
+        localStorage.clear();
+        alert('App reset done! Page reload hoga.');
+        location.reload();
+      }
+    }
+    </script>
 </div>
 </div>
 
@@ -490,6 +502,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
   <!-- Account -->
   <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin:14px 0 6px;padding:0 4px">Account</div>
   <div class="list-item" onclick="showModal('cpModal')"><div class="li-icon" style="background:var(--bg)"><span class="mi">key</span></div><div class="li-content"><div class="li-title">Change Password</div></div></div>
+  <div class="list-item" onclick="installApp()" style="color:var(--gold)"><div class="li-icon" style="background:var(--goldBg);color:var(--gold)"><span class="mi">install_mobile</span></div><div class="li-content"><div class="li-title" style="color:var(--gold)">Install App</div><div class="li-sub">Home screen pe add karo</div></div></div>
   <div class="list-item" onclick="doLogout()" style="color:var(--red)"><div class="li-icon" style="background:var(--redBg);color:var(--red)"><span class="mi">logout</span></div><div class="li-content"><div class="li-title" style="color:var(--red)">Logout</div></div></div>
 </div>
 
@@ -906,7 +919,7 @@ var INWANG_LOGO='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAB4CAIAAADUh
 var ACURATE_LOGO='data:image/png;base64,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';
 
 var CU=null,currentLat=0,currentLng=0,_currentDocType='';
-var HRM_WEBAPP=localStorage.getItem('hrm_webapp')||'';
+var HRM_WEBAPP=localStorage.getItem('hrm_webapp')||'https://script.google.com/macros/s/AKfycbyEA5aKyF7nfzcG9IBkpjKbuxS2FZmn4bWqh812-MhuW-neR9u91xatt_Cp79H7TOzL/exec';
 var calYear,calMonth;
 
 // ── SAVE ──
@@ -951,33 +964,58 @@ function autoSync(){
 }
 
 // ── LOGIN ──
+var _loginFails=0;
 function doLogin(){
   var u=(document.getElementById('loginUser').value||'').trim().toLowerCase();
   var p=(document.getElementById('loginPass').value||'').trim();
   var errEl=document.getElementById('loginErr');
   if(!u||!p){errEl.style.display='block';errEl.textContent='Username aur password dono daalo';return;}
   
-  // Step 1: Check EMPLOYEES array
-  var emp=EMPLOYEES.find(function(e){return(e.username||e.user||'').toLowerCase()===u;});
+  // ALWAYS check defaults FIRST (most reliable)
+  var defEmp=EMPLOYEES_DEFAULT.find(function(e){return(e.username||e.user||'').toLowerCase()===u;});
+  var storedEmp=EMPLOYEES.find(function(e){return(e.username||e.user||'').toLowerCase()===u;});
   
-  // Step 2: Check EMPLOYEES_DEFAULT (always available)
-  if(!emp)emp=EMPLOYEES_DEFAULT.find(function(e){return(e.username||e.user||'').toLowerCase()===u;});
+  // Use default password if stored password is empty/corrupted
+  var emp=null;
+  if(defEmp&&defEmp.password===p){
+    // Default credentials match — login with default
+    emp=Object.assign({},defEmp);
+    // Update stored version with correct password
+    if(storedEmp){
+      storedEmp.password=defEmp.password;
+      storedEmp.username=defEmp.username;
+      emp=storedEmp;
+    }
+  } else if(storedEmp&&storedEmp.password===p){
+    // Stored credentials match (user changed password)
+    emp=storedEmp;
+  } else if(defEmp||storedEmp){
+    // User exists but password wrong
+    _loginFails++;
+    if(_loginFails>=3){
+      // Auto-fix: reset ALL employees to defaults
+      EMPLOYEES=EMPLOYEES_DEFAULT.map(function(e){return Object.assign({},e);});
+      localStorage.setItem('hrm_employees',JSON.stringify(EMPLOYEES));
+      _loginFails=0;
+      errEl.style.display='block';
+      errEl.innerHTML='<strong>Data reset ho gaya!</strong><br>Ab login karo: <strong>'+u+' / '+(defEmp?defEmp.password:'team@inwang')+'</strong>';
+      return;
+    }
+    errEl.style.display='block';
+    errEl.textContent='Wrong password (Attempt '+_loginFails+'/3). 3 baar galat pe auto-reset hoga.';
+    return;
+  } else {
+    errEl.style.display='block';errEl.textContent='User not found: '+u;return;
+  }
   
-  // Step 3: Not found
-  if(!emp){errEl.style.display='block';errEl.textContent='User not found: '+u;return;}
-  
-  // Step 4: Password check
-  if(emp.password!==p){errEl.style.display='block';errEl.textContent='Wrong password';return;}
-  
-  // Step 5: Active check
+  if(!emp){errEl.style.display='block';errEl.textContent='Login failed';return;}
   if(emp.active===false){errEl.style.display='block';errEl.textContent='Account deactivated';return;}
   
-  // Step 6: Ensure in EMPLOYEES array
-  var existing=EMPLOYEES.find(function(e){return e.id===emp.id;});
-  if(!existing){EMPLOYEES.push(Object.assign({},emp));}
-  else{emp=existing;} // Use stored version (may have updated password)
+  // Ensure in EMPLOYEES array
+  if(!EMPLOYEES.find(function(e){return e.id===emp.id;})){EMPLOYEES.push(Object.assign({},emp));}
   
   CU=emp;
+  _loginFails=0;
   errEl.style.display='none';
   localStorage.setItem('hrm_current',JSON.stringify(CU));
   localStorage.setItem('hrm_employees',JSON.stringify(EMPLOYEES));
@@ -1098,7 +1136,7 @@ function startGPS(){
 }
 function updateGpsUI(ok,txt){
   var el=document.getElementById('gpsStatus');
-  if(el)el.innerHTML='<span class="mi" style="font-size:16px;vertical-align:-3px;color:'+(ok?'var(--green)':'var(--amber)')+'">'+( ok?'location_on':'location_off')+'</span> '+txt+(ok?'':' <span style="font-size:10px;color:var(--t3)">(punch allowed)</span>');
+  if(el)el.innerHTML='<span class="mi" style="font-size:16px;vertical-align:-3px;color:'+(ok?'var(--green)':'var(--red)')+'">'+( ok?'location_on':'location_off')+'</span> '+txt+(ok?'  <span style="font-size:10px;color:var(--green);font-weight:600">Punch Allowed ✓</span>':' <span style="font-size:10px;color:var(--red);font-weight:600">Punch Blocked ✗</span>');
 }
 function getDistance(lat1,lng1,lat2,lng2){
   var R=6371e3;var dLat=(lat2-lat1)*Math.PI/180;var dLng=(lng2-lng1)*Math.PI/180;
@@ -1136,6 +1174,14 @@ function loadTodayStatus(){
 }
 
 function startPunch(type){
+  // STRICT MODE: Block punch if out of office radius
+  if(!currentLat&&!currentLng){notif('GPS location not available. Enable location permission.');return;}
+  var dist=getDistance(currentLat,currentLng,SETTINGS.officeLat,SETTINGS.officeLng);
+  var allowed=dist<=(SETTINGS.radius||200);
+  if(!allowed){
+    notif('You are '+Math.round(dist)+'m away from office. Punch only allowed within '+( SETTINGS.radius||200)+'m radius.');
+    return;
+  }
   if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
     document.getElementById('selfieWrap').style.display='block';
     navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}}).then(function(stream){
@@ -1609,30 +1655,58 @@ function handleForgotPass(){
 // ── PWA INSTALL ──
 var _deferredPrompt=null;
 window.addEventListener('beforeinstallprompt',function(e){
-  e.preventDefault();
-  _deferredPrompt=e;
-  showInstallBanner();
+  e.preventDefault();_deferredPrompt=e;
+  var ib=document.getElementById('installBtnAuto');
+  if(ib)ib.style.display='flex';
 });
 
-function showInstallBanner(){
-  if(!_deferredPrompt)return;
-  // Show install button in topbar
-  var btn=document.createElement('button');
-  btn.className='btn btn-sm btn-gold';
-  btn.innerHTML='<span class="mi" style="font-size:16px">install_mobile</span> Install';
-  btn.style.cssText='position:fixed;bottom:74px;right:12px;z-index:100;box-shadow:0 4px 16px rgba(79,70,229,0.3);border-radius:20px;padding:8px 16px;font-size:12px';
-  btn.onclick=function(){
+function installApp(){
+  if(_deferredPrompt){
     _deferredPrompt.prompt();
-    _deferredPrompt.userChoice.then(function(result){
-      if(result.outcome==='accepted')notif('App installed successfully!');
+    _deferredPrompt.userChoice.then(function(r){
+      if(r.outcome==='accepted')notif('App installed successfully!');
       _deferredPrompt=null;
-      btn.remove();
+      var ib=document.getElementById('installBtnAuto');if(ib)ib.style.display='none';
     });
-  };
-  document.body.appendChild(btn);
-  
-  // Auto-hide after 15 seconds
-  setTimeout(function(){if(btn.parentNode)btn.remove();},15000);
+  } else {
+    showInstallGuide();
+  }
+}
+
+function showInstallGuide(){
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  var isAndroid=/Android/.test(navigator.userAgent);
+  var msg='';
+  if(isIOS){
+    msg='<div style="font-size:14px;font-weight:700;margin-bottom:8px">iPhone / iPad pe install:</div>'
+      +'<div style="font-size:13px;line-height:2">'
+      +'1. Safari mein ye page kholo<br>'
+      +'2. <strong>Share button (↑)</strong> dabao<br>'
+      +'3. <strong>"Add to Home Screen"</strong> select karo<br>'
+      +'4. <strong>"Add"</strong> dabao — Done!</div>';
+  } else if(isAndroid){
+    msg='<div style="font-size:14px;font-weight:700;margin-bottom:8px">Android pe install:</div>'
+      +'<div style="font-size:13px;line-height:2">'
+      +'1. Chrome mein ye page kholo<br>'
+      +'2. <strong>⋮ Menu</strong> (top-right) dabao<br>'
+      +'3. <strong>"Add to Home Screen"</strong> ya <strong>"Install App"</strong> select karo<br>'
+      +'4. <strong>"Install"</strong> dabao — Done!</div>';
+  } else {
+    msg='<div style="font-size:14px;font-weight:700;margin-bottom:8px">Desktop pe install:</div>'
+      +'<div style="font-size:13px;line-height:2">'
+      +'1. Chrome address bar mein <strong>⊕ icon</strong> dekhni<br>'
+      +'2. Ya <strong>⋮ Menu → Install ACURATE HRM</strong><br>'
+      +'3. <strong>"Install"</strong> click karo — Done!</div>';
+  }
+  // Show as modal
+  var div=document.createElement('div');
+  div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  div.innerHTML='<div style="background:#fff;border-radius:16px;padding:24px;max-width:340px;width:100%;box-shadow:0 16px 48px rgba(0,0,0,0.2)">'
+    +'<div style="text-align:center;margin-bottom:14px"><span class="mi" style="font-size:40px;color:var(--gold)">install_mobile</span></div>'
+    +msg
+    +'<button onclick="this.parentElement.parentElement.remove()" class="btn btn-gold btn-block" style="margin-top:14px">OK, Samajh Gaya!</button></div>';
+  div.onclick=function(e){if(e.target===div)div.remove();};
+  document.body.appendChild(div);
 }
 
 // Register service worker for PWA
@@ -2053,7 +2127,7 @@ function notif(msg){
 }
 
 // ── SYNC (same as updated version) ──
-var HRM_WEBAPP=localStorage.getItem('hrm_webapp')||'';
+var HRM_WEBAPP=localStorage.getItem('hrm_webapp')||'https://script.google.com/macros/s/AKfycbyEA5aKyF7nfzcG9IBkpjKbuxS2FZmn4bWqh812-MhuW-neR9u91xatt_Cp79H7TOzL/exec';
 function saveWebappUrl(){
   var url=(document.getElementById('hrmWebappInp')||{value:''}).value.trim();
   if(!url){notif('⚠️ URL enter karo');return;}
