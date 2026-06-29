@@ -1062,13 +1062,31 @@ function showApp(){
 }
 function autoPull(callback){
   if(!HRM_WEBAPP){if(callback)callback();return;}
-  var cbName='ap_'+Date.now();var s=document.createElement('script');
-  var timeout=setTimeout(function(){delete window[cbName];if(callback)callback();console.log('Pull timeout — AppScript slow');},15000);
-  window[cbName]=function(d){
-    clearTimeout(timeout);delete window[cbName];if(s.parentNode)s.parentNode.removeChild(s);
-    if(d&&d.success!==false){
-      if(d.employees&&d.employees.length>0){
-        // Merge: keep defaults, add pulled data
+  // Try fetch GET first (more reliable than JSONP)
+  fetch(HRM_WEBAPP+'?action=hrm_pull',{redirect:'follow'})
+  .then(function(r){return r.text();})
+  .then(function(text){
+    try{var d=JSON.parse(text);}catch(e){if(callback)callback();return;}
+    applyPulledData(d);
+    if(callback)callback();
+  })
+  .catch(function(){
+    // Fallback to JSONP
+    var cbName='ap_'+Date.now();var s=document.createElement('script');
+    var timeout=setTimeout(function(){delete window[cbName];if(callback)callback();},15000);
+    window[cbName]=function(d){
+      clearTimeout(timeout);delete window[cbName];if(s.parentNode)s.parentNode.removeChild(s);
+      applyPulledData(d);
+      if(callback)callback();
+    };
+    s.onerror=function(){clearTimeout(timeout);delete window[cbName];if(callback)callback();};
+    s.src=HRM_WEBAPP+'?action=hrm_pull&callback='+cbName;
+    document.body.appendChild(s);
+  });
+}
+function applyPulledData(d){
+  if(!d||d.success===false)return;
+  if(d.employees&&d.employees.length>0){
         var pulled=d.employees;
         // Ensure all defaults are preserved
         EMPLOYEES_DEFAULT.forEach(function(def){
@@ -1113,12 +1131,6 @@ function autoPull(callback){
       localStorage.setItem('hrm_notifs',JSON.stringify(NOTIFICATIONS));
       localStorage.setItem('hrm_goals',JSON.stringify(GOALS));
       console.log('Auto-pull: synced from sheets');
-    }
-    if(callback)callback();
-  };
-  s.onerror=function(){clearTimeout(timeout);delete window[cbName];if(callback)callback();};
-  s.src=HRM_WEBAPP+'?action=hrm_pull&callback='+cbName;
-  document.body.appendChild(s);
 }
 
 // ── CLOCK ──
@@ -1159,7 +1171,7 @@ function getDistance(lat1,lng1,lat2,lng2){
 // ── PUNCH ──
 function loadTodayStatus(){
   var today=new Date().toISOString().split('T')[0];
-  var recs=ATTENDANCE.filter(function(a){return a.empId===CU.id&&a.date===today;});
+  var recs=ATTENDANCE.filter(function(a){return a.empId===CU.id&&isToday(a.date);});
   var pIn=recs.find(function(r){return r.type==='in';});
   var pOut=recs.filter(function(r){return r.type==='out';});
   var lastOut=pOut.length?pOut[pOut.length-1]:null;
@@ -1334,7 +1346,7 @@ function loadLeaveBalWidget(){
 // ── TODAY WIDGET ──
 function loadTodayWidget(){
   var today=new Date().toISOString().split('T')[0];
-  var myPunch=ATTENDANCE.find(function(a){return a.empId===CU.id&&a.date===today&&a.type==='in';});
+  var myPunch=ATTENDANCE.find(function(a){return a.empId===CU.id&&isToday(a.date)&&a.type==='in';});
   var html='<div style="display:flex;align-items:center;gap:10px">'
     +'<div class="avatar avatar-md" style="background:'+(myPunch?'var(--greenBg);color:var(--green)':'var(--redBg);color:var(--red)')+'">'+( myPunch?'✓':'✗')+'</div>'
     +'<div><div style="font-size:13px;font-weight:600">'+(myPunch?'Present':'Not Punched In')+'</div>'
@@ -1452,11 +1464,10 @@ function inboxTab(t){
 // ── TEAM ──
 function loadTeam(){
   var today=new Date().toISOString().split('T')[0];
-  normDates(ATTENDANCE,['date']);
   var active=EMPLOYEES.filter(function(e){return e.active!==false;});
-  var todayIn=new Set(ATTENDANCE.filter(function(a){return a.date===today&&a.type==='in';}).map(function(a){return a.empId;}));
+  var todayIn=new Set(ATTENDANCE.filter(function(a){return isToday(a.date)&&a.type==='in';}).map(function(a){return a.empId;}));
   var onLeave=LEAVES.filter(function(l){return l.status==='Approved'&&l.from<=today&&l.to>=today;});
-  var lateC=ATTENDANCE.filter(function(a){return a.date===today&&a.type==='in'&&a.isLate;}).length;
+  var lateC=ATTENDANCE.filter(function(a){return isToday(a.date)&&a.type==='in'&&a.isLate;}).length;
   document.getElementById('teamPresent').textContent=todayIn.size;
   document.getElementById('teamAbsent').textContent=Math.max(0,active.length-todayIn.size-onLeave.length);
   document.getElementById('teamLeave').textContent=onLeave.length;
@@ -1880,6 +1891,28 @@ function normDates(arr,fields){
   return arr;
 }
 
+// ── SMART DATE CHECK ──
+function isToday(dateStr){
+  if(!dateStr)return false;
+  var today=new Date();
+  var ty=today.getFullYear(),tm=today.getMonth(),td=today.getDate();
+  try{
+    var d=new Date(dateStr);
+    if(!isNaN(d.getTime()))return d.getFullYear()===ty&&d.getMonth()===tm&&d.getDate()===td;
+  }catch(e){}
+  // Try YYYY-MM-DD format
+  var todayStr=ty+'-'+String(tm+1).padStart(2,'0')+'-'+String(td).padStart(2,'0');
+  return String(dateStr).indexOf(todayStr)>=0;
+}
+function isSameDate(d1,d2){
+  if(!d1||!d2)return false;
+  if(d1===d2)return true;
+  try{
+    var a=new Date(d1),b=new Date(d2);
+    return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+  }catch(e){return false;}
+}
+
 function manualRefresh(){
   var btn=document.getElementById('refreshBtn');
   if(btn)btn.style.animation='spin .5s linear';
@@ -2039,9 +2072,9 @@ function loadAllAtt(){
 function loadAdminDashboard(){
   var today=new Date().toISOString().split('T')[0];
   var active=EMPLOYEES.filter(function(e){return e.active!==false;}).length;
-  var todayIn=new Set(ATTENDANCE.filter(function(a){return a.date===today&&a.type==='in';}).map(function(a){return a.empId;}));
+  var todayIn=new Set(ATTENDANCE.filter(function(a){return isToday(a.date)&&a.type==='in';}).map(function(a){return a.empId;}));
   var onLeave=LEAVES.filter(function(l){return l.status==='Approved'&&l.from<=today&&l.to>=today;}).length;
-  var late=ATTENDANCE.filter(function(a){return a.date===today&&a.type==='in'&&a.isLate;}).length;
+  var late=ATTENDANCE.filter(function(a){return isToday(a.date)&&a.type==='in'&&a.isLate;}).length;
   var pendingLeaves=LEAVES.filter(function(l){return l.status==='Pending';}).length;
   var html='<div class="stat sg"><div class="stat-val">'+todayIn.size+'</div><div class="stat-label">Present</div></div>'
     +'<div class="stat sr"><div class="stat-val">'+Math.max(0,active-todayIn.size-onLeave)+'</div><div class="stat-label">Absent</div></div>'
