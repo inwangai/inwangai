@@ -339,6 +339,12 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     <div class="req-card" onclick="showModal('regularizeModal')"><div class="req-icon"><span class="mi" style="font-size:28px;color:var(--blue)">update</span></div><div class="req-label">Regularize</div></div>
     <div class="req-card" onclick="showModal('onDutyModal')"><div class="req-icon"><span class="mi" style="font-size:28px;color:var(--purple)">work</span></div><div class="req-label">On Duty</div></div>
   </div>
+  <!-- Sync Status Bar -->
+  <div id="syncBar" class="card" style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:12px;border-left:3px solid var(--amber)">
+    <span class="mi" style="color:var(--amber)">cloud_off</span>
+    <div style="flex:1;font-size:12px"><span id="syncBarText" style="font-weight:600">Sync status: Checking...</span><br><span id="syncBarSub" style="color:var(--t3);font-size:10px"></span></div>
+    <button class="btn btn-sm btn-gold" onclick="testSync()"><span class="mi" style="font-size:14px">sync</span> Sync</button>
+  </div>
 
   <!-- Tabs: Feed / Calendar / Widgets -->
   <div class="tabs" id="homeTabs">
@@ -1057,7 +1063,7 @@ function showApp(){
 function autoPull(callback){
   if(!HRM_WEBAPP){if(callback)callback();return;}
   var cbName='ap_'+Date.now();var s=document.createElement('script');
-  var timeout=setTimeout(function(){delete window[cbName];if(callback)callback();},5000);
+  var timeout=setTimeout(function(){delete window[cbName];if(callback)callback();console.log('Pull timeout — AppScript slow');},15000);
   window[cbName]=function(d){
     clearTimeout(timeout);delete window[cbName];if(s.parentNode)s.parentNode.removeChild(s);
     if(d&&d.success!==false){
@@ -1214,7 +1220,7 @@ function completePunch(type,photo){
 
 // ── HOME ──
 function loadHome(){
-  loadCelebrations();loadFeedV2();loadCalendar();loadLeaveBalWidget();loadTodayWidget();loadTodayStatus();
+  loadCelebrations();loadFeedV2();loadCalendar();loadLeaveBalWidget();loadTodayWidget();loadTodayStatus();updateSyncBar();
 }
 
 // ── HOME TABS ──
@@ -1712,6 +1718,127 @@ function showInstallGuide(){
 // Register service worker for PWA
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(function(e){console.log('SW:',e);});
+}
+
+// ── VISIBLE SYNC TEST ──
+function testSync(){
+  var bar=document.getElementById('syncBar');
+  var txt=document.getElementById('syncBarText');
+  var sub=document.getElementById('syncBarSub');
+  if(!HRM_WEBAPP){
+    txt.textContent='No AppScript URL set!';
+    bar.style.borderLeftColor='var(--red)';
+    return;
+  }
+  txt.textContent='Pushing data to server...';
+  sub.textContent='';
+  bar.style.borderLeftColor='var(--amber)';
+  
+  // Step 1: PUSH
+  var payload={action:'hrm_push',data:{
+    employees:EMPLOYEES,attendance:ATTENDANCE,leaves:LEAVES,
+    payrolls:PAYROLLS,company:COMPANY,settings:SETTINGS,
+    holidays:HOLIDAYS,reimbursements:REIMBURSEMENTS,
+    posts:POSTS,requests:REQUESTS,notifications:NOTIFICATIONS,goals:GOALS
+  }};
+  
+  fetch(HRM_WEBAPP,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(payload),redirect:'follow'})
+  .then(function(r){return r.text();})
+  .then(function(text){
+    try{var d=JSON.parse(text);}catch(e){var d={success:false,error:'Bad response'};}
+    if(d&&d.success!==false){
+      txt.textContent='Push OK! Now pulling...';
+      bar.style.borderLeftColor='var(--green)';
+      sub.textContent='Employees: '+EMPLOYEES.length+' | Attendance: '+ATTENDANCE.length+' | Leaves: '+LEAVES.length;
+      // Step 2: PULL
+      setTimeout(function(){
+        var cbName='ts_'+Date.now();var s=document.createElement('script');
+        var to=setTimeout(function(){
+          delete window[cbName];
+          txt.textContent='Push OK but Pull timeout (AppScript slow)';
+          sub.textContent='Try again in 10 seconds';
+          bar.style.borderLeftColor='var(--amber)';
+        },15000);
+        window[cbName]=function(pd){
+          clearTimeout(to);delete window[cbName];if(s.parentNode)s.parentNode.removeChild(s);
+          if(pd&&pd.success!==false){
+            var pullCount=(pd.employees?pd.employees.length:0);
+            var attCount=(pd.attendance?pd.attendance.length:0);
+            txt.textContent='Sync Complete! Connected.';
+            sub.textContent='Pulled: '+pullCount+' employees, '+attCount+' attendance records';
+            bar.style.borderLeftColor='var(--green)';
+            notif('Sync successful! '+pullCount+' employees, '+attCount+' attendance records');
+            // Apply pulled data
+            if(pd.employees&&pd.employees.length>0){
+              var pulled=pd.employees;
+              EMPLOYEES_DEFAULT.forEach(function(def){
+                if(!pulled.find(function(p){return p.id===def.id;}))pulled.push(Object.assign({},def));
+              });
+              pulled.forEach(function(p){
+                var def=EMPLOYEES_DEFAULT.find(function(d){return d.id===p.id;});
+                if(def&&(!p.password||p.password===''))p.password=def.password;
+                if(def&&def.isAdmin)p.isAdmin=true;
+              });
+              EMPLOYEES=pulled;
+            }
+            if(pd.attendance&&pd.attendance.length)ATTENDANCE=pd.attendance;
+            if(pd.leaves)LEAVES=pd.leaves;
+            if(pd.payrolls)PAYROLLS=pd.payrolls;
+            if(pd.holidays)HOLIDAYS=pd.holidays;
+            if(pd.reimbursements)REIMBURSEMENTS=pd.reimbursements;
+            if(pd.posts)POSTS=pd.posts;
+            if(pd.requests)REQUESTS=pd.requests;
+            localStorage.setItem('hrm_employees',JSON.stringify(EMPLOYEES));
+            localStorage.setItem('hrm_attendance',JSON.stringify(ATTENDANCE));
+            localStorage.setItem('hrm_leaves',JSON.stringify(LEAVES));
+            localStorage.setItem('hrm_payrolls',JSON.stringify(PAYROLLS));
+            localStorage.setItem('hrm_holidays',JSON.stringify(HOLIDAYS));
+            localStorage.setItem('hrm_reimb',JSON.stringify(REIMBURSEMENTS));
+            localStorage.setItem('hrm_posts',JSON.stringify(POSTS));
+            localStorage.setItem('hrm_requests',JSON.stringify(REQUESTS));
+            loadHome();
+          } else {
+            txt.textContent='Push OK but Pull failed';
+            sub.textContent=pd?pd.error:'No response';
+            bar.style.borderLeftColor='var(--amber)';
+          }
+        };
+        s.onerror=function(){clearTimeout(to);delete window[cbName];
+          txt.textContent='Push OK but Pull network error';
+          bar.style.borderLeftColor='var(--red)';
+        };
+        s.src=HRM_WEBAPP+'?action=hrm_pull&callback='+cbName;
+        document.body.appendChild(s);
+      },2000);
+    } else {
+      txt.textContent='Push FAILED!';
+      sub.textContent=d?d.error:'Server error — check AppScript deploy';
+      bar.style.borderLeftColor='var(--red)';
+    }
+  })
+  .catch(function(err){
+    txt.textContent='Network error!';
+    sub.textContent=err.message+' — Check internet connection';
+    bar.style.borderLeftColor='var(--red)';
+  });
+}
+
+// Auto-check sync status on home load
+function updateSyncBar(){
+  var bar=document.getElementById('syncBar');
+  var txt=document.getElementById('syncBarText');
+  var sub=document.getElementById('syncBarSub');
+  if(!bar)return;
+  if(!HRM_WEBAPP){
+    txt.textContent='Not connected to server';
+    sub.textContent='Settings mein AppScript URL set karo';
+    bar.style.borderLeftColor='var(--red)';
+  } else {
+    txt.textContent='Connected to server';
+    sub.textContent='Employees: '+EMPLOYEES.length+' | Attendance: '+ATTENDANCE.length+' | Press Sync to refresh';
+    bar.style.borderLeftColor='var(--green)';
+  }
 }
 
 function manualRefresh(){
