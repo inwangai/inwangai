@@ -1086,8 +1086,14 @@ function autoPull(callback){
         var me=EMPLOYEES.find(function(e){return e.id===CU.id;});
         if(me)CU=me;
       }
-      if(d.attendance&&d.attendance.length)ATTENDANCE=d.attendance;
-      if(d.leaves)LEAVES=d.leaves;
+      if(d.attendance){
+        normDates(d.attendance,['date']);
+        ATTENDANCE=mergeById(ATTENDANCE,d.attendance);
+      }
+      if(d.leaves){
+        normDates(d.leaves,['from','to','applied']);
+        LEAVES=mergeById(LEAVES,d.leaves);
+      }
       if(d.payrolls)PAYROLLS=d.payrolls;
       if(d.holidays)HOLIDAYS=d.holidays;
       if(d.reimbursements)REIMBURSEMENTS=d.reimbursements;
@@ -1209,7 +1215,8 @@ function cancelSelfie(){
   if(v.srcObject)v.srcObject.getTracks().forEach(function(t){t.stop();});
   document.getElementById('selfieWrap').style.display='none';
 }
-function completePunch(type,photo){
+var _lastPunchTime=0;
+function completePunch(type,photo){_lastPunchTime=Date.now();
   var now=new Date();var date=now.toISOString().split('T')[0];
   var time=now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
   var isLate=false;
@@ -1445,6 +1452,7 @@ function inboxTab(t){
 // ── TEAM ──
 function loadTeam(){
   var today=new Date().toISOString().split('T')[0];
+  normDates(ATTENDANCE,['date']);
   var active=EMPLOYEES.filter(function(e){return e.active!==false;});
   var todayIn=new Set(ATTENDANCE.filter(function(a){return a.date===today&&a.type==='in';}).map(function(a){return a.empId;}));
   var onLeave=LEAVES.filter(function(l){return l.status==='Approved'&&l.from<=today&&l.to>=today;});
@@ -1782,13 +1790,16 @@ function testSync(){
               });
               EMPLOYEES=pulled;
             }
-            if(pd.attendance&&pd.attendance.length)ATTENDANCE=pd.attendance;
-            if(pd.leaves)LEAVES=pd.leaves;
+            if(pd.attendance){
+              normDates(pd.attendance,['date']);
+              ATTENDANCE=mergeById(ATTENDANCE,pd.attendance);
+            }
+            if(pd.leaves){normDates(pd.leaves,['from','to','applied']);LEAVES=mergeById(LEAVES,pd.leaves);}
             if(pd.payrolls)PAYROLLS=pd.payrolls;
             if(pd.holidays)HOLIDAYS=pd.holidays;
             if(pd.reimbursements)REIMBURSEMENTS=pd.reimbursements;
-            if(pd.posts)POSTS=pd.posts;
-            if(pd.requests)REQUESTS=pd.requests;
+            if(pd.posts)POSTS=mergeById(POSTS,pd.posts);
+            if(pd.requests)REQUESTS=mergeById(REQUESTS,pd.requests);
             localStorage.setItem('hrm_employees',JSON.stringify(EMPLOYEES));
             localStorage.setItem('hrm_attendance',JSON.stringify(ATTENDANCE));
             localStorage.setItem('hrm_leaves',JSON.stringify(LEAVES));
@@ -1839,6 +1850,34 @@ function updateSyncBar(){
     sub.textContent='Employees: '+EMPLOYEES.length+' | Attendance: '+ATTENDANCE.length+' | Press Sync to refresh';
     bar.style.borderLeftColor='var(--green)';
   }
+}
+
+// ── SMART MERGE: Keep local + add remote missing records ──
+function mergeById(local,remote){
+  if(!remote||!remote.length)return local;
+  if(!local||!local.length)return remote;
+  var map={};
+  // Local records take priority (most recent)
+  local.forEach(function(item){map[item.id||item.date+item.empId+item.type]=item;});
+  // Add remote records that don't exist locally
+  remote.forEach(function(item){
+    var key=item.id||item.date+item.empId+item.type;
+    if(!map[key])map[key]=item;
+  });
+  return Object.values(map);
+}
+function normDate(d){
+  if(!d)return '';
+  if(typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d))return d;
+  try{var dd=new Date(d);if(!isNaN(dd.getTime()))return dd.toISOString().split('T')[0];}catch(e){}
+  return String(d);
+}
+function normDates(arr,fields){
+  if(!arr)return arr;
+  arr.forEach(function(item){
+    (fields||['date']).forEach(function(f){if(item[f])item[f]=normDate(item[f]);});
+  });
+  return arr;
 }
 
 function manualRefresh(){
@@ -2331,6 +2370,7 @@ function syncFromSheets(){
   // Auto-refresh every 60 sec (only when logged in)
   setInterval(function(){
     if(!CU||!HRM_WEBAPP)return;
+    if(Date.now()-_lastPunchTime<30000)return; // Skip pull 30s after punch
     autoPull(function(){
       var pg=document.querySelector('.page.active');
       if(pg&&pg.id==='page-home')loadHome();
